@@ -55,10 +55,12 @@ extension URLResourcePair {
     public static var isApplication: URLResourcePair<KeyPath<URLResourceValues, Bool?>, Bool?> {
         .init(key: .isApplicationKey, valueKeyPath: \.isApplication)
     }
+#if os(macOS)
     @available(macOS 10.11, *)
     public static var applicationIsScriptable: URLResourcePair<KeyPath<URLResourceValues, Bool?>, Bool?> {
         .init(key: .applicationIsScriptableKey, valueKeyPath: \.applicationIsScriptable)
     }
+#endif
     public static var isSystemImmutable: URLResourcePair<KeyPath<URLResourceValues, Bool?>, Bool?> {
         .init(key: .isSystemImmutableKey, valueKeyPath: \.isSystemImmutable)
     }
