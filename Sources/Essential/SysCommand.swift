@@ -12,14 +12,19 @@ import ConcurrencyPlus
 @discardableResult
 public func sysCommand(_ program: String, _ args: [String]) throws -> Data? {
     let process = Process()
-    process.launchPath = program
-    process.arguments = args
+#if os(Windows)
+    process.executableURL = .init(fileURLWithPath: "C:\\Windows\\System32\\cmd.exe")
+    process.arguments = ["/c", program] + args
+#else
+    process.executableURL = .init(fileURLWithPath: "/usr/bin/env")
+    process.arguments = [program] + args
+#endif
 
     let pipe = Pipe()
     
     process.standardOutput = pipe
     process.standardError = pipe
-    process.launch()
+    try process.run()
     process.waitUntilExit()
 
     if #available(macOS 10.15.4, iOS 13.4, watchOS 6.2, tvOS 13.4, *) {

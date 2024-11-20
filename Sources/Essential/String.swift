@@ -14,7 +14,7 @@ extension String {
     /// Whether the string is empty or contains only white space characters
     /// - Complexity: O(n) where n is the length of the string
     public var isBlank: Bool {
-        self.first(where: { !$0.isWhitespace }) != nil
+        self.first(where: { !$0.isWhitespace }) == nil
     }
     
     /// Whether the string is not empty and contains at least one character

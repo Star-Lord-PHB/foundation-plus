@@ -56,11 +56,11 @@ extension Target.Dependency {
     static var concurrencyPlus: Self = "ConcurrencyPlus"
 
     static var fileManagerPlus: Self = "FileManagerPlus"
-    
+
     static var datePlus: Self = "DatePlus"
-    
+
     static var foundationPlus: Self = "FoundationPlus"
-    
+
     static var swiftTesting: Self = .product(name: "Testing", package: "swift-testing")
-    
+
 }

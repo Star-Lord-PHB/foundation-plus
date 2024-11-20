@@ -8,11 +8,11 @@ public func launchTask<Result>(
     operation block: @escaping () throws -> Result,
     onCancel cancelOperation: @Sendable () -> Void = {}
 ) async throws -> Result {
-    
+
     return try await withTaskCancellationHandler {
-        
+
         try await withCheckedThrowingContinuation { continuation in
-            
+
             let workItem = DispatchWorkItem {
                 do {
                     let result = try block();
@@ -21,15 +21,15 @@ public func launchTask<Result>(
                     continuation.resume(throwing: error)
                 }
             }
-            
+
             executor.queue.async(execute: workItem)
-            
+
         }
-        
+
     } onCancel: {
         cancelOperation()
     }
-    
+
 }
 
 
@@ -39,29 +39,29 @@ public func launchTask<Result>(
     operation block: @escaping () -> Result,
     onCancel cancelOperation: @Sendable () -> Void = {}
 ) async -> Result {
-    
+
     return await withTaskCancellationHandler {
-        
+
         await withCheckedContinuation { continuation in
-            
+
             let workItem = DispatchWorkItem {
                 continuation.resume(returning: block())
             }
-            
+
             executor.queue.async(execute: workItem)
-            
+
         }
-        
+
     } onCancel: {
         cancelOperation()
     }
-    
+
 }
 
 
 @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 extension Task where Failure == Error {
-    
+
     /// Execute long running / blocking tasks on an ``DefaultTaskExecutor``
     /// - Parameters:
     ///   - executor: The executor for running the task, default is ``DefaultTaskExecutor/default``
@@ -88,11 +88,11 @@ extension Task where Failure == Error {
         operation block: @escaping () throws -> Success,
         onCancel cancelOperation: @Sendable () -> Void = {}
     ) async rethrows -> Success {
-        
+
         return try await withTaskCancellationHandler {
-            
+
             try await withCheckedThrowingContinuation { continuation in
-                
+
                 let workItem = DispatchWorkItem {
                     do {
                         let result = try block();
@@ -101,11 +101,11 @@ extension Task where Failure == Error {
                         continuation.resume(throwing: error)
                     }
                 }
-                
+
                 executor.queue.async(execute: workItem)
-                
+
             }
-            
+
         } onCancel: {
             cancelOperation()
         }
@@ -140,23 +140,23 @@ extension Task where Failure == Never {
     @available(tvOS, introduced: 13.0, deprecated: 18, message: "use `withTaskExecutorPreference` instead")
     @available(visionOS, introduced: 1.0, deprecated: 2.0, message: "use `withTaskExecutorPreference` instead")
     public static func launch(
-        on executor: DefaultTaskExecutor = .default, 
+        on executor: DefaultTaskExecutor = .default,
         _ block: @Sendable @escaping () -> Success,
         onCancel cancelOperation: @Sendable () -> Void = {}
     ) async -> Success {
-        
+
         return await withTaskCancellationHandler {
-            
+
             await withCheckedContinuation { continuation in
                 executor.queue.async {
                     continuation.resume(returning: block())
                 }
             }
-            
+
         } onCancel: {
             cancelOperation()
         }
-        
+
     }
 
 }
@@ -164,14 +164,14 @@ extension Task where Failure == Never {
 
 @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 extension Task {
-    
+
     /// Cancel the task and wait until it is truely stopped
     public func cancelAndWait() async {
         cancel()
         await wait()
     }
-    
-    
+
+
     /// Wait for the task to stop
     public func wait() async {
         _ = await result
@@ -182,13 +182,13 @@ extension Task {
     public func waitThrowing() async throws {
         _ = try await value
     }
-    
+
 }
 
 
 @available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *)
 extension Task<Never, Never> {
-    
+
     /// Wait until certain condition to be true
     /// - Parameters:
     ///   - condition: The condition to wait on, will wait until it returns true
