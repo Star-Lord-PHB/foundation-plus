@@ -7,3 +7,5 @@ DerivedData/
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc
 *.playground
+.vscode/settings.json
+.index-build

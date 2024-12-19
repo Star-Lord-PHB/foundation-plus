@@ -12,7 +12,7 @@ import Testing
 extension FileManagerTest {
     
     @Suite("Test Creating FileHandle for Reading")
-    class ReadHandleCreationTest: FileManagerTestCases {
+    final class ReadHandleCreationTest: FileManagerTestCases {
         
         init() throws {
             try super.init(relativePath: "foundation_plus/file_manager/read_handle_creation")
@@ -29,9 +29,9 @@ extension FileManagerTest.ReadHandleCreationTest {
     @Test("Open: file exist")
     func openForRead1() async throws {
         
-        try await withFile(content: "test") { url, content in
+        try await withFileAtPath(content: "test") { path, content in
             
-            let actualContent = try await manager.openFile(forReadingFrom: url).readToEnd()
+            let actualContent = try await manager.openFile(forReadingFrom: path).readToEnd()
             #expect(actualContent == content)
             
         }
@@ -42,9 +42,9 @@ extension FileManagerTest.ReadHandleCreationTest {
     @Test("WithHandle: file exist")
     func withReadHandle1() async throws {
         
-        try await withFile(content: "test") { url, content in
+        try await withFileAtPath(content: "test") { path, content in
             
-            let actualContent = try await manager.withFileHandle(forReadingFrom: url) { handle in
+            let actualContent = try await manager.withFileHandle(forReadingFrom: path) { handle in
                 dispatchPrecondition(condition: .onQueue(DefaultTaskExecutor.io.queue))
                 return try handle.readToEnd()
             }
@@ -53,17 +53,16 @@ extension FileManagerTest.ReadHandleCreationTest {
             
         }
         
+
         if #available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *) {
             
-            try await withFile(content: "test") { url, content in
+            try await withFileAtPath(content: "test") { path, content in
                 
                 let actualContent = try await manager.withFileHandle(
-                    forReadingFrom: url
+                    forReadingFrom: path
                 ) { handle in
                     dispatchPrecondition(condition: .onQueue(DefaultTaskExecutor.io.queue))
-                    return try await handle.bytes.reduce(into: Data()) { partialResult, byte in
-                        partialResult.append(contentsOf: [byte])
-                    }
+                    return try await handle.readToEnd()
                 }
                 
                 #expect(actualContent == content)
@@ -78,10 +77,11 @@ extension FileManagerTest.ReadHandleCreationTest {
     @Test("Open: file not exist")
     func openForRead2() async throws {
         
-        let url = makeTestingFileUrl()
+        let path = makeTestingFilePath()
         
         await #expect(throws: Error.self) {
-            let _ = try await manager.openFile(forReadingFrom: url).readToEnd()
+            let handle = try await manager.openFile(forReadingFrom: path)
+            try await handle.close()
         }
         
     }
@@ -90,16 +90,18 @@ extension FileManagerTest.ReadHandleCreationTest {
     @Test("WithHandle: file not exist")
     func withReadHandle2() async throws {
         
-        let url = makeTestingFileUrl()
+        let path = makeTestingFilePath()
         
         await #expect(throws: Error.self) {
-            try await manager.withFileHandle(forReadingFrom: url) { _ in }
+            try await manager.withFileHandle(forReadingFrom: path) { _ in }
         }
         
         if #available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *) {
             
             await #expect(throws: Error.self) {
-                try await manager.withFileHandle(forReadingFrom: url) { _ in }
+                try await manager.withFileHandle(forReadingFrom: path) { _ in 
+                    await Task.yield()      // make the compiler to use the async version
+                }
             }
             
         }

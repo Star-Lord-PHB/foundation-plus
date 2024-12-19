@@ -12,7 +12,7 @@ import Testing
 extension DateTest {
     
     @Suite("Test Creating Date")
-    class CreateDateTest: DateTest {}
+    final class CreateDateTest: DateTest {}
     
 }
 
@@ -83,18 +83,20 @@ extension DateTest.CreateDateTest {
     }
     
     
+#if !os(Windows)
+
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @Test(
         "Create Date with Date.FormatString",
         arguments: [
             (
                 "2024-08-15 12:04:34 12345",
-                "\(year: .defaultDigits)-\(month: .twoDigits)-\(day: .twoDigits) \(hour: .twoDigits24()):\(minute: .twoDigits):\(second: .twoDigits) \(secondFraction: .fractional(5))"
+                "\(year: .defaultDigits)-\(month: .twoDigits)-\(day: .twoDigits) \(hour: .twoDigits24()):\(minute: .twoDigits):\(second: .twoDigits) \(secondFraction: .fractional(5))" as Date.FormatString
             ),
             (
                 "2024.8_15 23:4",
                 "\(year: .defaultDigits).\(month: .narrow)_\(day: .twoDigits) \(hour: .twoDigits24()) \(minute: .defaultDigits)"
-            )
+            ),
         ] as [(String, Date.FormatString)]
     )
     func create4(_ string: String, _ format: Date.FormatString) async throws {
@@ -114,5 +116,7 @@ extension DateTest.CreateDateTest {
         #expect(expected == date)
         
     }
+
+#endif
     
 }

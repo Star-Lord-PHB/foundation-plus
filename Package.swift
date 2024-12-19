@@ -13,7 +13,9 @@ let package = Package(
             name: "FoundationPlus",
             targets: ["FoundationPlus"]),
     ],
-    dependencies: [.package(url: "https://github.com/apple/swift-testing.git", branch: "main")],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-testing.git", branch: "main"),
+        .package(url: "https://github.com/apple/swift-system.git", from: "1.4.0"),],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
@@ -26,7 +28,7 @@ let package = Package(
             path: "Sources/Essential"),
         .target(
             name: "FileManagerPlus",
-            dependencies: [.concurrencyPlus, .foundationPlusEssential],
+            dependencies: [.concurrencyPlus, .foundationPlusEssential, .swiftSystem],
             path: "Sources/FileManagerPlus"),
         .target(
             name: "ConcurrencyPlus",
@@ -62,5 +64,7 @@ extension Target.Dependency {
     static var foundationPlus: Self = "FoundationPlus"
 
     static var swiftTesting: Self = .product(name: "Testing", package: "swift-testing")
+
+    static var swiftSystem: Self = .product(name: "SystemPackage", package: "swift-system")
 
 }

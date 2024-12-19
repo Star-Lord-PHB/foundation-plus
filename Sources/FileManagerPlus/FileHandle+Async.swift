@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SystemPackage
 
 
 
@@ -32,6 +33,15 @@ extension FileHandle {
             try .init(forReadingFrom: url)
         }
     }
+
+
+    /// Returns a file handle initialized for reading the file, device, or named socket
+    /// at the specified file path.
+    ///
+    /// - Seealso: [`init(forReadingFrom:)`](https://developer.apple.com/documentation/foundation/filehandle/1408422-init)
+    public static func open(forReadingFrom path: FilePath) async throws -> FileHandle {
+        try await self.open(forReadingFrom: path.toURL())
+    }
     
     
     /// Returns a file handle initialized for writing to the file, device, or named socket
@@ -53,6 +63,15 @@ extension FileHandle {
         try await FileManager.runOnIOQueue {
             try .init(forWritingTo: url)
         }
+    }
+
+
+    /// Returns a file handle initialized for writing to the file, device, or named socket
+    /// at the specified file path.
+    ///
+    /// - Seealso: [`init(forWritingTo:)`](https://developer.apple.com/documentation/foundation/filehandle/1416892-init)
+    public static func open(forWritingTo path: FilePath) async throws -> FileHandle {
+        try await self.open(forWritingTo: path.toURL())
     }
     
     
@@ -76,6 +95,15 @@ extension FileHandle {
             try .init(forUpdating: url)
         }
     }
+
+
+    /// Returns a file handle initialized for reading and writing to the file, device, or named socket
+    /// at the specified file path.
+    ///
+    /// - Seealso: [`init(forUpdating:)`]
+    public static func open(forUpdating path: FilePath) async throws -> FileHandle {
+        try await self.open(forUpdating: path.toURL())
+    }
     
 }
 
@@ -96,7 +124,7 @@ extension FileHandle {
     /// Moves the file pointer to the specified offset within the file.
     ///
     /// - Seealso: [`seek(toOffset:)`](https://developer.apple.com/documentation/foundation/filehandle/3172530-seek)
-    public func seekAsync(to offset: UInt64) async throws {
+    public func seek(to offset: UInt64) async throws {
         try await FileManager.runOnIOQueue {
             try self.seek(toOffset: offset)
         }
@@ -105,7 +133,7 @@ extension FileHandle {
     /// Truncates or extends the file represented by the file handle to a specified offset within the file and puts the file pointer at that position.
     ///
     /// - Seealso: [`truncate(atOffset:)`](https://developer.apple.com/documentation/foundation/filehandle/3172532-truncate)
-    public func truncateAsync(at offset: UInt64) async throws {
+    public func truncate(at offset: UInt64) async throws {
         try await FileManager.runOnIOQueue {
             try self.truncate(atOffset: offset)
         }
@@ -115,7 +143,7 @@ extension FileHandle {
     /// Causes all in-memory data and attributes of the file represented by the file handle to write to permanent storage.
     ///
     /// - Seealso: [`synchronize()`](https://developer.apple.com/documentation/foundation/filehandle/3172531-synchronize)
-    public func synchronizeAsync() async throws {
+    public func synchronize() async throws {
         try await FileManager.runOnIOQueue {
             try self.synchronize()
         }
@@ -125,7 +153,7 @@ extension FileHandle {
     /// Disallows further access to the represented file or communications channel and signals end of file on communications channels that permit writing.
     ///
     /// - Seealso: [`close()`](https://developer.apple.com/documentation/foundation/filehandle/3172525-close)
-    public func closeAsync() async throws {
+    public func close() async throws {
         try await FileManager.runOnIOQueue {
             try self.close()
         }
@@ -136,7 +164,7 @@ extension FileHandle {
     ///
     /// - Seealso: [`readToEnd()`](https://developer.apple.com/documentation/foundation/filehandle/3516318-readtoend)
     @available(macOS 10.15.4, iOS 13.4, watchOS 6.2, tvOS 13.4, *)
-    public func readToEndAsync() async throws -> Data? {
+    public func readToEnd() async throws -> Data? {
         try await FileManager.runOnIOQueue {
             try self.readToEnd()
         }
@@ -147,7 +175,7 @@ extension FileHandle {
     ///
     /// - Seealso: [`read(upToCount:)`](https://developer.apple.com/documentation/foundation/filehandle/3516317-read)
     @available(macOS 10.15.4, iOS 13.4, watchOS 6.2, tvOS 13.4, *)
-    public func readAsync(upToCount count: Int) async throws -> Data? {
+    public func read(upToCount count: Int) async throws -> Data? {
         try await FileManager.runOnIOQueue {
             try self.read(upToCount: count)
         }
@@ -158,7 +186,7 @@ extension FileHandle {
     ///
     /// - Seealso: [`seekToEnd()`](https://developer.apple.com/documentation/foundation/filehandle/3516319-seektoend)
     @available(macOS 10.15.4, iOS 13.4, watchOS 6.2, tvOS 13.4, *)
-    public func seekToEndAsync() async throws -> UInt64 {
+    public func seekToEnd() async throws -> UInt64 {
         try await FileManager.runOnIOQueue {
             try self.seekToEnd()
         }
@@ -169,7 +197,7 @@ extension FileHandle {
     ///
     /// - Seealso: [`write(contentsOf:)`](https://developer.apple.com/documentation/foundation/filehandle/3516320-write)
     @available(macOS 10.15.4, iOS 13.4, watchOS 6.2, tvOS 13.4, *)
-    public func writeAsync<T: DataProtocol>(contentsOf data: T) async throws {
+    public func write<T: DataProtocol>(contentsOf data: T) async throws {
         try await FileManager.runOnIOQueue {
             try self.write(contentsOf: data)
         }
@@ -187,7 +215,7 @@ extension FileHandle {
     /// Reads the available data synchronously up to the end of file or maximum number of bytes.
     ///
     /// - Seealso: [`readDataToEndOfFile()`](https://developer.apple.com/documentation/foundation/filehandle/1411490-readdatatoendoffile)
-    public func readDataToEndOfFileAsync() async -> Data {
+    public func readDataToEndOfFile() async -> Data {
         await FileManager.runOnIOQueue {
             self.readDataToEndOfFile()
         }
@@ -197,7 +225,7 @@ extension FileHandle {
     /// Reads data synchronously up to the specified number of bytes.
     ///
     /// - Seealso: [`readData(ofLength:)`](https://developer.apple.com/documentation/foundation/filehandle/1413916-readdata)
-    public func readDataAsync(ofLength length: Int) async -> Data {
+    public func readData(ofLength length: Int) async -> Data {
         await FileManager.runOnIOQueue {
             self.readData(ofLength: length)
         }
@@ -207,7 +235,7 @@ extension FileHandle {
     /// Writes the specified data synchronously to the file handle.
     ///
     /// - Seealso: [`write(_:)`](https://developer.apple.com/documentation/foundation/filehandle/1410936-write)
-    public func writeAsync(_ data: Data) async {
+    public func write(_ data: Data) async {
         await FileManager.runOnIOQueue {
             self.write(data)
         }
@@ -217,7 +245,7 @@ extension FileHandle {
     /// Places the file pointer at the end of the file referenced by the file handle and returns the new file offset.
     ///
     /// - Seealso: [`seekToEndOfFile()`](https://developer.apple.com/documentation/foundation/filehandle/1411311-seektoendoffile)
-    public func seekToEndOfFileAsync() async -> UInt64 {
+    public func seekToEndOfFile() async -> UInt64 {
         await FileManager.runOnIOQueue {
             self.seekToEndOfFile()
         }
@@ -227,7 +255,7 @@ extension FileHandle {
     /// Moves the file pointer to the specified offset within the file represented by the receiver.
     ///
     /// - Seealso: [`seekAsync(toFileOffset:)`](https://developer.apple.com/documentation/foundation/filehandle/1412135-seek)
-    public func seekAsync(toFileOffset offset: UInt64) async {
+    public func seek(toFileOffset offset: UInt64) async {
         await FileManager.runOnIOQueue {
             self.seek(toFileOffset: offset)
         }
@@ -237,7 +265,7 @@ extension FileHandle {
     /// Truncates or extends the file represented by the file handle to a specified offset within the file and puts the file pointer at that position.
     ///
     /// - Seealso: [`truncateFile(atOffset:)`](https://developer.apple.com/documentation/foundation/filehandle/1411716-truncatefile)
-    public func truncateFileAsync(atOffset offset: UInt64) async {
+    public func truncateFile(atOffset offset: UInt64) async {
         await FileManager.runOnIOQueue {
             self.truncateFile(atOffset: offset)
         }
@@ -247,7 +275,7 @@ extension FileHandle {
     /// Causes all in-memory data and attributes of the file represented by the handle to write to permanent storage.
     ///
     /// - Seealso: [`synchronizeFile()`](https://developer.apple.com/documentation/foundation/filehandle/1411016-synchronizefile)
-    public func synchronizeFileAsync() async {
+    public func synchronizeFile() async {
         await FileManager.runOnIOQueue {
             self.synchronizeFile()
         }
@@ -257,7 +285,7 @@ extension FileHandle {
     /// Disallows further access to the represented file or communications channel and signals end of file on communications channels that permit writing.
     ///
     /// - Seealso: [`closeFile()`](https://developer.apple.com/documentation/foundation/filehandle/1413393-closefile)
-    public func closeFileAsync() async {
+    public func closeFile() async {
         await FileManager.runOnIOQueue {
             self.closeFile()
         }

@@ -12,7 +12,7 @@ import Testing
 extension FileManagerTest {
     
     @Suite("Test Removing File & Dir")
-    class RemoveFileTest: FileManagerTestCases {
+    final class RemoveFileTest: FileManagerTestCases {
         
         init() throws {
             try super.init(relativePath: "foundation_plus/file_manager/remove_file")
@@ -28,9 +28,9 @@ extension FileManagerTest.RemoveFileTest {
     @Test("Remove File: file exist")
     func removeFile1() async throws {
         
-        try await withFile { url, _ in
-            try await manager.remove(at: url)
-            #expect(!manager.fileExists(atPath: url.compactPath()))
+        try await withFileAtPath { path, _ in
+            try await manager.removeItem(at: path)
+            #expect(!manager.fileExists(atPath: path.string))
         }
         
     }
@@ -39,10 +39,10 @@ extension FileManagerTest.RemoveFileTest {
     @Test("Remove File: file not exist")
     func removeFile2() async throws {
         
-        let url = makeTestingFileUrl()
+        let path = makeTestingFilePath()
         
         await #expect(throws: Error.self) {
-            try await manager.remove(at: url)
+            try await manager.removeItem(at: path)
         }
         
     }
@@ -50,18 +50,16 @@ extension FileManagerTest.RemoveFileTest {
     
     @Test("Remove Dir: dir exist")
     func removeDir1() async throws {
-        
-        try await withDirectory { url in
-            
-            manager.createFile(
-                atPath: url.appending(path: "contained.txt").compactPath(),
-                contents: nil
-            )
-            
-            try await manager.remove(at: url)
-            
-            #expect(!manager.fileExists(atPath: url.compactPath()))
-            
+
+        try await withFileTree(
+            [
+                .directory(name: "dir", [
+                    .file(name: "contained.txt")])
+            ]
+        ) { tree in
+            let dir = tree["dir"]
+            try await manager.removeItem(at: dir.path)
+            #expect(!manager.fileExists(at: dir.path))
         }
         
     }
@@ -70,10 +68,10 @@ extension FileManagerTest.RemoveFileTest {
     @Test("Remove Dir: dir not exist")
     func removeDir2() async throws {
         
-        let url = makeTestingFileUrl()
+        let path = makeTestingFilePath()
         
         await #expect(throws: Error.self) {
-            try await manager.remove(at: url)
+            try await manager.removeItem(at: path)
         }
         
     }

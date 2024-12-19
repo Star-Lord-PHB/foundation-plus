@@ -7,10 +7,16 @@
 
 import Foundation
 import ConcurrencyPlus
+import SystemPackage
 
 
 @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 extension Data {
+
+    public static func read(contentAt path: FilePath) async throws -> Data {
+        try await self.read(contentsOf: path.toURL())
+    }
+
     
     /// Read the content of the provided `URL` and return as `Data`
     /// - Parameter url: The `URL` of the resource to be read
@@ -18,15 +24,14 @@ extension Data {
     ///
     /// - Note: This operation will automatically be executed on seperate threads for IO
     public static func read(contentsOf url: URL) async throws -> Data {
-        if #available(macOS 15, iOS 18, watchOS 11, tvOS 18, visionOS 2, *) {
-            try await withTaskExecutorPreference(DefaultTaskExecutor.io) {
-                try Data(contentsOf: url)
-            }
-        } else {
-            try await Task.launch(on: .io) {
-                try Data(contentsOf: url)
-            }
+        try await FileManager.runOnIOQueue {
+            try Data(contentsOf: url)
         }
+    }
+
+
+    public func write(to path: FilePath) async throws {
+        try await write(to: path.toURL())
     }
     
     
@@ -36,14 +41,8 @@ extension Data {
     ///
     /// - Note: This operation will automatically be executed on seperate threads for IO
     public func write(to url: URL) async throws {
-        if #available(macOS 15, iOS 18, watchOS 11, tvOS 18, visionOS 2, *) {
-            try await withTaskExecutorPreference(DefaultTaskExecutor.io) {
-                try write(to: url)
-            }
-        } else {
-            try await Task.launch(on: .io) {
-                try write(to: url)
-            }
+        try await FileManager.runOnIOQueue {
+            try write(to: url)
         }
     }
     

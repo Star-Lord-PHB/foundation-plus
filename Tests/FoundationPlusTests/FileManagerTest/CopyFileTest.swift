@@ -12,7 +12,7 @@ import Testing
 extension FileManagerTest {
     
     @Suite("Test Copying File & Dir")
-    class CopyFileTest: FileManagerTestCases {
+    final class CopyFileTest: FileManagerTestCases {
         
         init() throws {
             try super.init(relativePath: "foundation_plus/file_manager/copy_file")
@@ -28,16 +28,16 @@ extension FileManagerTest.CopyFileTest {
     @Test("Copy File: file exist / dest not exist")
     func copyFile1() async throws {
         
-        try await withFile(suffix: "-src", content: "test1") { src, srcContent in
+        try await withFileAtPath(suffix: "-src", content: "test1") { srcPath, srcContent in
             
-            let dest = makeTestingFileUrl(suffix: "-dest")
-            defer { try? manager.removeItem(at: dest) }
+            let destPath = makeTestingFilePath(suffix: "-dest")
+            defer { try? manager.removeItem(at: destPath) }
             
-            try await manager.copy(src, to: dest)
+            try await manager.copyItem(at: srcPath, to: destPath)
             
             #expect(throws: Never.self) {
-                try #expect(Data(contentsOf: src) == srcContent)
-                try #expect(Data(contentsOf: dest) == srcContent)
+                try #expect(self.contentOfFile(at: srcPath) == srcContent)
+                try #expect(self.contentOfFile(at: destPath) == srcContent)
             }
             
         }
@@ -47,22 +47,26 @@ extension FileManagerTest.CopyFileTest {
     
     @Test("Copy File: file exist / dest exist")
     func copyFile2() async throws {
-        
-        try await withFile(suffix: "-src", content: "test1") { src, srcContent in
+
+        try await withFileTree(
+            [
+                .file(name: "src", content: "test1"),
+                .file(name: "dest", content: "test2")
+            ]
+        ) { tree in
             
-            try await withFile(suffix: "-dest", content: "test2") { dest, destContent in
-                
-                await #expect(throws: Error.self) {
-                    try await manager.copy(src, to: dest)
-                }
-                
-                #expect(throws: Never.self) {
-                    try #expect(Data(contentsOf: src) == srcContent)
-                    try #expect(Data(contentsOf: dest) == destContent)
-                }
-                
+            let srcFile = tree["src"]
+            let destFile = tree["dest"]
+
+            await #expect(throws: Error.self) {
+                try await manager.copyItem(at: srcFile.path, to: destFile.path)
             }
-            
+
+            #expect(throws: Never.self) {
+                try #expect(self.contentOfFile(at: srcFile.path) == srcFile.content)
+                try #expect(self.contentOfFile(at: destFile.path) == destFile.content)
+            }
+
         }
         
     }
@@ -71,11 +75,11 @@ extension FileManagerTest.CopyFileTest {
     @Test("Copy File: file not exist / dest not exist")
     func copyFile3() async throws {
         
-        let src = makeTestingFileUrl(suffix: "-src")
-        let dest = makeTestingFileUrl(suffix: "-dest")
+        let src = makeTestingFilePath(suffix: "-src")
+        let dest = makeTestingFilePath(suffix: "-dest")
         
         await #expect(throws: Error.self) {
-            try await manager.copy(src, to: dest)
+            try await manager.copyItem(at: src, to: dest)
         }
         
     }
@@ -83,24 +87,26 @@ extension FileManagerTest.CopyFileTest {
     
     @Test("Copy Dir: dir exist / dest not exist")
     func copyDir1() async throws {
-        
-        try await withDirectory(suffix: "-src") { src in
+
+        try await withFileTree(
+            [
+                .directory(name: "src", [
+                    .file(name: "test", content: "test")])
+            ]
+        ) { tree in
             
-            try await withFile(baseUrl: src, content: "test1") { srcContainedUrl, srcContainedContent in
-                
-                let dest = makeTestingFileUrl(suffix: "-dest")
-                let destContainedUrl = dest.appending(path: srcContainedUrl.lastPathComponent)
-                defer { try? manager.removeItem(at: dest) }
-                
-                try await manager.copy(src, to: dest)
-                
-                #expect(throws: Never.self) {
-                    try #expect(Data(contentsOf: srcContainedUrl) == srcContainedContent)
-                    try #expect(Data(contentsOf: destContainedUrl) == srcContainedContent)
-                }
-                
+            let srcDir = tree["src"]
+            let destDirPath = tree.path.appending("dest")
+            let srcContainedFile = srcDir["test"]
+            let destContainedPath = destDirPath.appending(srcContainedFile.path.lastComponent!)
+
+            try await manager.copyItem(at: srcDir.path, to: destDirPath)
+
+            #expect(throws: Never.self) {
+                try #expect(self.contentOfFile(at: srcContainedFile.path) == srcContainedFile.content)
+                try #expect(self.contentOfFile(at: destContainedPath) == srcContainedFile.content)
             }
-            
+
         }
         
     }
@@ -108,30 +114,30 @@ extension FileManagerTest.CopyFileTest {
     
     @Test("Copy Dir: dir exist / dest exist")
     func copyDir2() async throws {
-        
-        try await withDirectory(suffix: "-src") { src in
+
+        try await withFileTree(
+            [
+                .directory(name: "src", [
+                    .file(name: "test", content: "test1")]),
+                .directory(name: "dest", [
+                    .file(name: "test", content: "test2")])
+            ]
+        ) { tree in
             
-            try await withDirectory(suffix: "-dest") { dest in
-                
-                try await withFile(baseUrl: src) { srcContainedUrl, srcContainedContent in
-                    
-                    try await withFile(baseUrl: dest) { destContainedUrl, destContainedContent in
-                        
-                        await #expect(throws: Error.self) {
-                            try await self.manager.copy(src, to: dest)
-                        }
-                        
-                        #expect(throws: Never.self) {
-                            try #expect(Data(contentsOf: srcContainedUrl) == srcContainedContent)
-                            try #expect(Data(contentsOf: destContainedUrl) == destContainedContent)
-                        }
-                        
-                    }
-                    
-                }
-                
+            let srcDir = tree["src"]
+            let destDir = tree["dest"]
+            let srcContainedFile = srcDir["test"]
+            let destContainedFile = destDir["test"]
+
+            await #expect(throws: Error.self) {
+                try await manager.copyItem(at: srcDir.path, to: destDir.path)
             }
-            
+
+            #expect(throws: Never.self) {
+                try #expect(self.contentOfFile(at: srcContainedFile.path) == srcContainedFile.content)
+                try #expect(self.contentOfFile(at: destContainedFile.path) == destContainedFile.content)
+            }
+
         }
         
     }
@@ -140,11 +146,11 @@ extension FileManagerTest.CopyFileTest {
     @Test("Copy Dir: dir not exist / dest not exist")
     func copyDir3() async throws {
         
-        let src = makeTestingFileUrl(suffix: "-src")
-        let dest = makeTestingFileUrl(suffix: "-dest")
+        let src = makeTestingFilePath(suffix: "-src")
+        let dest = makeTestingFilePath(suffix: "-dest")
         
         await #expect(throws: Error.self) {
-            try await self.manager.copy(src, to: dest)
+            try await self.manager.copyItem(at: src, to: dest)
         }
         
     }

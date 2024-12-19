@@ -1,4 +1,4 @@
-import Testing
+@_spi(Experimental) import Testing
 import Foundation
 @testable import FoundationPlus
 
@@ -32,7 +32,7 @@ struct TaskExecutorTest {
     }
     
     
-    @Test(.timeLimit(.minutes(1)))
+    @Test(.timeLimit(TimeLimitTrait.Duration.minutes(1)))
     func cancellingTasks() async throws {
         
         let canceller = Canceller()

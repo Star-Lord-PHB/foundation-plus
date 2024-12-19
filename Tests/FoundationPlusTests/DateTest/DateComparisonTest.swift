@@ -12,7 +12,7 @@ import Testing
 extension DateTest {
     
     @Suite("Test Date Comparison")
-    class DateComparisonTest: DateTest {}
+    final class DateComparisonTest: DateTest {}
     
 }
 

@@ -1,0 +1,40 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "swift",
+			"args": [
+				"build",
+				"--build-tests",
+				"-Xlinker",
+				"-debug:dwarf",
+				"-Xswiftc",
+				"-diagnostic-style=llvm"
+			],
+			"cwd": "c:\\Users\\fsphs\\code\\project\\FoundationPlus",
+			"disableTaskQueue": true,
+			"showBuildStatus": "progress",
+			"group": "build",
+			"problemMatcher": [],
+			"label": "swift: Build All",
+			"detail": "swift build --build-tests -Xlinker -debug:dwarf -Xswiftc -diagnostic-style=llvm"
+		},
+		{
+			"type": "swift",
+			"args": [
+				"build",
+				"-Xlinker",
+				"-debug:dwarf",
+				"-Xswiftc",
+				"-diagnostic-style=llvm"
+			],
+			"cwd": "c:\\Users\\fsphs\\code\\project\\FoundationPlus",
+			"disableTaskQueue": true,
+			"showBuildStatus": "progress",
+			"group": "build",
+			"problemMatcher": [],
+			"label": "swift: Build",
+			"detail": "swift build -Xlinker -debug:dwarf -Xswiftc -diagnostic-style=llvm"
+		},
+	]
+}

@@ -12,7 +12,7 @@ import Testing
 extension DateTest {
     
     @Suite("Test Date Arithmetic")
-    class DateArithmeticTest: DateTest {}
+    final class DateArithmeticTest: DateTest {}
     
 }
 
