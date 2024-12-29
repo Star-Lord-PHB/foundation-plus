@@ -61,6 +61,70 @@ extension FileManager {
 }
 
 
+extension FileManager {
+
+    public final class FilePathdDirectoryEnumerator: Sequence, AsyncSequence, AsyncIteratorProtocol, IteratorProtocol {
+
+        public typealias AsyncIterator = FilePathdDirectoryEnumerator 
+
+        private let enumerator: FileManager.DirectoryEnumerator
+
+        public var level: Int { enumerator.level }
+        public var isEnumeratingDirectoryPostOrder: Bool { enumerator.isEnumeratingDirectoryPostOrder }
+
+        init(enumerator: FileManager.DirectoryEnumerator) {
+            self.enumerator = enumerator
+        }
+
+        public func makeAsyncIterator() -> FileManager.FilePathdDirectoryEnumerator { self }
+
+        public func next() -> FilePath? {
+            enumerator.nextObject().flatMap { $0 as? URL }.flatMap { $0.toFilePath() }
+        }
+
+        public func next() async throws -> FilePath? {
+            enumerator.nextObject().flatMap { $0 as? URL }.flatMap { $0.toFilePath() }
+        }
+
+        public func skipDescendants() {
+            enumerator.skipDescendants()
+        }
+
+        public func skipDescendents() {
+            enumerator.skipDescendants()
+        }
+
+    }
+
+
+    public final class URLDirectoryEnumerator: Sequence, IteratorProtocol {
+
+        private let enumerator: FileManager.DirectoryEnumerator
+
+        public var level: Int { enumerator.level }
+        public var isEnumeratingDirectoryPostOrder: Bool { enumerator.isEnumeratingDirectoryPostOrder }
+
+        init(enumerator: FileManager.DirectoryEnumerator) {
+            self.enumerator = enumerator
+        }
+
+        public func next() -> URL? {
+            enumerator.nextObject() as? URL
+        }
+
+        public func skipDescendants() {
+            enumerator.skipDescendants()
+        }
+
+        public func skipDescendents() {
+            enumerator.skipDescendants()
+        }
+
+    }
+
+}
+
+
 @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 extension FileManager {
 

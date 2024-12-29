@@ -16,12 +16,21 @@ extension FileManager {
     }
 
 
-#if os(macOS) 
+#if canImport(Darwin) 
+
     public func trashItem(at path: FilePath) throws -> FilePath? {
         var newUrl: NSURL?
         try self.trashItem(at: path.toURL(), resultingItemURL: &newUrl)
         return (newUrl as URL?)?.toFilePath()
     }
+
+
+    public func trashItem(at url: URL) throws -> URL? {
+        var newUrl: NSURL?
+        try self.trashItem(at: url, resultingItemURL: &newUrl)
+        return newUrl as URL?
+    }
+
 #endif 
 
 }
@@ -49,7 +58,7 @@ extension FileManager {
     }
     
     
-#if os(macOS)
+#if canImport(Darwin) 
 
     @discardableResult
     public func trashItem(at path: FilePath) async throws -> FilePath? {

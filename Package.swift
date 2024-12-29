@@ -7,6 +7,7 @@ let packageName: String = "FoundationPlus"
 
 let package = Package(
     name: packageName,
+    platforms: [.macOS(.v10_15), .iOS(.v13), .watchOS(.v6), .tvOS(.v13)],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(

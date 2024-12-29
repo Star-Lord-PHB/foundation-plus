@@ -332,6 +332,7 @@ extension FileManager {
     }
 
 
+    @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
     public func attributesOfItem(at path: FilePath) async throws -> FileAttributes {
         try await Self.runOnIOQueue {
             try self.attributesOfItem(at: path)

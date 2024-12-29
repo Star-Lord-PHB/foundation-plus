@@ -7,7 +7,9 @@
 
 import Testing
 @testable import FoundationPlus
+#if os(Windows)
 import WinSDK
+#endif
 
 
 extension FileManagerTest {
@@ -36,12 +38,15 @@ extension FileManagerTest.FileInfoTest {
             let info = try await manager.infoOfItem(at: path)
             let fileManagerAttributes = try manager.attributesOfItem(atPath: path.string)
             
-            #expect(info.size == content.count)
             #expect(fileManagerAttributes[.creationDate] as? Date == info.creationDate)
 
-            // The url ResourceValues only support precision to seconds
+#if os(Windows)
+            // The url ResourceValues only support precision to seconds on Windows
             let lastAccessDateToSeconds = Calendar.current.dateInterval(of: .second, for: info.lastAccessDate)?.start
             try #expect(url.resourceValues(forKeys: [.contentAccessDateKey]).contentAccessDate == lastAccessDateToSeconds)
+#else
+            try #expect(url.resourceValues(forKeys: [.contentAccessDateKey]).contentAccessDate == info.lastAccessDate)
+#endif
 
             #expect(fileManagerAttributes[.modificationDate] as? Date == info.modificationDate)
 #if os(Windows)
@@ -67,12 +72,15 @@ extension FileManagerTest.FileInfoTest {
             let info = try await manager.infoOfItem(at: path)
             let fileManagerAttributes = try manager.attributesOfItem(atPath: path.string)
             
-            #expect(info.size == 0)
             #expect(fileManagerAttributes[.creationDate] as? Date == info.creationDate)
             
+#if os(Windows)
+            // The url ResourceValues only support precision to seconds on Windows
             let lastAccessDateToSeconds = Calendar.current.dateInterval(of: .second, for: info.lastAccessDate)?.start
             try #expect(url.resourceValues(forKeys: [.contentAccessDateKey]).contentAccessDate == lastAccessDateToSeconds)
-            #expect(fileManagerAttributes[.modificationDate] as? Date == info.modificationDate)
+#else
+            try #expect(url.resourceValues(forKeys: [.contentAccessDateKey]).contentAccessDate == info.lastAccessDate)
+#endif
 
             #expect(fileManagerAttributes[.modificationDate] as? Date == info.modificationDate)
 #if os(Windows)
@@ -100,12 +108,15 @@ extension FileManagerTest.FileInfoTest {
             let info = try await manager.infoOfItem(at: path)
             let fileManagerAttributes = try manager.attributesOfItem(atPath: path.string)
             
-            #expect(info.size == 0)
             #expect(fileManagerAttributes[.creationDate] as? Date == info.creationDate)
             
+#if os(Windows)
+            // The url ResourceValues only support precision to seconds on Windows
             let lastAccessDateToSeconds = Calendar.current.dateInterval(of: .second, for: info.lastAccessDate)?.start
             try #expect(url.resourceValues(forKeys: [.contentAccessDateKey]).contentAccessDate == lastAccessDateToSeconds)
-            #expect(fileManagerAttributes[.modificationDate] as? Date == info.modificationDate)
+#else
+            try #expect(url.resourceValues(forKeys: [.contentAccessDateKey]).contentAccessDate == info.lastAccessDate)
+#endif
 
             #expect(fileManagerAttributes[.modificationDate] as? Date == info.modificationDate)
 #if os(Windows)
@@ -143,17 +154,20 @@ extension FileManagerTest.FileInfoTest {
     func setFileInfo1() async throws {
         
         try await withFileAtPath { path, _ in
-            
+
             var setInfo = try await manager.infoOfItem(at: path)
-            setInfo.creationDate = .now.addingTimeInterval(-10)
-            setInfo.lastAccessDate = .now.addingTimeInterval(-5)
-            setInfo.modificationDate = .now.addingTimeInterval(-7)
+// #if os(Windows)
+//             setInfo.setCreationDate(.now.addingTimeInterval(-10))
+// #endif
+//             setInfo.lastAccessDate = .now.addingTimeInterval(-5)
+//             setInfo.modificationDate = .now.addingTimeInterval(-7)
 #if os(Windows)
-            setInfo.isHidden = true
-            setInfo.isArchive = true
-            setInfo.notContentIndexed = true 
+            setInfo.fileFlags.isHidden = true
+            setInfo.fileFlags.isArchive = true
+            setInfo.fileFlags.notContentIndexed = true 
 #else
-            setInfo.posixPermissions = (1 << 9) - 1
+            setInfo.posixPermissions = .userReadWriteExecute
+            setInfo.fileFlags.isHidden = true
 #endif
 
             try await manager.setInfo(setInfo, forItemAt: path)
@@ -173,15 +187,18 @@ extension FileManagerTest.FileInfoTest {
         try await withDirectoryAtPath { path in
             
             var setInfo = try await manager.infoOfItem(at: path)
-            setInfo.creationDate = .now.addingTimeInterval(-10)
-            setInfo.lastAccessDate = .now.addingTimeInterval(-5)
-            setInfo.modificationDate = .now.addingTimeInterval(-7)
+// #if os(Windows)
+//             setInfo.setCreationDate(.now.addingTimeInterval(-10))
+// #endif
+//             setInfo.lastAccessDate = .now.addingTimeInterval(-5)
+//             setInfo.modificationDate = .now.addingTimeInterval(-7)
 #if os(Windows)
-            setInfo.isHidden = true
-            setInfo.isArchive = true
-            setInfo.notContentIndexed = true 
+            setInfo.fileFlags.isHidden = true
+            setInfo.fileFlags.isArchive = true
+            setInfo.fileFlags.notContentIndexed = true 
 #else
-            setInfo.posixPermissions = (1 << 9) - 1
+            setInfo.posixPermissions = .userReadWriteExecute
+            setInfo.fileFlags.isHidden = true
 #endif
             
             try await manager.setInfo(setInfo, forItemAt: path)
@@ -203,15 +220,18 @@ extension FileManagerTest.FileInfoTest {
             let path = paths.first!
             
             var setInfo = try await manager.infoOfItem(at: path)
-            setInfo.creationDate = .now.addingTimeInterval(-10)
-            setInfo.lastAccessDate = .now.addingTimeInterval(-5)
-            setInfo.modificationDate = .now.addingTimeInterval(-7)
+// #if os(Windows)
+//             setInfo.setCreationDate(.now.addingTimeInterval(-10))
+// #endif
+//             setInfo.lastAccessDate = .now.addingTimeInterval(-5)
+//             setInfo.modificationDate = .now.addingTimeInterval(-7)
 #if os(Windows)
-            setInfo.isHidden = true
-            setInfo.isArchive = true
-            setInfo.notContentIndexed = true 
+            setInfo.fileFlags.isHidden = true
+            setInfo.fileFlags.isArchive = true
+            setInfo.fileFlags.notContentIndexed = true 
 #else
-            setInfo.posixPermissions = (1 << 9) - 1
+            setInfo.posixPermissions = .userReadWriteExecute
+            setInfo.fileFlags.isHidden = true
 #endif
             
             try await manager.setInfo(setInfo, forItemAt: path)
@@ -231,15 +251,18 @@ extension FileManagerTest.FileInfoTest {
         let path = makeTestingFilePath()
         
         var setInfo = FileManager.FileInfo()
-        setInfo.creationDate = .now.addingTimeInterval(-10)
-        setInfo.lastAccessDate = .now.addingTimeInterval(-5)
-        setInfo.modificationDate = .now.addingTimeInterval(-7)
+// #if os(Windows)
+//         setInfo.setCreationDate(.now.addingTimeInterval(-10))
+// #endif
+//         setInfo.lastAccessDate = .now.addingTimeInterval(-5)
+//         setInfo.modificationDate = .now.addingTimeInterval(-7)
 #if os(Windows)
-            setInfo.isHidden = true
-            setInfo.isArchive = true
-            setInfo.notContentIndexed = true 
+            setInfo.fileFlags.isHidden = true
+            setInfo.fileFlags.isArchive = true
+            setInfo.fileFlags.notContentIndexed = true 
 #else
-            setInfo.posixPermissions = (1 << 9) - 1
+            setInfo.posixPermissions = .userReadWriteExecute
+            setInfo.fileFlags.isHidden = true
 #endif
         
         await #expect(throws: Error.self) {

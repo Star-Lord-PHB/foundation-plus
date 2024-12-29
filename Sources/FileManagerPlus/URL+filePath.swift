@@ -34,7 +34,11 @@ extension URL {
 extension FilePath {
 
     func toURL() -> URL {
-        .init(filePath: self.string)
+        if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
+            .init(filePath: self.string)
+        } else {
+            .init(fileURLWithPath: self.string)
+        }
     }
 
 #if os(Windows) 

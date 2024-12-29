@@ -138,7 +138,7 @@ extension FileManager {
         operation: (FileHandle) throws -> R
     ) throws -> R {
         let handle = try FileHandle(forReadingFrom: path)
-        defer { try? handle.close() }
+        defer {  try? handle.close() }
         return try operation(handle)
     }
 

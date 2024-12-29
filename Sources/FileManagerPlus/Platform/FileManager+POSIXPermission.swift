@@ -25,54 +25,54 @@ extension FileManager.PosixPermission {
 
     public var userReadable: Bool {
         get { bits & 0o400 != 0 }
-        set { setBits(for: &bits, at: 0o400, to: newValue) }
+        set { setBits(at: 0o400, to: newValue) }
     }
 
     public var userWritable: Bool {
         get { bits & 0o200 != 0 }
-        set { setBits(for: &bits, at: 0o200, to: newValue) }
+        set { setBits(at: 0o200, to: newValue) }
     }
 
     public var userExecutable: Bool {
         get { bits & 0o100 != 0 }
-        set { setBits(for: &bits, at: 0o100, to: newValue) }
+        set { setBits(at: 0o100, to: newValue) }
     }
 
 #if !os(Windows)
 
     public var groupReadable: Bool {
         get { bits & 0o40 != 0 }
-        set { setBits(for: &bits, at: 0o40, to: newValue) }
+        set { setBits(at: 0o40, to: newValue) }
     }
 
 
     public var groupWritable: Bool {
         get { bits & 0o20 != 0 }
-        set { setBits(for: &bits, at: 0o20, to: newValue) }
+        set { setBits(at: 0o20, to: newValue) }
     }
 
 
     public var groupExecutable: Bool {
         get { bits & 0o10 != 0 }
-        set { setBits(for: &bits, at: 0o10, to: newValue) }
+        set { setBits(at: 0o10, to: newValue) }
     }
 
 
     public var otherReadable: Bool {
         get { bits & 0o4 != 0 }
-        set { setBits(for: &bits, at: 0o4, to: newValue) }
+        set { setBits(at: 0o4, to: newValue) }
     }
 
 
     public var otherWritable: Bool {
         get { bits & 0o2 != 0 }
-        set { setBits(for: &bits, at: 0o2, to: newValue) }
+        set { setBits(at: 0o2, to: newValue) }
     }
 
 
     public var otherExecutable: Bool {
         get { bits & 0o1 != 0 }
-        set { setBits(for: &bits, at: 0o1, to: newValue) }
+        set { setBits(at: 0o1, to: newValue) }
     }
 
 #endif
@@ -146,7 +146,7 @@ extension FileManager.PosixPermission {
 
 extension FileManager.PosixPermission {
 
-    fileprivate func setBits(for bits: inout UInt16, at mask: UInt16, to value: Bool) {
+    fileprivate mutating func setBits(at mask: UInt16, to value: Bool) {
         if value {
             bits |= mask
         } else {
