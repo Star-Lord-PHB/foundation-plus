@@ -32,15 +32,15 @@ extension FileManager {
         public let size: Int64
 #if os(Windows)
         /// The date the file was created
-        public private(set) var creationDate: FileTimeStamp?
+        public private(set) var creationDate: FileManager.FileTimeStamp?
 #else
         /// The date the file was created
-        public let creationDate: FileTimeStamp?
+        public let creationDate: FileManager.FileTimeStamp?
 #endif
         /// The date the file was last accessed
-        public var lastAccessDate: FileTimeStamp
+        public var lastAccessDate: FileManager.FileTimeStamp
         /// The time the content was last modified
-        public var modificationDate: FileTimeStamp
+        public var modificationDate: FileManager.FileTimeStamp
         /// The file system object type as [`FileAttributeType`]
         ///
         /// - seealso: [`FileAttributeType`]
@@ -48,8 +48,8 @@ extension FileManager {
         /// [`FileAttributeType`]: https://developer.apple.com/documentation/foundation/fileattributetype
         public let type: FileAttributeType
 
-        private(set) var originalLastAccessDate: FileTimeStamp
-        private(set) var originalModificationDate: FileTimeStamp
+        private(set) var originalLastAccessDate: FileManager.FileTimeStamp
+        private(set) var originalModificationDate: FileManager.FileTimeStamp
         var lastAccessDateChanged: Bool { lastAccessDate != originalLastAccessDate }
         var modificationDateChanged: Bool { modificationDate != originalModificationDate }
 
@@ -63,7 +63,7 @@ extension FileManager {
         public var isSymbolicLink: Bool { type == .typeSymbolicLink }
 
 #if os(Windows)
-        private(set) var originalCreationDate: FileTimeStamp
+        private(set) var originalCreationDate: FileManager.FileTimeStamp
         var creationDateChanged: Bool { creationDate != originalCreationDate }
         public let sid: String
         public let isExecutable: Bool 
@@ -100,9 +100,9 @@ extension FileManager {
         public init(
             path: FilePath = "",
             size: Int64 = 0,
-            creationDate: FileTimeStamp? = .now,
-            lastAccessDate: FileTimeStamp = .now,
-            modificationDate: FileTimeStamp = .now,
+            creationDate: FileManager.FileTimeStamp? = .now,
+            lastAccessDate: FileManager.FileTimeStamp = .now,
+            modificationDate: FileManager.FileTimeStamp = .now,
             sid: String = "",
             fileFlags: FileManager.PlatformFileFlags = 0,
             type: FileAttributeType = .typeUnknown,
@@ -126,9 +126,9 @@ extension FileManager {
         public init(
             path: FilePath = "",
             size: Int64 = 0,
-            creationDate: FileTimeStamp? = .now,
-            lastAccessDate: FileTimeStamp = .now,
-            modificationDate: FileTimeStamp = .now,
+            creationDate: FileManager.FileTimeStamp? = .now,
+            lastAccessDate: FileManager.FileTimeStamp = .now,
+            modificationDate: FileManager.FileTimeStamp = .now,
             ownerUID: UInt32 = 0,
             ownerGID: UInt32 = 0,
             fileMode: mode_t = 0,
@@ -154,9 +154,9 @@ extension FileManager {
         public init(
             path: FilePath = "",
             size: Int64 = 0,
-            creationDate: FileTimeStamp? = nil,
-            lastAccessDate: FileTimeStamp = .now,
-            modificationDate: FileTimeStamp = .now,
+            creationDate: FileManager.FileTimeStamp? = nil,
+            lastAccessDate: FileManager.FileTimeStamp = .now,
+            modificationDate: FileManager.FileTimeStamp = .now,
             ownerUID: UInt32 = 0,
             ownerGID: UInt32 = 0,
             fileMode: mode_t = 0,
@@ -184,7 +184,7 @@ extension FileManager {
 #if !os(Windows)
         @available(*, unavailable, message: "Only support changing creation date on Windows")
 #endif
-        public mutating func setCreationDate(_ date: FileTimeStamp) {
+        public mutating func setCreationDate(_ date: FileManager.FileTimeStamp) {
             #if os(Windows)
             self.creationDate = date
             #endif

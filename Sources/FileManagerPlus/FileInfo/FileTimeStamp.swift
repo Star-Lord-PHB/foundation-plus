@@ -1,51 +1,57 @@
 import Foundation
 
 
-public struct FileTimeStamp: Sendable {
+extension FileManager {
 
-    public var seconds: Int64
-    public var nanoseconds: UInt64
+    public struct FileTimeStamp: Sendable {
 
-    @available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
-    public var totalNanoseconds: Int128 {
-        return .init(seconds) * 1_000_000_000 + .init(nanoseconds)
-    }
+        public var seconds: Int64
+        public var nanoseconds: UInt64
 
-    public var date: Date {
-#if os(Windows)
-        .init(timeIntervalSinceReferenceDate: .init(seconds) - Date.timeIntervalBetween1601AndReferenceDate + .init(nanoseconds) / 1_000_000_000)
-#else
-        .init(timeIntervalSinceReferenceDate: .init(seconds) - Date.timeIntervalBetween1970AndReferenceDate + .init(nanoseconds) / 1_000_000_000)
-#endif
-    }
+        @available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
+        public var totalNanoseconds: Int128 {
+            return .init(seconds) * 1_000_000_000 + .init(nanoseconds)
+        }
 
-
-    public var platformTrimmed: FileTimeStamp {
-#if os(Windows)
-        .init(seconds: seconds, nanoseconds: nanoseconds / 100 * 100)
-#else
-        self
-#endif
-    }
+        @inlinable
+        public var date: Date {
+    #if os(Windows)
+            .init(timeIntervalSinceReferenceDate: .init(seconds) - Date.timeIntervalBetween1601AndReferenceDate + .init(nanoseconds) / 1_000_000_000)
+    #else
+            .init(timeIntervalSinceReferenceDate: .init(seconds) - Date.timeIntervalBetween1970AndReferenceDate + .init(nanoseconds) / 1_000_000_000)
+    #endif
+        }
 
 
-    public init(seconds: Int64, nanoseconds: UInt64) {
-        self.seconds = seconds + .init(nanoseconds / 1_000_000_000)
-        self.nanoseconds = nanoseconds % 1_000_000_000
-    }
+        @inlinable
+        public var platformTrimmed: FileManager.FileTimeStamp {
+    #if os(Windows)
+            .init(seconds: seconds, nanoseconds: nanoseconds / 100 * 100)
+    #else
+            self
+    #endif
+        }
 
 
-    public static var now: FileTimeStamp { 
-        Date().fileTimeStamp.platformTrimmed
+        public init(seconds: Int64, nanoseconds: UInt64) {
+            self.seconds = seconds + .init(nanoseconds / 1_000_000_000)
+            self.nanoseconds = nanoseconds % 1_000_000_000
+        }
+
+
+        public static var now: FileManager.FileTimeStamp { 
+            Date().fileTimeStamp.platformTrimmed
+        }
+
     }
 
 }
 
 
 
-extension FileTimeStamp: Equatable, Hashable, Comparable {
+extension FileManager.FileTimeStamp: Equatable, Hashable, Comparable {
 
-    public static func < (lhs: FileTimeStamp, rhs: FileTimeStamp) -> Bool {
+    public static func < (lhs: Self, rhs: Self) -> Bool {
         if lhs.seconds == rhs.seconds {
             return lhs.nanoseconds < rhs.nanoseconds
         }

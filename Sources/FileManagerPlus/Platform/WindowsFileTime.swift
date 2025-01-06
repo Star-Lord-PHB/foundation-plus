@@ -12,7 +12,7 @@ extension FILETIME {
         return .init(timeIntervalSince1970: time - Date.timeIntervalBetween1601AndReferenceDate + Date.timeIntervalBetween1970AndReferenceDate)
     }
 
-    var fileTimeStamp: FileTimeStamp {
+    var fileTimeStamp: FileManager.FileTimeStamp {
         let time = UInt64(dwHighDateTime) << 32 | UInt64(dwLowDateTime)
         return .init(seconds: .init(time / 10_000_000), nanoseconds: .init(time % 10_000_000) * 100)
     }
@@ -36,7 +36,7 @@ extension Date {
         return ft
     }
 
-    var fileTimeStamp: FileTimeStamp {
+    var fileTimeStamp: FileManager.FileTimeStamp {
         let interval = timeIntervalSince1601
         let seconds = Int64(interval)
         let nanoseconds = UInt64(interval.truncatingRemainder(dividingBy: 1) * 1_000_000_000)
@@ -46,7 +46,7 @@ extension Date {
 }
 
 
-extension FileTimeStamp {
+extension FileManager.FileTimeStamp {
 
     var windowsFileTime: FILETIME? {
         var ft = FILETIME()

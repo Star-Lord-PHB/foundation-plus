@@ -85,9 +85,9 @@ func getFileOwnerSidWithCmd(at path: FilePath) async throws -> String {
 
 
 
-extension FileTimeStamp {
+extension FileManager.FileTimeStamp {
 
-    func adding(seconds: Int64, nanoseconds: UInt64) -> FileTimeStamp {
+    func adding(seconds: Int64, nanoseconds: UInt64) -> FileManager.FileTimeStamp {
         return .init(seconds: self.seconds + seconds, nanoseconds: self.nanoseconds + nanoseconds)
     }
 

@@ -14,7 +14,7 @@ let SUPPORT_BIRTHTIME = GlibcInterop.SUPPORT_BIRTHTIME == 1
 
 extension timespec {
 
-    var fileTimeStamp: FileTimeStamp {
+    var fileTimeStamp: FileManager.FileTimeStamp {
         .init(seconds: .init(tv_sec), nanoseconds: .init(tv_nsec))
     }
 
@@ -33,7 +33,7 @@ extension timespec {
 #if canImport(Glibc)
 extension statx_timestamp {
 
-    var fileTimeStamp: FileTimeStamp {
+    var fileTimeStamp: FileManager.FileTimeStamp {
         .init(seconds: .init(tv_sec), nanoseconds: .init(tv_nsec))
     }
 
@@ -52,7 +52,7 @@ extension Date {
     }
 
 
-    var fileTimeStamp: FileTimeStamp {
+    var fileTimeStamp: FileManager.FileTimeStamp {
         let interval = timeIntervalSince1970
         let seconds = Int64(interval)
         let nanoseconds = UInt64(interval.truncatingRemainder(dividingBy: 1) * 1_000_000_000)
@@ -62,7 +62,7 @@ extension Date {
 }
 
 
-extension FileTimeStamp {
+extension FileManager.FileTimeStamp {
 
     var timeSpec: timespec {
         .init(tv_sec: .init(seconds), tv_nsec: .init(nanoseconds))
