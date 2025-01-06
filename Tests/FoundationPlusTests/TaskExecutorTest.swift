@@ -1,4 +1,4 @@
-@_spi(Experimental) import Testing
+import Testing
 import Foundation
 @testable import FoundationPlus
 

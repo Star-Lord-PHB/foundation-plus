@@ -218,7 +218,7 @@ extension FileManager {
 
 #if os(Windows)
 
-        let ftCreate = info.creationDate.windowsFileTime
+        let ftCreate = info.creationDate?.windowsFileTime
         let ftModify = info.modificationDate.windowsFileTime
         let ftAccess = info.lastAccessDate.windowsFileTime
 

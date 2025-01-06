@@ -48,9 +48,10 @@ extension Date {
 
 extension FileTimeStamp {
 
-    var windowsFileTime: FILETIME {
+    var windowsFileTime: FILETIME? {
         var ft = FILETIME()
-        let time = UInt64(seconds) * 10_000_000 + UInt64(nanoseconds) / 100
+        guard let seconds = UInt64(exactly: seconds) else { return nil }
+        let time = seconds * 10_000_000 + nanoseconds / 100
         ft.dwLowDateTime = DWORD(time & 0xFFFFFFFF)
         ft.dwHighDateTime = DWORD(time >> 32)
         return ft

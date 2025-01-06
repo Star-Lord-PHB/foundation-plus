@@ -49,12 +49,12 @@ extension FileManagerTest.FileInfoTest {
                 #expect(creationDate == expectedCreationDate)
             }
 #else
-            #expect((fileManagerAttributes[.creationDate] as? Date).approximateEqual(to: info.creationDate))
+            #expect((fileManagerAttributes[.creationDate] as? Date).approximateEqual(to: info.creationDate?.date))
 #endif
 
 #if os(Windows)
             // The url ResourceValues only support precision to seconds on Windows
-            let lastAccessDateToSeconds = Calendar.current.dateInterval(of: .second, for: info.lastAccessDate)?.start
+            let lastAccessDateToSeconds = Calendar.current.dateInterval(of: .second, for: info.lastAccessDate.date)?.start
             #expect(expectedLastAccessDate == lastAccessDateToSeconds)
 #else
             #expect(expectedLastAccessDate.approximateEqual(to: info.lastAccessDate.date))
@@ -96,12 +96,12 @@ extension FileManagerTest.FileInfoTest {
                 #expect(creationDate == expectedCreationDate)
             }
 #else
-            #expect((fileManagerAttributes[.creationDate] as? Date).approximateEqual(to: info.creationDate))
+            #expect((fileManagerAttributes[.creationDate] as? Date).approximateEqual(to: info.creationDate?.date))
 #endif
 
 #if os(Windows)
             // The url ResourceValues only support precision to seconds on Windows
-            let lastAccessDateToSeconds = Calendar.current.dateInterval(of: .second, for: info.lastAccessDate)?.start
+            let lastAccessDateToSeconds = Calendar.current.dateInterval(of: .second, for: info.lastAccessDate.date)?.start
             #expect(expectedLastAccessDate == lastAccessDateToSeconds)
 #else
             #expect(expectedLastAccessDate.approximateEqual(to: info.lastAccessDate.date))
@@ -145,12 +145,12 @@ extension FileManagerTest.FileInfoTest {
                 #expect(creationDate == expectedCreationDate)
             }
 #else
-            #expect((fileManagerAttributes[.creationDate] as? Date).approximateEqual(to: info.creationDate))
+            #expect((fileManagerAttributes[.creationDate] as? Date).approximateEqual(to: info.creationDate?.date))
 #endif
 
 #if os(Windows)
             // The url ResourceValues only support precision to seconds on Windows
-            let lastAccessDateToSeconds = Calendar.current.dateInterval(of: .second, for: info.lastAccessDate)?.start
+            let lastAccessDateToSeconds = Calendar.current.dateInterval(of: .second, for: info.lastAccessDate.date)?.start
             #expect(expectedLastAccessDate == lastAccessDateToSeconds)
 #else
             #expect(expectedLastAccessDate.approximateEqual(to: info.lastAccessDate.date))
@@ -196,7 +196,7 @@ extension FileManagerTest.FileInfoTest {
 
             var setInfo = try await manager.infoOfItem(at: path)
 #if os(Windows)
-            setInfo.setCreationDate(.now.addingTimeInterval(-10))
+            setInfo.setCreationDate(.now.adding(seconds: -10, nanoseconds: 0))
 #endif
             setInfo.lastAccessDate = (setInfo.creationDate ?? .now).adding(seconds: 120, nanoseconds: 0)
             setInfo.modificationDate = (setInfo.creationDate ?? .now).adding(seconds: 60, nanoseconds: 0)
@@ -231,7 +231,7 @@ extension FileManagerTest.FileInfoTest {
             
             var setInfo = try await manager.infoOfItem(at: path)
 #if os(Windows)
-            setInfo.setCreationDate(.now.addingTimeInterval(-10))
+            setInfo.setCreationDate(.now.adding(seconds: -10, nanoseconds: 0))
 #endif
             setInfo.lastAccessDate = (setInfo.creationDate ?? .now).adding(seconds: 120, nanoseconds: 0)
             setInfo.modificationDate = (setInfo.creationDate ?? .now).adding(seconds: 60, nanoseconds: 0)
@@ -267,7 +267,7 @@ extension FileManagerTest.FileInfoTest {
             
             var setInfo = try await manager.infoOfItem(at: path)
 #if os(Windows)
-            setInfo.setCreationDate(.now.addingTimeInterval(-10))
+            setInfo.setCreationDate(.now.adding(seconds: -10, nanoseconds: 0))
 #endif
             setInfo.lastAccessDate = (setInfo.creationDate ?? .now).adding(seconds: 120, nanoseconds: 0)
             setInfo.modificationDate = (setInfo.creationDate ?? .now).adding(seconds: 60, nanoseconds: 0)
@@ -343,7 +343,7 @@ extension FileManagerTest.FileInfoTest {
         var setInfo = FileManager.FileInfo()
 
 #if os(Windows)
-        setInfo.setCreationDate(.now.addingTimeInterval(-10))
+        setInfo.setCreationDate(.now.adding(seconds: -10, nanoseconds: 0))
 #endif
         setInfo.lastAccessDate = (setInfo.creationDate ?? .now).adding(seconds: 120, nanoseconds: 0)
         setInfo.modificationDate = (setInfo.creationDate ?? .now).adding(seconds: 60, nanoseconds: 0)

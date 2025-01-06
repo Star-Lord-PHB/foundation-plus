@@ -63,7 +63,7 @@ extension FileManager {
         public var isSymbolicLink: Bool { type == .typeSymbolicLink }
 
 #if os(Windows)
-        private(set) var originalCreationDate: Date
+        private(set) var originalCreationDate: FileTimeStamp
         var creationDateChanged: Bool { creationDate != originalCreationDate }
         public let sid: String
         public let isExecutable: Bool 
@@ -118,7 +118,7 @@ extension FileManager {
             self.type = type
             self.isExecutable = isExecutable
             self.originalFileFlags = fileFlags
-            self.originalCreationDate = creationDate
+            self.originalCreationDate = creationDate ?? .now
             self.originalLastAccessDate = lastAccessDate
             self.originalModificationDate = modificationDate
         }
@@ -126,9 +126,9 @@ extension FileManager {
         public init(
             path: FilePath = "",
             size: Int64 = 0,
-            creationDate: FileTimeStamp? = .init(),
-            lastAccessDate: FileTimeStamp = .init(),
-            modificationDate: FileTimeStamp = .init(),
+            creationDate: FileTimeStamp? = .now,
+            lastAccessDate: FileTimeStamp = .now,
+            modificationDate: FileTimeStamp = .now,
             ownerUID: UInt32 = 0,
             ownerGID: UInt32 = 0,
             fileMode: mode_t = 0,
@@ -184,7 +184,7 @@ extension FileManager {
 #if !os(Windows)
         @available(*, unavailable, message: "Only support changing creation date on Windows")
 #endif
-        public func setCreationDate(_ date: Date) {
+        public func setCreationDate(_ date: FileTimeStamp) {
             #if os(Windows)
             self.creationDate = date
             #endif

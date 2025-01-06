@@ -1,3 +1,4 @@
+#if !os(Windows)
 import Foundation
 #if canImport(Glibc)
 import GlibcInterop
@@ -74,3 +75,5 @@ extension FileTimeStamp {
 #endif
 
 }
+
+#endif

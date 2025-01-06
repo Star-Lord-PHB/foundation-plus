@@ -12,6 +12,8 @@ import Foundation
 
 @Suite
 final class FileManagerTest {
+
+    private static let lock: NSLock = .init()
     
     /// A helper super class for tests related to `FileManager`.
     ///
@@ -55,12 +57,10 @@ final class FileManagerTest {
         var baseUrl: URL {
             .init(filePath: basePath.string)
         }
-
-        private static let lock: NSLock = .init()
         
         init(relativePath: String) throws {
             self.basePath = .init(FileManager.default.temporaryDirectory.appending(path: relativePath).path) 
-            try Self.lock.withLock {
+            try FileManagerTest.lock.withLock {
                 try manager.createDirectory(atPath: basePath.string, withIntermediateDirectories: true)
             }
         }

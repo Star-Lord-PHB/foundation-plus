@@ -6,17 +6,13 @@ public struct FileTimeStamp: Sendable {
     public var seconds: Int64
     public var nanoseconds: UInt64
 
+    @available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
     public var totalNanoseconds: Int128 {
         return .init(seconds) * 1_000_000_000 + .init(nanoseconds)
     }
 
     public var date: Date {
-#if os(Windows)
-        let time = Double(UInt64(dwHighDateTime) << 32 | UInt64(dwLowDateTime)) / 10_000_000
-        return .init(timeIntervalSince1970: time - Date.timeIntervalBetween1601AndReferenceDate + Date.timeIntervalBetween1970AndReferenceDate)
-#else 
-        return .init(timeIntervalSinceReferenceDate: .init(seconds) - Date.timeIntervalBetween1970AndReferenceDate + .init(nanoseconds) / 1_000_000_000)
-#endif
+        .init(timeIntervalSinceReferenceDate: .init(seconds) - Date.timeIntervalBetween1970AndReferenceDate + .init(nanoseconds) / 1_000_000_000)
     }
 
 
