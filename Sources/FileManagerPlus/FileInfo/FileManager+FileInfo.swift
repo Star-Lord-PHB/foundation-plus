@@ -69,7 +69,7 @@ extension FileManager {
         public let isExecutable: Bool 
         public var posixPermissionBits: UInt16 {
             var poxisPermissions = UInt16(_S_IREAD)
-            if fileFlags.isReadOnly {
+            if !fileFlags.isReadOnly {
                 poxisPermissions |= UInt16(_S_IWRITE)
             }
             if isExecutable || type == .typeDirectory {
@@ -184,7 +184,7 @@ extension FileManager {
 #if !os(Windows)
         @available(*, unavailable, message: "Only support changing creation date on Windows")
 #endif
-        public func setCreationDate(_ date: FileTimeStamp) {
+        public mutating func setCreationDate(_ date: FileTimeStamp) {
             #if os(Windows)
             self.creationDate = date
             #endif

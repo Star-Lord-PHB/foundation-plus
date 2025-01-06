@@ -12,7 +12,20 @@ public struct FileTimeStamp: Sendable {
     }
 
     public var date: Date {
+#if os(Windows)
+        .init(timeIntervalSinceReferenceDate: .init(seconds) - Date.timeIntervalBetween1601AndReferenceDate + .init(nanoseconds) / 1_000_000_000)
+#else
         .init(timeIntervalSinceReferenceDate: .init(seconds) - Date.timeIntervalBetween1970AndReferenceDate + .init(nanoseconds) / 1_000_000_000)
+#endif
+    }
+
+
+    public var platformTrimmed: FileTimeStamp {
+#if os(Windows)
+        .init(seconds: seconds, nanoseconds: nanoseconds / 100 * 100)
+#else
+        self
+#endif
     }
 
 
@@ -23,7 +36,7 @@ public struct FileTimeStamp: Sendable {
 
 
     public static var now: FileTimeStamp { 
-        Date().fileTimeStamp
+        Date().fileTimeStamp.platformTrimmed
     }
 
 }

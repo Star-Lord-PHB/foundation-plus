@@ -217,7 +217,6 @@ extension FileManagerTest.FileInfoTest {
             let newInfo = try await manager.infoOfItem(at: path)
             
             #expect(newInfo == setInfo)
-            print(newInfo.creationDate == setInfo.creationDate)
             
         }
         
