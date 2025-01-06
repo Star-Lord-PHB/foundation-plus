@@ -32,15 +32,15 @@ extension FileManager {
         public let size: Int64
 #if os(Windows)
         /// The date the file was created
-        public private(set) var creationDate: Date?
+        public private(set) var creationDate: FileTimeStamp?
 #else
         /// The date the file was created
-        public let creationDate: Date?
+        public let creationDate: FileTimeStamp?
 #endif
         /// The date the file was last accessed
-        public var lastAccessDate: Date
+        public var lastAccessDate: FileTimeStamp
         /// The time the content was last modified
-        public var modificationDate: Date
+        public var modificationDate: FileTimeStamp
         /// The file system object type as [`FileAttributeType`]
         ///
         /// - seealso: [`FileAttributeType`]
@@ -48,8 +48,8 @@ extension FileManager {
         /// [`FileAttributeType`]: https://developer.apple.com/documentation/foundation/fileattributetype
         public let type: FileAttributeType
 
-        private(set) var originalLastAccessDate: Date
-        private(set) var originalModificationDate: Date
+        private(set) var originalLastAccessDate: FileTimeStamp
+        private(set) var originalModificationDate: FileTimeStamp
         var lastAccessDateChanged: Bool { lastAccessDate != originalLastAccessDate }
         var modificationDateChanged: Bool { modificationDate != originalModificationDate }
 
@@ -89,9 +89,9 @@ extension FileManager {
             get { posixPermissions.bits }
             set { posixPermissions = .init(bits: newValue) }
         }
-        private(set) var originalFileMode: UInt16
+        private(set) var originalFileMode: mode_t
         /// file’s POSIX mode
-        public var fileMode: UInt16 { typeBits | posixPermissionBits }
+        public var fileMode: mode_t { .init(typeBits | posixPermissionBits) }
         var fileModeChanged: Bool { fileMode != originalFileMode }
 #endif
         
@@ -100,9 +100,9 @@ extension FileManager {
         public init(
             path: FilePath = "",
             size: Int64 = 0,
-            creationDate: Date? = .now,
-            lastAccessDate: Date = .now,
-            modificationDate: Date = .now,
+            creationDate: FileTimeStamp? = .now,
+            lastAccessDate: FileTimeStamp = .now,
+            modificationDate: FileTimeStamp = .now,
             sid: String = "",
             fileFlags: FileManager.PlatformFileFlags = 0,
             type: FileAttributeType = .typeUnknown,
@@ -126,9 +126,9 @@ extension FileManager {
         public init(
             path: FilePath = "",
             size: Int64 = 0,
-            creationDate: Date? = .init(),
-            lastAccessDate: Date = .init(),
-            modificationDate: Date = .init(),
+            creationDate: FileTimeStamp? = .init(),
+            lastAccessDate: FileTimeStamp = .init(),
+            modificationDate: FileTimeStamp = .init(),
             ownerUID: UInt32 = 0,
             ownerGID: UInt32 = 0,
             fileMode: mode_t = 0,
@@ -154,9 +154,9 @@ extension FileManager {
         public init(
             path: FilePath = "",
             size: Int64 = 0,
-            creationDate: Date? = nil,
-            lastAccessDate: Date = .init(),
-            modificationDate: Date = .init(),
+            creationDate: FileTimeStamp? = nil,
+            lastAccessDate: FileTimeStamp = .now,
+            modificationDate: FileTimeStamp = .now,
             ownerUID: UInt32 = 0,
             ownerGID: UInt32 = 0,
             fileMode: mode_t = 0,
@@ -169,11 +169,11 @@ extension FileManager {
             self.modificationDate = modificationDate
             self.ownerUID = ownerUID
             self.ownerGID = ownerGID
-            self.posixPermissions = .init(bits: fileMode)
+            self.posixPermissions = .init(bits: .init(clamping: fileMode))
             self.type = fileMode.fileType
             self.fileFlags = fileFlags
             self.originalFileMode = fileMode
-            self.typeBits = fileMode & S_IFMT
+            self.typeBits = .init(clamping: fileMode & S_IFMT)
             self.originalLastAccessDate = lastAccessDate
             self.originalModificationDate = modificationDate
             self.originalFileFlags = fileFlags

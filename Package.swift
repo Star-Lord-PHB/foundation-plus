@@ -15,31 +15,17 @@ let package = Package(
             targets: ["FoundationPlus"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-testing.git", branch: "main"),
         .package(url: "https://github.com/apple/swift-system.git", from: "1.4.0"),],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
-        .target(
-            name: "FoundationPlus",
-            dependencies: [.foundationPlusEssential, .fileManagerPlus, .concurrencyPlus, .datePlus]),
-        .target(
-            name: "FoundationPlusEssential",
-            dependencies: [.concurrencyPlus],
-            path: "Sources/Essential"),
-        .target(
-            name: "FileManagerPlus",
-            dependencies: [.concurrencyPlus, .foundationPlusEssential, .swiftSystem],
-            path: "Sources/FileManagerPlus"),
-        .target(
-            name: "ConcurrencyPlus",
-            path: "Sources/ConcurrencyPlus"),
-        .target(
-            name: "DatePlus",
-            path: "Sources/DatePlus"),
-        .testTarget(
-            name: "FoundationPlusTests",
-            dependencies: [.foundationPlus, .swiftTesting]),
+        .foundationPlus,
+        .foundationPlusEssential,
+        .fileManagerPlus,
+        .concurrencyPlus,
+        .datePlus,
+        .glibcInterop,
+        .foundationPlusTests,
     ]
 )
 
@@ -48,6 +34,59 @@ package.targets.forEach {
     var swiftSetting = $0.swiftSettings ?? []
     swiftSetting.append(.enableExperimentalFeature("StrictConcurrency"))
     $0.swiftSettings = swiftSetting
+}
+
+
+@MainActor
+extension Target {
+
+    static let foundationPlus: Target = .target(
+        name: "FoundationPlus",
+        dependencies: [.foundationPlusEssential, .fileManagerPlus, .concurrencyPlus, .datePlus]
+    )
+
+    static let foundationPlusEssential: Target = .target(
+        name: "FoundationPlusEssential",
+        dependencies: [.concurrencyPlus],
+        path: "Sources/Essential"
+    )
+
+#if canImport(Glibc)
+    static let fileManagerPlus: Target = .target(
+        name: "FileManagerPlus",
+        dependencies: [.concurrencyPlus, .foundationPlusEssential, .swiftSystem, .glibcInterop],
+        path: "Sources/FileManagerPlus"
+    )
+#else
+    static let fileManagerPlus: Target = .target(
+        name: "FileManagerPlus",
+        dependencies: [.concurrencyPlus, .foundationPlusEssential, .swiftSystem],
+        path: "Sources/FileManagerPlus"
+    )
+#endif
+
+    static let concurrencyPlus: Target = .target(
+        name: "ConcurrencyPlus",
+        path: "Sources/ConcurrencyPlus"
+    )
+
+    static let datePlus: Target = .target(
+        name: "DatePlus",
+        path: "Sources/DatePlus"
+    )
+
+    static let glibcInterop: Target = .target(
+        name: "GlibcInterop", 
+        path: "Sources/GlibcInterop",
+        publicHeadersPath: ".",
+        cSettings: [.headerSearchPath(".")]
+    )
+
+    static let foundationPlusTests: Target = .testTarget(
+        name: "FoundationPlusTests",
+        dependencies: [.foundationPlus]
+    )
+
 }
 
 
@@ -64,8 +103,8 @@ extension Target.Dependency {
 
     static var foundationPlus: Self = "FoundationPlus"
 
-    static var swiftTesting: Self = .product(name: "Testing", package: "swift-testing")
-
     static var swiftSystem: Self = .product(name: "SystemPackage", package: "swift-system")
+
+    static var glibcInterop: Self = "GlibcInterop"
 
 }

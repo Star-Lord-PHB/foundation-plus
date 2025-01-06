@@ -132,33 +132,4 @@ enum WindowsFileUtils {
 
 }
 
-
-
-extension FILETIME {
-    var date: Date {
-        let time = Double(UInt64(dwHighDateTime) << 32 | UInt64(dwLowDateTime)) / 10_000_000
-        // let interval = 11_644_473_600 as Double
-        return .init(timeIntervalSince1970: time - 12622780800.0 + Date.timeIntervalBetween1970AndReferenceDate)
-    }
-}
-
-
-extension Date {
-
-    static let timeIntervalBetween1601AndReferenceDate: TimeInterval = 12622780800
-
-    var timeIntervalSince1601: TimeInterval {
-        self.timeIntervalSinceReferenceDate + Self.timeIntervalBetween1601AndReferenceDate
-    }
-
-    var windowsFileTime: FILETIME? {
-        var ft = FILETIME()
-        guard let windowsTicks = UInt64(exactly: timeIntervalSince1601 * 10_000_000) else { return nil }
-        ft.dwLowDateTime = DWORD(windowsTicks & 0xFFFFFFFF)
-        ft.dwHighDateTime = DWORD(windowsTicks >> 32)
-        return ft
-    }
-    
-}
-
 #endif

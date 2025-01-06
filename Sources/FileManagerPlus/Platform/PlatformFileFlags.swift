@@ -23,10 +23,6 @@ extension FileManager {
             self.bits = bits
         }
 
-        public init(bits: Int32) {
-            self.init(bits: .init(bitPattern: bits))
-        }
-
 
         mutating func setBits(_ mask: BitValue, to active: Bool) {
             if active {
@@ -34,7 +30,6 @@ extension FileManager {
             } else {
                 self.bits &= ~mask
             }
-            
         }
 
 

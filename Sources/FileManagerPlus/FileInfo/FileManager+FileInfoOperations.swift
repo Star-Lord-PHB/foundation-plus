@@ -4,6 +4,9 @@ import FoundationPlusEssential
 #if os(Windows)
 import WinSDK
 #endif
+#if os(Linux)
+import GlibcInterop
+#endif
 
 
 extension FileManager.FileInfo {
@@ -54,9 +57,9 @@ extension FileManager.FileInfo {
         self.init(
             path: path,
             size: Int64(infoByHandle.nFileSizeHigh) << 32 | Int64(infoByHandle.nFileSizeLow),
-            creationDate: infoByHandle.ftCreationTime.date,
-            lastAccessDate: infoByHandle.ftLastAccessTime.date,
-            modificationDate: infoByHandle.ftLastWriteTime.date,
+            creationDate: infoByHandle.ftCreationTime.fileTimeStamp,
+            lastAccessDate: infoByHandle.ftLastAccessTime.fileTimeStamp,
+            modificationDate: infoByHandle.ftLastWriteTime.fileTimeStamp,
             sid: ownerSid,
             fileFlags: .init(bits: infoByHandle.dwFileAttributes),
             type: type,
@@ -65,35 +68,57 @@ extension FileManager.FileInfo {
 
 #else
 
+#if canImport(Darwin)
+
         var fileStat = stat()
         guard lstat(path.string, &fileStat) == 0 else {
             throw CocoaError.lastPosixError(path: path, reading: true)
         }
 
-#if canImport(Darwin)
         self.init(
             path: path, 
             size: fileStat.st_size, 
-            creationDate: fileStat.st_birthtimespec.date, 
-            lastAccessDate: fileStat.st_atimespec.date, 
-            modificationDate: fileStat.st_mtimespec.date, 
+            creationDate: fileStat.st_birthtimespec.fileTimeStamp, 
+            lastAccessDate: fileStat.st_atimespec.fileTimeStamp, 
+            modificationDate: fileStat.st_mtimespec.fileTimeStamp, 
             ownerUID: fileStat.st_uid, 
             ownerGID: fileStat.st_gid, 
             fileMode: fileStat.st_mode, 
             fileFlags: .init(bits: fileStat.st_flags)
         )
-#else
+
+#else   
+
+        var fileStat = statx()
+        guard stat_compat(path.string, &fileStat) == 0 else {
+            throw CocoaError.lastPosixError(path: path, reading: true)
+        }
+
+        // symbolic link on linux does not support file flags
+        var flags = 0 as UInt32
+        if fileStat.stx_mode & .init(clamping: Glibc.S_IFMT) != Glibc.S_IFLNK {
+            let fd = openat(AT_FDCWD, path.string, O_RDONLY)
+            guard fd >= 0 else {
+                throw CocoaError.lastPosixError(path: path, reading: true)
+            }
+            defer { close(fd) }
+            guard fgetFileFlags(fd, &flags) == 0 || errno == ENOSYS else {
+                throw CocoaError.lastPosixError(path: path, reading: true)
+            }
+        }
+
         self.init(
             path: path,
-            size: fileStat.st_size,
-            creationDate: nil,
-            lastAccessDate: fileStat.st_atimespec.date,
-            modificationDate: fileStat.st_mtimespec.date,
-            ownerUID: fileStat.st_uid,
-            ownerGID: fileStat.st_gid,
-            fileMode: fileStat.st_mode,
-            fileFlags: 0            // TODO: Implement for Linux
+            size: .init(fileStat.stx_size),
+            creationDate: SUPPORT_BIRTHTIME ? fileStat.stx_btime.fileTimeStamp : nil,
+            lastAccessDate: fileStat.stx_atime.fileTimeStamp,
+            modificationDate: fileStat.stx_mtime.fileTimeStamp,
+            ownerUID: fileStat.stx_uid,
+            ownerGID: fileStat.stx_gid,
+            fileMode: .init(fileStat.stx_mode),
+            fileFlags: .init(bits: flags)
         )
+
 #endif
 
 #endif
@@ -221,13 +246,10 @@ extension FileManager {
             }
         }
 
-#else 
+#elseif canImport(Darwin)
 
-#if canImport(Darwin)
         let fd = openat(AT_FDCWD, path.string, O_RDONLY | AT_SYMLINK_NOFOLLOW | O_SYMLINK)
-#else
-        let fd = openat(AT_FDCWD, path.string, O_RDONLY | AT_SYMLINK_NOFOLLOW)
-#endif
+
         guard fd >= 0 else {
             throw CocoaError.lastPosixError(path: path, reading: false)
         }
@@ -247,17 +269,53 @@ extension FileManager {
 
         if info.fileModeChanged {
             guard fchmod(fd, info.fileMode) == 0 else {
+                print(errno)
                 throw CocoaError.lastPosixError(path: path, reading: false)
             }
         }
 
-#if canImport(Darwin)
         if info.fileFlagsChanged {
             guard fchflags(fd, info.fileFlags.bits) == 0 else {
                 throw CocoaError.lastPosixError(path: path, reading: false)
             }
         }
-#endif
+
+#else
+
+        guard !(info.isSymbolicLink && (info.fileFlagsChanged || info.fileModeChanged)) else {
+            throw CocoaError.posixError(path: path, posixError: .init(.EOPNOTSUPP), reading: false)
+        }
+
+        var times = (
+            info.lastAccessDateChanged ? info.lastAccessDate.timeSpec : .omit, 
+            info.modificationDateChanged ? info.modificationDate.timeSpec : .omit
+        )
+        try withUnsafeMutablePointer(to: &times) { ptr in 
+            try ptr.withMemoryRebound(to: timespec.self, capacity: 2) { ptr in 
+                guard utimensat(AT_FDCWD, path.string, ptr, AT_SYMLINK_NOFOLLOW) == 0 else {
+                    throw CocoaError.lastPosixError(path: path, reading: false)
+                }
+            }
+        }
+
+        if info.fileModeChanged || info.fileFlagsChanged {
+
+            let fd = openat(AT_FDCWD, path.string, O_RDONLY)
+            defer { close(fd) }
+
+            if info.fileModeChanged {
+                guard fchmodat(fd, "", info.fileMode, AT_EMPTY_PATH) == 0 else {
+                    throw CocoaError.lastPosixError(path: path, reading: false)
+                }
+            }
+
+            if info.fileFlagsChanged {
+                guard fsetFileFlags(fd, info.fileFlags.bits) == 0 else {
+                    throw CocoaError.lastPosixError(path: path, reading: false)
+                }
+            }
+
+        }
 
 #endif
 

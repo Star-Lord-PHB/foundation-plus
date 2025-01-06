@@ -70,7 +70,9 @@ extension FileManager {
         private let enumerator: FileManager.DirectoryEnumerator
 
         public var level: Int { enumerator.level }
+#if canImport(Darwin)
         public var isEnumeratingDirectoryPostOrder: Bool { enumerator.isEnumeratingDirectoryPostOrder }
+#endif
 
         init(enumerator: FileManager.DirectoryEnumerator) {
             self.enumerator = enumerator
@@ -102,7 +104,9 @@ extension FileManager {
         private let enumerator: FileManager.DirectoryEnumerator
 
         public var level: Int { enumerator.level }
+#if canImport(Darwin)
         public var isEnumeratingDirectoryPostOrder: Bool { enumerator.isEnumeratingDirectoryPostOrder }
+#endif
 
         init(enumerator: FileManager.DirectoryEnumerator) {
             self.enumerator = enumerator

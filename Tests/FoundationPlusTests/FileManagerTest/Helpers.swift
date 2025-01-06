@@ -1,6 +1,7 @@
 import Foundation
 import SystemPackage
 import Testing
+import FileManagerPlus
 #if os(Windows)
 import WinSDK
 #endif
@@ -81,3 +82,34 @@ func getFileOwnerSidWithCmd(at path: FilePath) async throws -> String {
 }
 
 #endif
+
+
+
+extension FileTimeStamp {
+
+    func adding(seconds: Int64, nanoseconds: UInt64) -> FileTimeStamp {
+        return .init(seconds: self.seconds + seconds, nanoseconds: self.nanoseconds + nanoseconds)
+    }
+
+}
+
+
+extension Date? {
+
+    func approximateEqual(to other: Date?, within timeInterval: TimeInterval = 10e-6) -> Bool {
+        if self == nil && other == nil { return true }
+        guard let self, let other else { return false }
+        return abs(self.timeIntervalSince(other)) <= timeInterval
+    }
+
+}
+
+
+extension Date {
+
+    func approximateEqual(to other: Date?, within timeInterval: TimeInterval = 10e-6) -> Bool {
+        guard let other else { return false }
+        return abs(self.timeIntervalSince(other)) <= timeInterval
+    }
+
+}

@@ -34,21 +34,34 @@ extension FileManagerTest.FileInfoTest {
         
         try await withFileAtPath(content: "test1") { path, content in
             
-            let url = URL(filePath: path.string)
+            // The resourceValues API causes atime to change, so call it at the beginning
+            let expectedLastAccessDate = try URL(filePath: path.string).resourceValues(forKeys: [.contentAccessDateKey]).contentAccessDate
             let info = try await manager.infoOfItem(at: path)
             let fileManagerAttributes = try manager.attributesOfItem(atPath: path.string)
             
-            #expect(fileManagerAttributes[.creationDate] as? Date == info.creationDate)
+#if os(Linux)
+            // on Linux, the creation date from file manager attributes use ctime instead of btime, which sometimes differ a little bit
+            let creationDate = info.creationDate?.date
+            let expectedCreationDate = fileManagerAttributes[.creationDate] as? Date
+            if let creationDate, let expectedCreationDate {
+                #expect(creationDate.approximateEqual(to: expectedCreationDate, within: 0.1))
+            } else {
+                #expect(creationDate == expectedCreationDate)
+            }
+#else
+            #expect((fileManagerAttributes[.creationDate] as? Date).approximateEqual(to: info.creationDate))
+#endif
 
 #if os(Windows)
             // The url ResourceValues only support precision to seconds on Windows
             let lastAccessDateToSeconds = Calendar.current.dateInterval(of: .second, for: info.lastAccessDate)?.start
-            try #expect(url.resourceValues(forKeys: [.contentAccessDateKey]).contentAccessDate == lastAccessDateToSeconds)
+            #expect(expectedLastAccessDate == lastAccessDateToSeconds)
 #else
-            try #expect(url.resourceValues(forKeys: [.contentAccessDateKey]).contentAccessDate == info.lastAccessDate)
+            #expect(expectedLastAccessDate.approximateEqual(to: info.lastAccessDate.date))
 #endif
 
-            #expect(fileManagerAttributes[.modificationDate] as? Date == info.modificationDate)
+            #expect((fileManagerAttributes[.modificationDate] as? Date).approximateEqual(to: info.modificationDate.date))
+
 #if os(Windows)
             try await #expect(getFileOwnerSidWithCmd(at: path) == info.sid)
 #else
@@ -68,21 +81,34 @@ extension FileManagerTest.FileInfoTest {
         
         try await withDirectoryAtPath { path in
             
-            let url = URL(filePath: path.string)
+            // The resourceValues API causes atime to change, so call it at the beginning
+            let expectedLastAccessDate = try URL(filePath: path.string).resourceValues(forKeys: [.contentAccessDateKey]).contentAccessDate
             let info = try await manager.infoOfItem(at: path)
             let fileManagerAttributes = try manager.attributesOfItem(atPath: path.string)
             
-            #expect(fileManagerAttributes[.creationDate] as? Date == info.creationDate)
-            
+#if os(Linux)
+            // on Linux, the creation date from file manager attributes use ctime instead of btime, which sometimes differ a little bit
+            let creationDate = info.creationDate?.date
+            let expectedCreationDate = fileManagerAttributes[.creationDate] as? Date
+            if let creationDate, let expectedCreationDate {
+                #expect(creationDate.approximateEqual(to: expectedCreationDate, within: 0.1))
+            } else {
+                #expect(creationDate == expectedCreationDate)
+            }
+#else
+            #expect((fileManagerAttributes[.creationDate] as? Date).approximateEqual(to: info.creationDate))
+#endif
+
 #if os(Windows)
             // The url ResourceValues only support precision to seconds on Windows
             let lastAccessDateToSeconds = Calendar.current.dateInterval(of: .second, for: info.lastAccessDate)?.start
-            try #expect(url.resourceValues(forKeys: [.contentAccessDateKey]).contentAccessDate == lastAccessDateToSeconds)
+            #expect(expectedLastAccessDate == lastAccessDateToSeconds)
 #else
-            try #expect(url.resourceValues(forKeys: [.contentAccessDateKey]).contentAccessDate == info.lastAccessDate)
+            #expect(expectedLastAccessDate.approximateEqual(to: info.lastAccessDate.date))
 #endif
 
-            #expect(fileManagerAttributes[.modificationDate] as? Date == info.modificationDate)
+            #expect((fileManagerAttributes[.modificationDate] as? Date).approximateEqual(to: info.modificationDate.date))
+
 #if os(Windows)
             try await #expect(getFileOwnerSidWithCmd(at: path) == info.sid)
 #else
@@ -103,22 +129,35 @@ extension FileManagerTest.FileInfoTest {
         try await withSymbolicLinkAtPath { paths, _ in
             
             let path = paths.first!
-            let url = URL(filePath: path.string)
+            // The resourceValues API causes atime to change, so call it at the beginning
+            let expectedLastAccessDate = try URL(filePath: path.string).resourceValues(forKeys: [.contentAccessDateKey]).contentAccessDate
             
             let info = try await manager.infoOfItem(at: path)
             let fileManagerAttributes = try manager.attributesOfItem(atPath: path.string)
             
-            #expect(fileManagerAttributes[.creationDate] as? Date == info.creationDate)
-            
+#if os(Linux)
+            // on Linux, the creation date from file manager attributes use ctime instead of btime, which sometimes differ a little bit
+            let creationDate = info.creationDate?.date
+            let expectedCreationDate = fileManagerAttributes[.creationDate] as? Date
+            if let creationDate, let expectedCreationDate {
+                #expect(creationDate.approximateEqual(to: expectedCreationDate, within: 0.1))
+            } else {
+                #expect(creationDate == expectedCreationDate)
+            }
+#else
+            #expect((fileManagerAttributes[.creationDate] as? Date).approximateEqual(to: info.creationDate))
+#endif
+
 #if os(Windows)
             // The url ResourceValues only support precision to seconds on Windows
             let lastAccessDateToSeconds = Calendar.current.dateInterval(of: .second, for: info.lastAccessDate)?.start
-            try #expect(url.resourceValues(forKeys: [.contentAccessDateKey]).contentAccessDate == lastAccessDateToSeconds)
+            #expect(expectedLastAccessDate == lastAccessDateToSeconds)
 #else
-            try #expect(url.resourceValues(forKeys: [.contentAccessDateKey]).contentAccessDate == info.lastAccessDate)
+            #expect(expectedLastAccessDate.approximateEqual(to: info.lastAccessDate.date))
 #endif
 
-            #expect(fileManagerAttributes[.modificationDate] as? Date == info.modificationDate)
+            #expect((fileManagerAttributes[.modificationDate] as? Date).approximateEqual(to: info.modificationDate.date))
+            
 #if os(Windows)
             try await #expect(getFileOwnerSidWithCmd(at: path) == info.sid)
 #else
@@ -156,18 +195,21 @@ extension FileManagerTest.FileInfoTest {
         try await withFileAtPath { path, _ in
 
             var setInfo = try await manager.infoOfItem(at: path)
-// #if os(Windows)
-//             setInfo.setCreationDate(.now.addingTimeInterval(-10))
-// #endif
-//             setInfo.lastAccessDate = .now.addingTimeInterval(-5)
-//             setInfo.modificationDate = .now.addingTimeInterval(-7)
+#if os(Windows)
+            setInfo.setCreationDate(.now.addingTimeInterval(-10))
+#endif
+            setInfo.lastAccessDate = (setInfo.creationDate ?? .now).adding(seconds: 120, nanoseconds: 0)
+            setInfo.modificationDate = (setInfo.creationDate ?? .now).adding(seconds: 60, nanoseconds: 0)
 #if os(Windows)
             setInfo.fileFlags.isHidden = true
             setInfo.fileFlags.isArchive = true
             setInfo.fileFlags.notContentIndexed = true 
-#else
+#elseif canImport(Darwin)
             setInfo.posixPermissions = .userReadWriteExecute
             setInfo.fileFlags.isHidden = true
+#else
+            setInfo.posixPermissions = .userReadWriteExecute
+            setInfo.fileFlags.secureRemove = true
 #endif
 
             try await manager.setInfo(setInfo, forItemAt: path)
@@ -175,6 +217,7 @@ extension FileManagerTest.FileInfoTest {
             let newInfo = try await manager.infoOfItem(at: path)
             
             #expect(newInfo == setInfo)
+            print(newInfo.creationDate == setInfo.creationDate)
             
         }
         
@@ -187,18 +230,21 @@ extension FileManagerTest.FileInfoTest {
         try await withDirectoryAtPath { path in
             
             var setInfo = try await manager.infoOfItem(at: path)
-// #if os(Windows)
-//             setInfo.setCreationDate(.now.addingTimeInterval(-10))
-// #endif
-//             setInfo.lastAccessDate = .now.addingTimeInterval(-5)
-//             setInfo.modificationDate = .now.addingTimeInterval(-7)
+#if os(Windows)
+            setInfo.setCreationDate(.now.addingTimeInterval(-10))
+#endif
+            setInfo.lastAccessDate = (setInfo.creationDate ?? .now).adding(seconds: 120, nanoseconds: 0)
+            setInfo.modificationDate = (setInfo.creationDate ?? .now).adding(seconds: 60, nanoseconds: 0)
 #if os(Windows)
             setInfo.fileFlags.isHidden = true
             setInfo.fileFlags.isArchive = true
             setInfo.fileFlags.notContentIndexed = true 
-#else
+#elseif canImport(Darwin)
             setInfo.posixPermissions = .userReadWriteExecute
             setInfo.fileFlags.isHidden = true
+#else
+            setInfo.posixPermissions = .userReadWriteExecute
+            setInfo.fileFlags.isCompressed = true
 #endif
             
             try await manager.setInfo(setInfo, forItemAt: path)
@@ -220,19 +266,19 @@ extension FileManagerTest.FileInfoTest {
             let path = paths.first!
             
             var setInfo = try await manager.infoOfItem(at: path)
-// #if os(Windows)
-//             setInfo.setCreationDate(.now.addingTimeInterval(-10))
-// #endif
-//             setInfo.lastAccessDate = .now.addingTimeInterval(-5)
-//             setInfo.modificationDate = .now.addingTimeInterval(-7)
+#if os(Windows)
+            setInfo.setCreationDate(.now.addingTimeInterval(-10))
+#endif
+            setInfo.lastAccessDate = (setInfo.creationDate ?? .now).adding(seconds: 120, nanoseconds: 0)
+            setInfo.modificationDate = (setInfo.creationDate ?? .now).adding(seconds: 60, nanoseconds: 0)
 #if os(Windows)
             setInfo.fileFlags.isHidden = true
             setInfo.fileFlags.isArchive = true
             setInfo.fileFlags.notContentIndexed = true 
-#else
+#elseif canImport(Darwin)
             setInfo.posixPermissions = .userReadWriteExecute
             setInfo.fileFlags.isHidden = true
-#endif
+#endif 
             
             try await manager.setInfo(setInfo, forItemAt: path)
 
@@ -243,26 +289,75 @@ extension FileManagerTest.FileInfoTest {
         }
         
     }
+
+
+#if canImport(Glibc)
+    @Test("Set (Linux): file exist / type: symbolic link / set fileflags")
+    func setFileInfo4() async throws {
+        
+        try await withSymbolicLinkAtPath { paths, _ in
+            
+            let path = paths.first!
+
+            var setInfo = try await manager.infoOfItem(at: path)
+            setInfo.fileFlags.isCompressed = true
+
+            await #expect("Linux does not support setting file mode for symbolic link") {
+                try await manager.setInfo(setInfo, forItemAt: path)
+            } throws: { error in
+                ((error as? CocoaError)?.underlying as? POSIXError)?.code == .EOPNOTSUPP
+            }
+
+        }
+
+    }
+
+
+    @Test("Set (Linux): file exist / type: symbolic link / set filemode")
+    func setFileInfo5() async throws {
+        
+        try await withSymbolicLinkAtPath { paths, _ in
+            
+            let path = paths.first!
+
+            var setInfo = try await manager.infoOfItem(at: path)
+            setInfo.posixPermissions = .userReadWrite
+
+            await #expect("Linux does not support setting file mode for symbolic link") {
+                try await manager.setInfo(setInfo, forItemAt: path)
+            } throws: { error in
+                ((error as? CocoaError)?.underlying as? POSIXError)?.code == .EOPNOTSUPP
+            }
+
+        }
+
+    }
+#endif
     
     
     @Test("Set: file not exist")
-    func setFileInfo4() async throws {
+    func setFileInfo6() async throws {
         
         let path = makeTestingFilePath()
         
         var setInfo = FileManager.FileInfo()
-// #if os(Windows)
-//         setInfo.setCreationDate(.now.addingTimeInterval(-10))
-// #endif
-//         setInfo.lastAccessDate = .now.addingTimeInterval(-5)
-//         setInfo.modificationDate = .now.addingTimeInterval(-7)
+
 #if os(Windows)
-            setInfo.fileFlags.isHidden = true
-            setInfo.fileFlags.isArchive = true
-            setInfo.fileFlags.notContentIndexed = true 
+        setInfo.setCreationDate(.now.addingTimeInterval(-10))
+#endif
+        setInfo.lastAccessDate = (setInfo.creationDate ?? .now).adding(seconds: 120, nanoseconds: 0)
+        setInfo.modificationDate = (setInfo.creationDate ?? .now).adding(seconds: 60, nanoseconds: 0)
+
+#if os(Windows)
+        setInfo.fileFlags.isHidden = true
+        setInfo.fileFlags.isArchive = true
+        setInfo.fileFlags.notContentIndexed = true 
+#elseif canImport(Darwin)
+        setInfo.posixPermissions = .userReadWriteExecute
+        setInfo.fileFlags.isHidden = true
 #else
-            setInfo.posixPermissions = .userReadWriteExecute
-            setInfo.fileFlags.isHidden = true
+        setInfo.posixPermissions = .userReadWriteExecute
+        setInfo.fileFlags.isCompressed = true
 #endif
         
         await #expect(throws: Error.self) {
