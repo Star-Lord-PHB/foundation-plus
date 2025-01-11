@@ -74,11 +74,11 @@ extension Clock {
         var result: R?
         let time = switch clockType {
             case .continuous:
-                try ContinuousClock().measure {
+                try ContinuousClock.continuous.measure {
                     result = try work()
                 }
             case .suspending:
-                try SuspendingClock().measure {
+                try SuspendingClock.suspending.measure {
                     result = try work()
                 }
         }
@@ -116,11 +116,11 @@ extension Clock {
         var result: R?
         let time = switch clockType {
             case .continuous:
-                try await ContinuousClock().measure {
+                try await ContinuousClock.continuous.measure {
                     result = try await work()
                 }
             case .suspending:
-                try await SuspendingClock().measure {
+                try await SuspendingClock.suspending.measure {
                     result = try await work()
                 }
         }
@@ -146,7 +146,7 @@ extension ContinuousClock {
     /// }
     /// ```
     public static func measureExpr<R>(_ work: () throws -> R) rethrows -> (result: R, time: Duration) {
-        try ContinuousClock().measureExpr(work)
+        try ContinuousClock.continuous.measureExpr(work)
     }
     
     
@@ -160,7 +160,7 @@ extension ContinuousClock {
     public static func measureExpr<R>(
         _ work: () async throws -> R
     ) async rethrows -> (result: R, time: Duration) {
-        try await ContinuousClock().measureExpr(work)
+        try await ContinuousClock.continuous.measureExpr(work)
     }
     
 }
@@ -178,7 +178,7 @@ extension SuspendingClock {
     /// }
     /// ```
     public static func measureExpr<R>(_ work: () throws -> R) rethrows -> (result: R, time: Duration) {
-        try SuspendingClock().measureExpr(work)
+        try SuspendingClock.suspending.measureExpr(work)
     }
     
     
@@ -192,7 +192,7 @@ extension SuspendingClock {
     public static func measureExpr<R>(
         _ work: () async throws -> R
     ) async rethrows -> (result: R, time: Duration) {
-        try await SuspendingClock().measureExpr(work)
+        try await SuspendingClock.suspending.measureExpr(work)
     }
     
 }

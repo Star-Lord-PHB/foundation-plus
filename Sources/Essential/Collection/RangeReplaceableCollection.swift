@@ -15,30 +15,17 @@ extension RangeReplaceableCollection {
     ///                        and returns true if the element should be removed
     ///                        or false if it should be kept.
     ///                        Once the predicate returns false it will not be called again
+    @inlinable
     public mutating func trimSuffix(while predicate: (Element) throws -> Bool) rethrows {
-        
-        guard isNotEmpty else { return }
-        
-        var start = startIndex
-        var foundConforming = false
-        
-        for (i, element) in zip(self.indices, self) {
-            
-            let conform = try predicate(element)
-            
-            if conform, !foundConforming {
-                start = i
-                foundConforming = true
-            } else if !conform, foundConforming {
-                foundConforming = false
-            }
-            
-        }
-        
-        if foundConforming {
-            self.removeSubrange(start ... endIndex)
-        }
-        
+        let startIndex = try self._startIndexOfContinuousElementsFromLast(where: predicate)
+        self.removeSubrange(startIndex...)
+    }
+
+
+    @inlinable
+    public mutating func trimSuffix<Suffix: Collection>(_ suffix: Suffix) 
+    where Element: Equatable, Element == Suffix.Element {
+        self.removeSubrange(_startIndexOfSuffix(suffix)...)
     }
     
 }
@@ -53,8 +40,14 @@ extension RangeReplaceableCollection where Self: BidirectionalCollection {
     ///                        or false if it should be kept.
     ///                        Once the predicate returns false it will not be called again
     public mutating func trimSuffix(while predicate: (Element) throws -> Bool) rethrows {
-        let count = try reversed().prefix(while: predicate).count
-        removeLast(count)
+        let startIndex = try self._startIndexOfContinuousElementsFromLast(where: predicate)
+        self.removeSubrange(startIndex...)
+    }
+
+
+    public mutating func trimSuffix<Suffix: Collection>(_ suffix: Suffix) 
+    where Element: Equatable, Element == Suffix.Element {
+        self.removeSubrange(_startIndexOfSuffix(suffix)...)
     }
     
 }

@@ -9,3 +9,4 @@ DerivedData/
 *.playground
 .vscode/settings.json
 .index-build
+.sourcekit-lsp

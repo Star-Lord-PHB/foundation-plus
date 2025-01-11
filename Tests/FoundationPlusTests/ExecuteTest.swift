@@ -40,11 +40,11 @@ struct ExecuteTest {
         
         let actor = TestActor()
         
-        await execute(isolatedOn: actor) { a in
+        await execute(isolatedOn: actor) { 
             
             actor.assertIsolated()
             
-            execute(isolatedOn: a) {
+            execute {
                 actor.assertIsolated()
             }
             

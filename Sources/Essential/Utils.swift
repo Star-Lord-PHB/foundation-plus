@@ -1,36 +1,29 @@
 import Foundation
 
 
-/// Execute the provided closure immediately and return the result
-///
+/// Execute the provided closure immediately on the provided actor and return the result
+/// 
 /// Exactly the same as the following:
 /// ```swift
 /// let result = {
 ///     // some task
 /// }()
-/// ```
 @discardableResult
-public func execute<R>(_ block: () throws -> R) rethrows -> R {
+public func execute<R, A: Actor>(isolatedOn actor: isolated A , _ block: () throws -> R) rethrows -> R {
     return try block()
 }
 
 
 /// Execute the provided closure immediately on the provided actor and return the result
-@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+/// 
+/// Exactly the same as the following:
+/// ```swift
+/// let result = {
+///     // some task
+/// }()
 @discardableResult
-public func execute<R, A: Actor>(isolatedOn actor: isolated A, _ block: () throws -> R) rethrows -> R {
+public func execute<R>(isolatedOn actor: isolated Actor? = #isolation, _ block: () throws -> R) rethrows -> R {
     return try block()
-}
-
-
-/// Execute the provided closure immediately on the provided actor and return the result
-@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
-@discardableResult
-public func execute<R, A: Actor>(
-    isolatedOn actor: isolated A,
-    _ block: @Sendable (isolated A) throws -> R
-) rethrows -> R {
-    return try block(actor)
 }
 
 
@@ -43,14 +36,12 @@ public func execute<R, A: Actor>(
 /// }()
 /// ```
 @discardableResult
-@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 public func executeAsync<R>(_ block: () async throws -> R) async rethrows -> R {
     return try await block()
 }
 
 
 /// Execute the provided closure immediately on the provided actor and return the result
-@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 @discardableResult
 public func executeAsync<R: Sendable, A: Actor>(
     isolatedOn actor: isolated A,

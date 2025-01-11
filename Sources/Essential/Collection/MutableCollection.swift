@@ -16,8 +16,6 @@ extension MutableCollection where Self: RandomAccessCollection {
     public mutating func sort<T: Comparable>(by keyPath: any KeyPath<Element, T> & Sendable) {
         if #available(iOS 15.0, macOS 12.0, tvOS 15.0, watchOS 8.0, *) {
             sort(using: KeyPathComparator(keyPath))
-            var a = [1]
-            a.sort(using: KeyPathComparator(\.id))
         } else {
             sort { $0[keyPath: keyPath] < $1[keyPath: keyPath] }
         }

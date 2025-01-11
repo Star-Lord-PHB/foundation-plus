@@ -77,10 +77,14 @@ public final class Canceller: @unchecked Sendable {
     }
     
     public func cancel() {
-        isCancelled = true
-        lock.withLock {
-            cancelOperation()
+        guard !isCancelled else { return }
+        let doCleanUp = lock.withLock {
+            guard !isCancelled else { return false }
+            isCancelled = true
+            return true
         }
+        guard doCleanUp else { return }
+        cancelOperation()
     }
     
 }
