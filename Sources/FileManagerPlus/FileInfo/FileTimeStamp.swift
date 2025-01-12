@@ -13,7 +13,6 @@ extension FileManager {
             return .init(seconds) * 1_000_000_000 + .init(nanoseconds)
         }
 
-        @inlinable
         public var date: Date {
     #if os(Windows)
             .init(timeIntervalSinceReferenceDate: .init(seconds) - Date.timeIntervalBetween1601AndReferenceDate + .init(nanoseconds) / 1_000_000_000)
