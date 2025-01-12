@@ -47,7 +47,8 @@ extension Date {
                 weekOfMonth: weekOfMonth,
                 weekOfYear: weekOfYear,
                 yearForWeekOfYear: yearForWeekOfYear
-            )
+            ),
+            calendar: calendar
         )
     }
     

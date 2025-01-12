@@ -11,8 +11,12 @@ import Foundation
 
 class DateTest {
     
-    static let calendar: Calendar = .autoupdatingCurrent
-    static let timeZone: TimeZone = .autoupdatingCurrent
+    static let calendar: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = timeZone
+        return calendar
+    }()
+    static let timeZone: TimeZone = .gmt
     static let locale: Locale = .autoupdatingCurrent
     
     var calendar: Calendar { Self.calendar }

@@ -24,25 +24,24 @@ extension DateTest.DateComponentsTest {
         "Getting Component",
         arguments: [
             (
-                Self.calendar.date(from: .init(year: 2024, month: 8, day: 10))!,
+                date(year: 2024, month: 8, day: 10),
                 .month, 8
             ),
             (
-                Self.calendar.date(from: .init(year: 2024, hour: 10, minute: 23))!,
+                date(year: 2024, hour: 10, minute: 23),
                 .minute, 23
             ),
             (
-                Self.calendar.date(from: .init(year: 2024, hour: 10, minute: 23))!,
+                date(year: 2024, hour: 10, minute: 23),
                 .hour, 10
             ),
             (
-                Self.calendar.date(from: .init(year: 2024, month: 6, day: 3))!,
-                .weekday, nil
+                date(year: 2024, month: 6, day: 3),
+                .weekday, 2
             ),
-        ] as [(Date, Calendar.Component, Int?)]
+        ] as [(Date, Calendar.Component, Int)]
     )
-    func component1(_ date: Date, _ component: Calendar.Component, _ expected: Int?) async throws {
-        let expected = expected ?? calendar.component(component, from: date)
+    func component1(_ date: Date, _ component: Calendar.Component, _ expected: Int) async throws {
         #expect(date.component(component, in: timeZone, using: calendar) == expected)
     }
     
@@ -59,6 +58,11 @@ extension DateTest.DateComponentsTest {
                 date(year: 2023, month: 2, day: 10, hour: 10, minute: 32, second: 12),
                 .day(29), .nextTimePreservingSmallerComponents,
                 date(year: 2023, month: 3, day: 1, hour: 10, minute: 32, second: 12)
+            ),
+            (
+                date(year: 2023, month: 2, day: 10, hour: 10, minute: 32, second: 12),
+                .day(29), .strict,
+                date(year: 2023, month: 3, day: 29, hour: 10, minute: 32, second: 12)
             ),
             (
                 date(year: 2024, month: 2, day: 10, hour: 10, minute: 32, second: 12),

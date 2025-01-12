@@ -28,6 +28,11 @@ extension DateTest.DateArithmeticTest {
                 DateTest.calendar.date(from: .init(year: 2024, month: 8, day: 2, hour: 14, minute: 32, second: 5))!
             ),
             (
+                DateTest.calendar.date(from: .init(year: 2024, month: 8, day: 1, hour: 14, minute: 32, second: 5))!,
+                .day, -1,
+                DateTest.calendar.date(from: .init(year: 2024, month: 7, day: 31, hour: 14, minute: 32, second: 5))!
+            ),
+            (
                 DateTest.calendar.date(from: .init(year: 2024, month: 12, day: 1, hour: 14, minute: 32, second: 5))!,
                 .month, 1,
                 DateTest.calendar.date(from: .init(year: 2025, month: 1, day: 1, hour: 14, minute: 32, second: 5))!
@@ -61,6 +66,11 @@ extension DateTest.DateArithmeticTest {
                 DateTest.calendar.date(from: .init(year: 2024, month: 8, day: 2, hour: 14, minute: 32, second: 5))!
             ),
             (
+                DateTest.calendar.date(from: .init(year: 2024, month: 8, day: 1, hour: 14, minute: 32, second: 5))!,
+                .day(-1),
+                DateTest.calendar.date(from: .init(year: 2024, month: 7, day: 31, hour: 14, minute: 32, second: 5))!
+            ),
+            (
                 DateTest.calendar.date(from: .init(year: 2024, month: 12, day: 1, hour: 14, minute: 32, second: 5))!,
                 .month(1),
                 DateTest.calendar.date(from: .init(year: 2025, month: 1, day: 1, hour: 14, minute: 32, second: 5))!
@@ -88,9 +98,14 @@ extension DateTest.DateArithmeticTest {
         "Substract with Calendar.ComponentValue",
         arguments: [
             (
-                DateTest.calendar.date(from: .init(year: 2024, month: 8, day: 1, hour: 14, minute: 32, second: 5))!,
+                DateTest.calendar.date(from: .init(year: 2024, month: 7, day: 31, hour: 14, minute: 32, second: 5))!,
                 .day(1),
-                DateTest.calendar.date(from: .init(year: 2024, month: 8, day: 2, hour: 14, minute: 32, second: 5))!
+                DateTest.calendar.date(from: .init(year: 2024, month: 8, day: 1, hour: 14, minute: 32, second: 5))!
+            ),
+            (
+                DateTest.calendar.date(from: .init(year: 2024, month: 8, day: 1, hour: 14, minute: 32, second: 5))!,
+                .day(-1),
+                DateTest.calendar.date(from: .init(year: 2024, month: 7, day: 31, hour: 14, minute: 32, second: 5))!
             ),
             (
                 DateTest.calendar.date(from: .init(year: 2024, month: 12, day: 1, hour: 14, minute: 32, second: 5))!,

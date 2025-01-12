@@ -8,9 +8,12 @@
 import Foundation
 
 
-/// A compat version of ``Foundation/Duration`` to support older OS versions
+/// A compat version of [`Swift/Duration`] to support older OS versions
 ///
-/// - Warning: If your OS version is new enough to use ``Foundation/Duration``, don't use this one
+/// - Warning: This implementation does not guarantee exactly the same behavior as the standard [`Swift/Duration`]
+/// - Warning: If your OS version is new enough to use [`Swift/Duration`], don't use this one
+/// 
+/// [`Swift/Duration`]: (https://developer.apple.com/documentation/Swift/Duration)
 @available(iOS, deprecated: 16, message: "use Duration instead")
 @available(macOS, deprecated: 13, message: "use Duration instead")
 @available(watchOS, deprecated: 9, message: "use Duration instead")

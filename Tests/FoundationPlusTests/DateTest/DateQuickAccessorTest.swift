@@ -121,5 +121,62 @@ extension DateTest.DateQuickAccessorTest {
         let interval = date.interval(of: component, using: calendar)
         #expect(interval == calendar.dateInterval(of: component.component, for: date))
     }
+
+
+    @Test(
+        "Next Day",
+        arguments: [
+            (
+                date(year: 2024, month: 6, day: 3, hour: 10, minute: 34, second: 23),
+                date(year: 2024, month: 6, day: 4),
+                .init(year: 2024, month: 6, day: 4),
+                .strict, .first, .forward
+            ),
+            (
+                date(year: 2025, month: 2, day: 1, hour: 10, minute: 34, second: 23),
+                date(year: 2025, month: 3, day: 29, hour: 10),
+                .init(year: 2025, day: 29, hour: 10),
+                .strict, .first, .forward
+            ),
+            (
+                date(year: 2025, month: 2, day: 1, hour: 10, minute: 34, second: 23),
+                date(year: 2025, month: 3, day: 1),
+                .init(month: 2, day: 29, hour: 10),
+                .nextTime, .first, .forward
+            ),
+            (
+                date(hour: 10, minute: 34, second: 23, weekday: 2, weekOfYear: 10, yearForWeekOfYear:2025),
+                date(weekday: 1, weekOfYear: 11, yearForWeekOfYear:2025),
+                .init(weekday: 1),
+                .strict, .first, .forward
+            ),
+            (
+                date(hour: 10, minute: 34, second: 23, weekday: 2, weekOfYear: 10, yearForWeekOfYear:2025),
+                date(weekday: 3, weekOfYear: 9, yearForWeekOfYear:2025),
+                .init(weekday: 3),
+                .strict, .first, .backward
+            ),
+        ] as [(Date, Date, DateComponents, Calendar.MatchingPolicy, Calendar.RepeatedTimePolicy, Calendar.SearchDirection)]
+    )
+    func accessor6(
+        _ date: Date,
+        _ expected: Date,
+        _ match: DateComponents,
+        _ matchPolicy: Calendar.MatchingPolicy,
+        _ repeatedTimePolicy: Calendar.RepeatedTimePolicy,
+        _ direction: Calendar.SearchDirection
+    ) async throws {
+
+        let next = date.nextDate(
+            matching: match, 
+            matchingPolicy: matchPolicy, 
+            repeatedTimePolicy: repeatedTimePolicy, 
+            direction: direction, 
+            using: calendar
+        )
+
+        #expect(next == expected)
+
+    }
     
 }

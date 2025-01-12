@@ -18,43 +18,38 @@ extension DateTest {
 
 
 extension DateTest.CreateDateTest {
-    
+
     @Test(
         "Create Date with DateComponents",
         arguments: [
-            [.year, .month, .day, .hour, .minute, .second, .nanosecond],
-            [.yearForWeekOfYear, .weekOfYear, .weekday, .hour, .minute, .second, .nanosecond],
-            [.year, .month, .weekOfMonth, .weekday, .hour, .minute, .second, .nanosecond]
-            
-        ] as [Set<Calendar.Component>]
+            .init(year: 2025, month: 1, day: 2, hour: 8, minute: 1, second: 45, nanosecond: 300),
+            .init(year: 2025, month: 1, day: 32, hour: 8, minute: 1, second: 70, nanosecond: 300),
+            .init(hour: 8, minute: 1, second: 45, nanosecond: 300, weekday: 1, weekOfYear: 10, yearForWeekOfYear: 2025),
+            .init(year: 2025, month: 5, hour: 8, minute: 1, second: 45, nanosecond: 300, weekday: 1, weekOfMonth: 7),
+        ] as [DateComponents]
     )
-    func create1(_ usedComponents: Set<Calendar.Component>) async throws {
+    func createComponents1(_ components: DateComponents) async throws {
         
-        let expectedDate = Date()
-        let components = calendar.dateComponents(usedComponents, from: expectedDate)
-        
+        let expected = calendar.date(from: components)
         let actualDate = Date(components: components, calendar: calendar)
-        
-        #expect(actualDate == expectedDate)
+        #expect(actualDate == expected)
         
     }
-    
-    
+
+
     @available(macOS 15, iOS 18, tvOS 18, watchOS 11, *)
     @Test(
         "Create Date with DateComponents (new apis)",
         arguments: [
-            [.year, .dayOfYear, .hour, .minute, .second, .nanosecond]
-        ] as [Set<Calendar.Component>]
+            .init(year: 2025, hour: 8, minute: 1, second: 45, nanosecond: 300, dayOfYear: 145),
+            .init(year: 2024, hour: 8, minute: 1, second: 45, nanosecond: 300, dayOfYear: 368),
+        ] as [DateComponents]
     )
-    func create2(_ usedComponents: Set<Calendar.Component>) async throws {
+    func createComponents2(_ components: DateComponents) async throws {
         
-        let expectedDate = Date()
-        let components = calendar.dateComponents(usedComponents, from: expectedDate)
-        
+        let expected = calendar.date(from: components)
         let actualDate = Date(components: components, calendar: calendar)
-        
-        #expect(actualDate == expectedDate)
+        #expect(actualDate == expected)
         
     }
     
@@ -66,7 +61,7 @@ extension DateTest.CreateDateTest {
             ("2024.8_15 23:4", "YYYY.M_dd HH:m")
         ]
     )
-    func create3(_ string: String, _ format: String) async throws {
+    func createParse1(_ string: String, _ format: String) async throws {
         
         let date = try Date(string, format: format, timeZone: timeZone, locale: locale, calendar: calendar)
         
@@ -83,7 +78,7 @@ extension DateTest.CreateDateTest {
     }
     
     
-#if !os(Windows)
+#if !os(Windows)    // for some reason, the FormatString arguments fail to compile on Windows
 
     @available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
     @Test(
@@ -99,7 +94,7 @@ extension DateTest.CreateDateTest {
             ),
         ] as [(String, Date.FormatString)]
     )
-    func create4(_ string: String, _ format: Date.FormatString) async throws {
+    func createParse2(_ string: String, _ format: Date.FormatString) async throws {
         
         let date = try Date(string, format: format, timeZone: timeZone, locale: locale, calendar: calendar)
         
@@ -119,4 +114,41 @@ extension DateTest.CreateDateTest {
 
 #endif
     
+}
+
+
+
+extension DateComponents {
+
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, *)
+    init(
+        year: Int? = nil, 
+        month: Int? = nil, 
+        day: Int? = nil, 
+        hour: Int? = nil, 
+        minute: Int? = nil, 
+        second: Int? = nil, 
+        nanosecond: Int? = nil, 
+        weekday: Int? = nil, 
+        weekOfYear: Int? = nil, 
+        yearForWeekOfYear: Int? = nil, 
+        weekOfMonth: Int? = nil, 
+        dayOfYear: Int
+    ) {
+        self.init(
+            year: year, 
+            month: month, 
+            day: day, 
+            hour: hour, 
+            minute: minute, 
+            second: second, 
+            nanosecond: nanosecond, 
+            weekday: weekday, 
+            weekOfMonth: weekOfMonth, 
+            weekOfYear: weekOfYear, 
+            yearForWeekOfYear: yearForWeekOfYear
+        )
+        self.dayOfYear = dayOfYear
+    }
+
 }
