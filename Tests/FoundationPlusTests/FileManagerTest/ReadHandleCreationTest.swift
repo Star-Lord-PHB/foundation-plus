@@ -45,7 +45,7 @@ extension FileManagerTest.ReadHandleCreationTest {
         try await withFileAtPath(content: "test") { path, content in
             
             let actualContent = try await manager.withFileHandle(forReadingFrom: path) { handle in
-                dispatchPrecondition(condition: .onQueue(DefaultTaskExecutor.io.queue))
+                dispatchPrecondition(condition: .onQueue(FoundationPlusTaskExecutor.io.queue))
                 return try handle.readToEnd()
             }
             
@@ -61,7 +61,7 @@ extension FileManagerTest.ReadHandleCreationTest {
                 let actualContent = try await manager.withFileHandle(
                     forReadingFrom: path
                 ) { handle in
-                    dispatchPrecondition(condition: .onQueue(DefaultTaskExecutor.io.queue))
+                    dispatchPrecondition(condition: .onQueue(FoundationPlusTaskExecutor.io.queue))
                     return try await handle.readToEnd()
                 }
                 

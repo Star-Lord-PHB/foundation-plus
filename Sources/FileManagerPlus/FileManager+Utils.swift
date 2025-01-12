@@ -19,29 +19,15 @@ extension FileManager {
     @available(watchOS, deprecated: 11.0)
     @available(tvOS, deprecated: 18.0)
     @available(visionOS, deprecated: 2.0)
-    public static func runOnIOQueue<R>(
-        _ operation: @escaping () throws -> R
-    ) async throws -> R {
+    public static func runOnIOQueue<R, E: Error>(
+        _ operation: @escaping () throws(E) -> R
+    ) async throws(E) -> R {
         if #available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *) {
-            try await withTaskExecutorPreference(.defaultExecutor.io, operation: { try operation() })
+            try await withTaskExecutorPreference(.foundationPlusTaskExecutor.io) { () throws(E) -> R in 
+                try operation() 
+            }
         } else {
-            try await launchTask(on: .io, operation: operation)
-        }
-    }
-    
-    
-    @available(macOS, deprecated: 15.0)
-    @available(iOS, deprecated: 18.0)
-    @available(watchOS, deprecated: 11.0)
-    @available(tvOS, deprecated: 18.0)
-    @available(visionOS, deprecated: 2.0)
-    public static func runOnIOQueue<R>(
-        _ operation: @escaping () -> R
-    ) async -> R {
-        if #available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *) {
-            await withTaskExecutorPreference(.defaultExecutor.io, operation: { operation() })
-        } else {
-            await launchTask(on: .io, operation: operation)
+            try await Task.launch(on: .io, operation: operation)
         }
     }
 
@@ -49,7 +35,7 @@ extension FileManager {
     
     
     public static func assertOnIOQueue() {
-        dispatchPrecondition(condition: .onQueue(DefaultTaskExecutor.io.queue))
+        dispatchPrecondition(condition: .onQueue(FoundationPlusTaskExecutor.io.queue))
     }
     
 }
@@ -60,7 +46,7 @@ extension FileManager {
 extension FileManager {
 
     public static func runOnIOQueue<R>(operation: () throws -> R) async rethrows -> R {
-        try await withTaskExecutorPreference(.defaultExecutor.io) {  
+        try await withTaskExecutorPreference(.foundationPlusTaskExecutor.io) {  
             try operation() 
         }
     }

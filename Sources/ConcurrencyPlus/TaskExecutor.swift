@@ -14,27 +14,27 @@ import Foundation
 ///
 /// ```swift
 /// // after swift 6
-/// await withTaskExecutorPreference(.defaultExecutor.io) {
+/// await withTaskExecutorPreference(.foundationPlusExecutor.io) {
 ///     // task that will be executed on the executor
 /// }
 ///
 /// // before swift 6
-/// await launchTask(on: .io) {
+/// await Task.launch(on: .io) {
 ///     // task that will be executed on the executor
 /// }
 /// ```
 ///
 /// Recomended to use the serveral provided executors as static properties:
-/// * ``DefaultTaskExecutor/main``
-/// * ``DefaultTaskExecutor/global``
-/// * ``DefaultTaskExecutor/default``
-/// * ``DefaultTaskExecutor/io``
-/// * ``DefaultTaskExecutor/background``
-/// * ``DefaultTaskExecutor/immediate``
+/// * ``FoundationPlusTaskExecutor/main``
+/// * ``FoundationPlusTaskExecutor/global``
+/// * ``FoundationPlusTaskExecutor/default``
+/// * ``FoundationPlusTaskExecutor/io``
+/// * ``FoundationPlusTaskExecutor/background``
+/// * ``FoundationPlusTaskExecutor/immediate``
 ///
 /// You can also create a new custom task executor using using the ``init(label:qos:attributes:)``
 /// initializer
-public final class DefaultTaskExecutor: Sendable {
+public final class FoundationPlusTaskExecutor: Sendable {
     
     public let queue: DispatchQueue
     
@@ -66,7 +66,7 @@ public final class DefaultTaskExecutor: Sendable {
 
 
 @available(macOS 15, iOS 18, watchOS 11, tvOS 18, visionOS 2, *)
-extension DefaultTaskExecutor: TaskExecutor {
+extension FoundationPlusTaskExecutor: TaskExecutor {
     
     public func enqueue(_ job: consuming ExecutorJob) {
         let job = UnownedJob(job)
@@ -78,25 +78,25 @@ extension DefaultTaskExecutor: TaskExecutor {
 }
 
 
-extension DefaultTaskExecutor {
+extension FoundationPlusTaskExecutor {
     
     /// Task executor that runs on main thread
     /// - Warning: DO NOT use this task executor for blocking / long-running operations
-    public static let main: DefaultTaskExecutor = .init(queue: .main)
+    public static let main: FoundationPlusTaskExecutor = .init(queue: .main)
     /// Task executor that runs on the system global GCD queue
-    public static let global: DefaultTaskExecutor = .init(queue: .global())
+    public static let global: FoundationPlusTaskExecutor = .init(queue: .global())
     /// Task executor that runs on a GCD queue with background qos
-    public static let background: DefaultTaskExecutor =
+    public static let background: FoundationPlusTaskExecutor =
         .init(label: "foundation_plus.default_queues.background", qos: .background, attributes: .concurrent)
     /// Task executor specifically for io operations, runs on a GCD queue with default qos
-    public static let io: DefaultTaskExecutor =
+    public static let io: FoundationPlusTaskExecutor =
         .init(label: "foundation_plus.default_queues.io", attributes: .concurrent)
     /// Task executor with highest priority, runs on a GCD queue with userInteractive qos
     /// - Warning: DO NOT use this task executor for blocking / long-running operations
-    public static let immediate: DefaultTaskExecutor =
+    public static let immediate: FoundationPlusTaskExecutor =
         .init(label: "foundation_plus.default_queues.immediate", qos: .userInteractive, attributes: .concurrent)
     /// Task executor that runs on a GCD queue with default qos
-    public static let `default`: DefaultTaskExecutor =
+    public static let `default`: FoundationPlusTaskExecutor =
         .init(label: "foundation_plus.default_queues.default", attributes: .concurrent)
     
 }
@@ -104,8 +104,8 @@ extension DefaultTaskExecutor {
 
 
 @available(macOS 15, iOS 18, watchOS 11, tvOS 18, visionOS 2, *)
-extension TaskExecutor where Self == DefaultTaskExecutor {
+extension TaskExecutor where Self == FoundationPlusTaskExecutor {
     
-    public static var defaultExecutor: DefaultTaskExecutor.Type { DefaultTaskExecutor.self }
+    public static var foundationPlusTaskExecutor: FoundationPlusTaskExecutor.Type { FoundationPlusTaskExecutor.self }
     
 }

@@ -9,10 +9,10 @@ struct TaskExecutorTest {
         .serialized,
         arguments: [
             .background, .default, .global, .immediate, .main, .io
-        ] as [DefaultTaskExecutor]
+        ] as [FoundationPlusTaskExecutor]
     )
     @available(macOS 15, iOS 18, watchOS 11, tvOS 18, visionOS 2, *)
-    func executeOnDefaultExecutors(_ executor: DefaultTaskExecutor) async throws {
+    func executeOnDefaultExecutors(_ executor: FoundationPlusTaskExecutor) async throws {
         await withTaskExecutorPreference(executor) {
             dispatchPrecondition(condition: .onQueue(executor.queue))
         }
@@ -23,9 +23,9 @@ struct TaskExecutorTest {
         .serialized,
         arguments: [
             .background, .default, .global, .immediate, .main, .io
-        ] as [DefaultTaskExecutor]
+        ] as [FoundationPlusTaskExecutor]
     )
-    func executeOnDefaultExecutorsOld(_ executor: DefaultTaskExecutor) async throws {
+    func executeOnDefaultExecutorsOld(_ executor: FoundationPlusTaskExecutor) async throws {
         await Task.launch(on: executor) {
             dispatchPrecondition(condition: .onQueue(executor.queue))
         }

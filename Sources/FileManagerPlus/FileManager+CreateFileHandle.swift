@@ -266,7 +266,7 @@ extension FileManager {
         forReadingFrom path: FilePath,
         operation: (FileHandle) async throws -> R
     ) async throws -> R {
-        try await withTaskExecutorPreference(.defaultExecutor.io) {
+        try await withTaskExecutorPreference(.foundationPlusTaskExecutor.io) {
             let handle = try FileHandle(forReadingFrom: path)
             defer { try? handle.close() }
             return try await operation(handle)
@@ -304,7 +304,7 @@ extension FileManager {
         forReadingFrom url: URL,
         operation: (FileHandle) async throws -> R
     ) async throws -> R {
-        try await withTaskExecutorPreference(.defaultExecutor.io) {
+        try await withTaskExecutorPreference(.foundationPlusTaskExecutor.io) {
             let handle = try FileHandle(forReadingFrom: url)
             defer { try? handle.close() }
             return try await operation(handle)
@@ -357,7 +357,7 @@ extension FileManager {
         options: OpenFileOption = .modifyFile(createIfNeeded: false),
         operation: (FileHandle) async throws -> R
     ) async throws -> R {
-        try await withTaskExecutorPreference(.defaultExecutor.io){
+        try await withTaskExecutorPreference(.foundationPlusTaskExecutor.io){
             let handle = try self.makeWritingHandle(from: path, with: options)
             defer { try? handle.close() }
             return try await operation(handle)
@@ -397,7 +397,7 @@ extension FileManager {
         options: OpenFileOption = .modifyFile(createIfNeeded: false),
         operation: (FileHandle) async throws -> R
     ) async throws -> R {
-        try await withTaskExecutorPreference(.defaultExecutor.io) {
+        try await withTaskExecutorPreference(.foundationPlusTaskExecutor.io) {
             let handle = try self.makeWritingHandle(from: url.assertAsFilePath(), with: options)
             defer { try? handle.close() }
             return try await operation(handle)
@@ -450,7 +450,7 @@ extension FileManager {
         options: OpenFileOption = .modifyFile(createIfNeeded: false),
         operation: (FileHandle) async throws -> R
     ) async throws -> R {
-        try await withTaskExecutorPreference(.defaultExecutor.io) {
+        try await withTaskExecutorPreference(.foundationPlusTaskExecutor.io) {
             let handle = try self.makeUpdatingHandle(from: path, with: options)
             defer { try? handle.close() }
             return try await operation(handle)
@@ -490,7 +490,7 @@ extension FileManager {
         options: OpenFileOption = .modifyFile(createIfNeeded: false),
         operation: (FileHandle) async throws -> R
     ) async throws -> R {
-        try await withTaskExecutorPreference(.defaultExecutor.io) {
+        try await withTaskExecutorPreference(.foundationPlusTaskExecutor.io) {
             let handle = try self.makeUpdatingHandle(from: url.assertAsFilePath(), with: options)
             defer { try? handle.close() }
             return try await operation(handle)
