@@ -3,9 +3,13 @@
 import WinSDK
 import Foundation
 
+
+/// A type representing Windows specific error.
 public struct WindowsError: LocalizedError {
 
+    /// The error code.
     public let code: DWORD
+    /// The description of the error.
     public let message: String
 
     public var errorDescription: String? { message }
@@ -25,11 +29,14 @@ public struct WindowsError: LocalizedError {
 
 extension WindowsError {
 
+    /// Create an instance from the last error, which is provided by 
+    /// the `GetLastError` function.
     public static func fromLastError() -> WindowsError {
         .init(code: GetLastError())
     }
 
 
+    /// Get the error message from the Windows error code.
     public static func getErrorMessage(from code: DWORD) -> String {
 
         var messageBuffer: LPWSTR? = nil 
@@ -51,16 +58,6 @@ extension WindowsError {
                 )
 
             }
-
-            // return FormatMessageW(
-            //     DWORD(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS),
-            //     nil,
-            //     code,
-            //     DWORD(LANG_NEUTRAL),
-            //     bufferPtr,
-            //     0,
-            //     nil
-            // )
 
         }
         

@@ -12,7 +12,7 @@ import GlibcInterop
 extension FileManager.FileInfo {
     
     /// Create a `FileInfo` instance by fetching the attributes from the file
-    /// located at the provided `path`
+    /// located at the provided path
     public init(path: FilePath) throws {
 
 #if os(Windows)
@@ -126,6 +126,8 @@ extension FileManager.FileInfo {
     }
 
 
+    /// Create a `FileInfo` instance by fetching the attributes from the file
+    /// located at the provided url
     public init(url: URL) throws {
         try self.init(path: url.assertAsFilePath())
     }
@@ -136,6 +138,10 @@ extension FileManager.FileInfo {
 
 extension FileManager {
 
+    /// Get a ``FileInfo`` instance holding the information of the item at the specified path
+    /// - Parameters:
+    ///   - path: The path to the item
+    ///   - resolveSymbolicLink: Whether to (recursively) resolve the symbolic link to find the destination
     public func infoOfItem(at path: FilePath, resolveSymbolicLink: Bool = false) throws -> FileInfo {
         if resolveSymbolicLink {
             let destPath = try self.destinationOfSymbolicLink(at: path, recursive: true)
@@ -146,20 +152,36 @@ extension FileManager {
     }
 
 
+    /// Get a ``FileInfo`` instance holding the information of the item at the specified url
+    /// - Parameters:
+    ///   - url: The url to the item
+    ///   - resolveSymbolicLink: Whether to (recursively) resolve the symbolic link to find the destination
     public func infoOfItem(at url: URL, resolveSymbolicLink: Bool = false) throws -> FileInfo {
         try self.infoOfItem(at: url.assertAsFilePath(), resolveSymbolicLink: resolveSymbolicLink)
     }
 
 
-    @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+    /// Get a ``FileInfo`` instance holding the information of the item at the specified path
+    /// - Parameters:
+    ///   - path: The path to the item
+    ///   - resolveSymbolicLink: Whether to (recursively) resolve the symbolic link to find the destination
+    /// 
+    /// - Note: This operation will automatically be executed on
+    /// ``DefaultTaskExecutor/io`` executor
     public func infoOfItem(at path: FilePath, resolveSymbolicLink: Bool = false) async throws -> FileInfo {
         try await Self.runOnIOQueue {
             try self.infoOfItem(at: path, resolveSymbolicLink: resolveSymbolicLink)
         }
     }
 
-
-    @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+    
+    /// Get a ``FileInfo`` instance holding the information of the item at the specified url
+    /// - Parameters:
+    ///   - url: The url to the item
+    ///   - resolveSymbolicLink: Whether to (recursively) resolve the symbolic link to find the destination
+    /// 
+    /// - Note: This operation will automatically be executed on
+    /// ``DefaultTaskExecutor/io`` executor
     public func infoOfItem(at url: URL, resolveSymbolicLink: Bool = false) async throws -> FileInfo {
         try await Self.runOnIOQueue {
             try self.infoOfItem(at: url, resolveSymbolicLink: resolveSymbolicLink)
@@ -167,6 +189,10 @@ extension FileManager {
     }
 
 
+    /// Check whether an item exists at the specified path
+    /// - Parameters:
+    ///   - path: The path to check
+    ///   - resolveSymbolicLink: Whether to (recursively) resolve the symbolic link to find the destination
     public func fileExists(at path: FilePath, resolveSymbolicLink: Bool = true) -> Bool {
         if resolveSymbolicLink {
             return self.fileExists(atPath: path.string)
@@ -183,12 +209,22 @@ extension FileManager {
     }
 
 
+    /// Check whether an item exists at the specified url
+    /// - Parameters:
+    ///   - url: The url to check
+    ///   - resolveSymbolicLink: Whether to (recursively) resolve the symbolic link to find the destination
     public func fileExists(at url: URL, resolveSymbolicLink: Bool = true) -> Bool {
         self.fileExists(at: try! url.assertAsFilePath(), resolveSymbolicLink: resolveSymbolicLink)
     }
 
 
-    @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+    /// Check whether an item exists at the specified path
+    /// - Parameters:
+    ///   - path: The path to check
+    ///   - resolveSymbolicLink: Whether to (recursively) resolve the symbolic link to find the destination
+    /// 
+    /// - Note: This operation will automatically be executed on
+    /// ``DefaultTaskExecutor/io`` executor
     public func fileExists(at path: FilePath, resolveSymbolicLink: Bool = true) async -> Bool {
         await Self.runOnIOQueue {
             self.fileExists(at: path, resolveSymbolicLink: resolveSymbolicLink)
@@ -196,9 +232,10 @@ extension FileManager {
     }
     
     
-    /// Check whether a file or directory exists at the specified url
-    /// - Parameter url: The url to check
-    /// - Returns: true if a file or directory exists, false otherwise
+    /// Check whether an item exists at the specified url
+    /// - Parameters:
+    ///   - url: The url to check
+    ///   - resolveSymbolicLink: Whether to (recursively) resolve the symbolic link to find the destination
     ///
     /// - Note: This operation will automatically be executed on
     /// ``DefaultTaskExecutor/io`` executor
@@ -214,6 +251,18 @@ extension FileManager {
 
 extension FileManager {
 
+    /// Set attributes for the item located at the specified path using the provided ``FileInfo`` instance
+    /// - Parameters:
+    ///   - info: The ``FileInfo`` instance used to set the attributes for the item
+    ///   - path: The path of the item to set the information values
+    /// 
+    /// Not all attributes in the ``FileInfo`` instance will be set into the item, supported
+    /// properties are:
+    /// - `creationDate` (Windows only)
+    /// - `lastAccessDate` 
+    /// - `modificationDate`
+    /// - `fileMode` (Only bits related to permissions. Not supported on Windows)
+    /// - `fileFlags`
     public func setInfo(_ info: FileInfo, forItemAt path: FilePath) throws {
 
 #if os(Windows)
@@ -322,21 +371,38 @@ extension FileManager {
     }
 
     
-    /// Set information values for the file located at `url` using [`URLResourceValues`]
+    /// Set attributes for the item located at the specified url using the provided ``FileInfo`` instance
     /// - Parameters:
-    ///   - info: The information values to set
-    ///   - url: The url of the file to set the information values
-    ///
-    /// - Note: [`URLResourceValues`] will record which attributes are modified, so only those
-    /// file information values will be set into the file
-    ///
-    /// [`URLResourceValues`]: https://developer.apple.com/documentation/foundation/urlresourcevalues
+    ///   - info: The ``FileInfo`` instance used to set the attributes for the item
+    ///   - url: The url of the item to set the information values
+    /// 
+    /// Not all attributes in the ``FileInfo`` instance will be set into the item, supported
+    /// properties are:
+    /// - `creationDate` (Windows only)
+    /// - `lastAccessDate` 
+    /// - `modificationDate`
+    /// - `fileMode` (Only bits related to permissions. Not supported on Windows)
+    /// - `fileFlags`
     public func setInfo(_ info: FileInfo, forItemAt url: URL) throws {
         try self.setInfo(info, forItemAt: url.assertAsFilePath())
     }
 
 
-    @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+    /// Set attributes for the item located at the specified path using the provided ``FileInfo`` instance
+    /// - Parameters:
+    ///   - info: The ``FileInfo`` instance used to set the attributes for the item
+    ///   - path: The path of the item to set the information values
+    /// 
+    /// Not all attributes in the ``FileInfo`` instance will be set into the item, supported
+    /// properties are:
+    /// - `creationDate` (Windows only)
+    /// - `lastAccessDate` 
+    /// - `modificationDate`
+    /// - `fileMode` (Only bits related to permissions. Not supported on Windows)
+    /// - `fileFlags`
+    /// 
+    /// - Note: This operation will automatically be executed on
+    /// ``DefaultTaskExecutor/io`` executor
     public func setInfo(_ info: FileInfo, forItemAt path: FilePath) async throws {
         try await Self.runOnIOQueue {
             try self.setInfo(info, forItemAt: path)
@@ -344,20 +410,21 @@ extension FileManager {
     }
     
     
-    /// Set information values for the file located at `url` using ``FileInfo``
+    /// Set attributes for the item located at the specified url using the provided ``FileInfo`` instance
     /// - Parameters:
-    ///   - info: The information values to set
-    ///   - url: The url of the file to set the information values
-    ///
-    /// - Note: Unlike [`URLResourceValues`], the ``FileInfo`` will NOT record which attributes are
-    /// modified, so everything inside will be set into the file, but values that are not included
-    /// by ``FileInfo`` will not be changed
+    ///   - info: The ``FileInfo`` instance used to set the attributes for the item
+    ///   - url: The url of the item to set the information values
+    /// 
+    /// Not all attributes in the ``FileInfo`` instance will be set into the item, supported
+    /// properties are:
+    /// - `creationDate` (Windows only)
+    /// - `lastAccessDate` 
+    /// - `modificationDate`
+    /// - `fileMode` (Only bits related to permissions. Not supported on Windows)
+    /// - `fileFlags`
     ///
     /// - Note: This operation will automatically be executed on
     /// ``DefaultTaskExecutor/io`` executor
-    ///
-    /// [`URLResourceValues`]: https://developer.apple.com/documentation/foundation/urlresourcevalues
-    @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
     public func setInfo(_ info: FileInfo, forItemAt url: URL) async throws {
         try await Self.runOnIOQueue {
             try self.setInfo(info, forItemAt: url)

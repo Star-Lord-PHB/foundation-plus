@@ -13,10 +13,12 @@ import SystemPackage
 extension FileManager {
 
     /// Options for opening a file
+    /// 
+    /// - Note: The implementation is based on https://github.com/apple/swift-nio/blob/main/Sources/NIOFileSystem/OpenOptions.swift
     public struct OpenFileOption: Sendable {
         /// Whether to create a new file if the file does not exist
         public let newFile: Bool
-        /// Whether to replace the existed file
+        /// How to handle existed file
         public let existingFile: ExistingFileOption
         public init(newFile: Bool = false, existingFile: ExistingFileOption = .open) {
             self.newFile = newFile
@@ -38,6 +40,8 @@ extension FileManager {
     
     
     /// Options for handling existing file
+    /// 
+    /// - Note: The implementation is based on https://github.com/apple/swift-nio/blob/main/Sources/NIOFileSystem/OpenOptions.swift
     public enum ExistingFileOption: Sendable {
         /// assert that the file does not exist, otherwise throw an error
         case error
@@ -123,16 +127,22 @@ extension FileManager {
 
 extension FileManager {
 
+    /// Open a file handle for reading the file at the specified file path.
     public func openFile(forReadingFrom path: FilePath) throws -> FileHandle {
         try .init(forReadingFrom: path)
     }
 
 
+    /// Open a file handle for reading the file at the specified url.
     public func openFile(forReadingFrom url: URL) throws -> FileHandle {
         try .init(forReadingFrom: url)
     }
 
 
+    /// Open a file handle for reading the file at the specified file path, and use
+    /// it immediately in the operation closure.
+    /// 
+    /// - Warning: DO NOT pass the file handle outside the closure
     public func withFileHandle<R>(
         forReadingFrom path: FilePath,
         operation: (FileHandle) throws -> R
@@ -143,6 +153,10 @@ extension FileManager {
     }
 
 
+    /// Open a file handle for reading the file at the specified url, and use
+    /// it immediately in the operation closure.
+    /// 
+    /// - Warning: DO NOT pass the file handle outside the closure
     public func withFileHandle<R>(
         forReadingFrom url: URL,
         operation: (FileHandle) throws -> R
@@ -151,6 +165,11 @@ extension FileManager {
     }
 
 
+    /// Open a file handle for writing to the file at the specified file path.
+    /// - Parameters:
+    ///   - path: The file path of the file to open
+    ///   - options: Options for opening the file. 
+    ///     By default, it will open the file directly and throw an error if the file does not exist
     public func openFile(
         forWritingTo path: FilePath,
         options: OpenFileOption = .modifyFile(createIfNeeded: false)
@@ -159,6 +178,11 @@ extension FileManager {
     }
 
 
+    /// Open a file handle for writing to the file at the specified url.
+    /// - Parameters:
+    ///   - url: The url of the file to open
+    ///   - options: Options for opening the file. 
+    ///    By default, it will open the file directly and throw an error if the file does not exist
     public func openFile(
         forWritingTo url: URL,
         options: OpenFileOption = .modifyFile(createIfNeeded: false)
@@ -167,6 +191,14 @@ extension FileManager {
     }
 
 
+    /// Open a file handle for writing to the file at the specified file path, and use
+    /// it immediately in the operation closure.
+    /// - Parameters:
+    ///   - path: The file path of the file to open
+    ///   - options: Options for opening the file.
+    ///   - operation: The operation to perform with the file handle
+    /// 
+    /// - Warning: DO NOT pass the file handle outside the closure
     public func withFileHandle<R>(
         forWritingTo path: FilePath,
         options: OpenFileOption = .modifyFile(createIfNeeded: false),
@@ -178,6 +210,14 @@ extension FileManager {
     }
 
 
+    /// Open a file handle for writing to the file at the specified url, and use
+    /// it immediately in the operation closure.
+    /// - Parameters:
+    ///   - url: The url of the file to open
+    ///   - options: Options for opening the file.
+    ///   - operation: The operation to perform with the file handle
+    /// 
+    /// - Warning: DO NOT pass the file handle outside the closure
     public func withFileHandle<R>(
         forWritingTo url: URL,
         options: OpenFileOption = .modifyFile(createIfNeeded: false),
@@ -187,6 +227,11 @@ extension FileManager {
     }
 
 
+    /// Open a file handle for updating the file at the specified file path.
+    /// - Parameters:
+    ///   - path: The file path of the file to open
+    ///   - options: Options for opening the file.
+    ///     By default, it will open the file directly and throw an error if the file does not exist
     public func openFile(
         forUpdating path: FilePath,
         options: OpenFileOption = .modifyFile(createIfNeeded: false)
@@ -195,6 +240,11 @@ extension FileManager {
     }
 
 
+    /// Open a file handle for updating the file at the specified url.
+    /// - Parameters:
+    ///   - url: The url of the file to open
+    ///   - options: Options for opening the file.
+    ///     By default, it will open the file directly and throw an error if the file does not exist
     public func openFile(
         forUpdating url: URL,
         options: OpenFileOption = .modifyFile(createIfNeeded: false)
@@ -203,6 +253,14 @@ extension FileManager {
     }
 
 
+    /// Open a file handle for updating the file at the specified file path, and use
+    /// it immediately in the operation closure.
+    /// - Parameters:
+    ///   - path: The file path of the file to open
+    ///   - options: Options for opening the file.
+    ///   - operation: The operation to perform with the file handle
+    ///
+    /// - Warning: DO NOT pass the file handle outside the closure 
     public func withFileHandle<R>(
         forUpdating path: FilePath,
         options: OpenFileOption = .modifyFile(createIfNeeded: false),
@@ -214,6 +272,14 @@ extension FileManager {
     }
 
 
+    /// Open a file handle for updating the file at the specified url, and use
+    /// it immediately in the operation closure.
+    /// - Parameters:
+    ///   - url: The url of the file to open
+    ///   - options: Options for opening the file.
+    ///   - operation: The operation to perform with the file handle
+    ///
+    /// - Warning: DO NOT pass the file handle outside the closure 
     public func withFileHandle<R>(
         forUpdating url: URL,
         options: OpenFileOption = .modifyFile(createIfNeeded: false),
@@ -229,6 +295,10 @@ extension FileManager {
 @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 extension FileManager {
 
+    /// Open a file handle for reading the file at the specified file path.
+    /// 
+    /// - Note: This operation will automatically be executed on
+    /// ``FoundationPlusTaskExecutor/io`` executor
     public func openFile(forReadingFrom path: FilePath) async throws -> FileHandle {
         try await Self.runOnIOQueue {
             try .init(forReadingFrom: path)
@@ -236,12 +306,10 @@ extension FileManager {
     }
 
     
-    /// Create a file handle for reading the file at the specific url
-    /// - Parameter url: The url of the file to create the file handle
-    /// - Returns: The file handle
+    /// Open a file handle for reading the file at the specified url.
     ///
     /// - Note: This operation will automatically be executed on
-    /// ``DefaultTaskExecutor/io`` executor
+    /// ``FoundationPlusTaskExecutor/io`` executor
     public func openFile(forReadingFrom url: URL) async throws -> FileHandle {
         try await Self.runOnIOQueue {
             try .init(forReadingFrom: url)
@@ -249,6 +317,13 @@ extension FileManager {
     }
 
 
+    /// Open a file handle for reading the file at the specified file path, and use
+    /// it immediately in the operation closure.
+    /// 
+    /// - Warning: DO NOT pass the file handle outside the closure
+    /// 
+    /// - Note: This operation will automatically be executed
+    /// on ``FoundationPlusTaskExecutor/io`` executor
     public func withFileHandle<R>(
         forReadingFrom path: FilePath,
         operation: @escaping (FileHandle) throws -> R
@@ -261,6 +336,13 @@ extension FileManager {
     }
 
 
+    /// Open a file handle for reading the file at the specified file path, and use
+    /// it immediately in the operation closure.
+    /// 
+    /// - Warning: DO NOT pass the file handle outside the closure
+    /// 
+    /// - Note: This operation will automatically be executed
+    /// on ``FoundationPlusTaskExecutor/io`` executor
     @available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
     public func withFileHandle<R>(
         forReadingFrom path: FilePath,
@@ -274,44 +356,53 @@ extension FileManager {
     }
     
     
-    /// Create a file handle for reading the file at the specific url
+    /// Open a file handle for reading the file at the specified file path, and use
+    /// it immediately in the operation closure.
+    /// 
+    /// - Warning: DO NOT pass the file handle outside the closure
+    /// 
+    /// - Note: This operation will automatically be executed
+    /// on ``FoundationPlusTaskExecutor/io`` executor
+    public func withFileHandle<R>(
+        forReadingFrom url: URL,
+        operation: @escaping (FileHandle) throws -> R
+    ) async throws -> R {
+        try await Self.runOnIOQueue {
+            let handle = try FileHandle(forReadingFrom: url)
+            defer { try? handle.close() }
+            return try operation(handle)
+        }
+    }
+
+
+    /// Open a file handle for reading the file at the specified file path, and use
+    /// it immediately in the operation closure.
+    /// 
+    /// - Warning: DO NOT pass the file handle outside the closure
+    /// 
+    /// - Note: This operation will automatically be executed
+    /// on ``FoundationPlusTaskExecutor/io`` executor
+    @available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
+    public func withFileHandle<R>(
+        forReadingFrom url: URL,
+        operation: (FileHandle) async throws -> R
+    ) async throws -> R {
+        try await withTaskExecutorPreference(.foundationPlusTaskExecutor.io) {
+            let handle = try FileHandle(forReadingFrom: url)
+            defer { try? handle.close() }
+            return try await operation(handle)
+        }
+    }
+
+
+    /// Open a file handle for writing to the file at the specified file path.
     /// - Parameters:
-    ///   - url: The url of the file to create the file handle
-    ///   - operation: operations on the file handle
-    ///
-    /// - Warning: Any operation on the file handle MUST happen within the `operation` closure.
-    /// NEVER try to pass the handle outside the closure
-    ///
-    /// - Attention: The handle will automatically be closed after the closure returns, so no
-    /// need to close it manually
-    ///
-    /// - Note: This operation will automatically be executed on
-    /// ``DefaultTaskExecutor/io`` executor
-    public func withFileHandle<R>(
-        forReadingFrom url: URL,
-        operation: @escaping (FileHandle) throws -> R
-    ) async throws -> R {
-        try await Self.runOnIOQueue {
-            let handle = try FileHandle(forReadingFrom: url)
-            defer { try? handle.close() }
-            return try operation(handle)
-        }
-    }
-
-
-    @available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
-    public func withFileHandle<R>(
-        forReadingFrom url: URL,
-        operation: (FileHandle) async throws -> R
-    ) async throws -> R {
-        try await withTaskExecutorPreference(.foundationPlusTaskExecutor.io) {
-            let handle = try FileHandle(forReadingFrom: url)
-            defer { try? handle.close() }
-            return try await operation(handle)
-        }
-    }
-
-
+    ///   - path: The file path of the file to open
+    ///   - options: Options for opening the file. 
+    ///     By default, it will open the file directly and throw an error if the file does not exist
+    /// 
+    /// - Note: This operation will automatically be executed
+    /// on ``FoundationPlusTaskExecutor/io`` executor
     public func openFile(
         forWritingTo path: FilePath,
         options: OpenFileOption = .modifyFile(createIfNeeded: false)
@@ -322,12 +413,14 @@ extension FileManager {
     }
     
     
-    /// Create a file handle for writing to the file at the specified url
-    /// - Parameter url: The url of the file to create the file handle
-    /// - Returns: The file handle
-    ///
-    /// - Note: This operation will automatically be executed on
-    /// ``DefaultTaskExecutor/io`` executor
+    /// Open a file handle for writing to the file at the specified url.
+    /// - Parameters:
+    ///   - url: The url of the file to open
+    ///   - options: Options for opening the file. 
+    ///    By default, it will open the file directly and throw an error if the file does not exist
+    /// 
+    /// - Note: This operation will automatically be executed
+    /// on ``FoundationPlusTaskExecutor/io`` executor
     public func openFile(
         forWritingTo url: URL,
         options: OpenFileOption = .modifyFile(createIfNeeded: false)
@@ -338,6 +431,17 @@ extension FileManager {
     }
 
 
+    /// Open a file handle for writing to the file at the specified file path, and use
+    /// it immediately in the operation closure.
+    /// - Parameters:
+    ///   - path: The file path of the file to open
+    ///   - options: Options for opening the file.
+    ///   - operation: The operation to perform with the file handle
+    /// 
+    /// - Warning: DO NOT pass the file handle outside the closure
+    /// 
+    /// - Note: This operation will automatically be executed
+    /// on ``FoundationPlusTaskExecutor/io`` executor
     public func withFileHandle<R>(
         forWritingTo path: FilePath,
         options: OpenFileOption = .modifyFile(createIfNeeded: false),
@@ -351,6 +455,17 @@ extension FileManager {
     }
 
 
+    /// Open a file handle for writing to the file at the specified file path, and use
+    /// it immediately in the operation closure.
+    /// - Parameters:
+    ///   - path: The file path of the file to open
+    ///   - options: Options for opening the file.
+    ///   - operation: The operation to perform with the file handle
+    /// 
+    /// - Warning: DO NOT pass the file handle outside the closure
+    /// 
+    /// - Note: This operation will automatically be executed
+    /// on ``FoundationPlusTaskExecutor/io`` executor
     @available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
     public func withFileHandle<R>(
         forWritingTo path: FilePath,
@@ -365,19 +480,17 @@ extension FileManager {
     }
     
     
-    /// Create a file handle for writing to the file at the specific url
+    /// Open a file handle for writing to the file at the specified url, and use
+    /// it immediately in the operation closure.
     /// - Parameters:
-    ///   - url: The url of the file to create the file handle
-    ///   - operation: operations on the file handle
-    ///
-    /// - Warning: Any operation on the file handle MUST happen within the `operation` closure.
-    /// NEVER try to pass the handle outside the closure
-    ///
-    /// - Attention: The handle will automatically be closed after the closure returns, so no
-    /// need to close it manually
+    ///   - url: The url of the file to open
+    ///   - options: Options for opening the file.
+    ///   - operation: The operation to perform with the file handle
+    /// 
+    /// - Warning: DO NOT pass the file handle outside the closure
     ///
     /// - Note: This operation will automatically be executed on
-    /// ``DefaultTaskExecutor/io`` executor
+    /// ``FoundationPlusTaskExecutor/io`` executor
     public func withFileHandle<R>(
         forWritingTo url: URL,
         options: OpenFileOption = .modifyFile(createIfNeeded: false),
@@ -391,6 +504,17 @@ extension FileManager {
     }
 
 
+    /// Open a file handle for writing to the file at the specified url, and use
+    /// it immediately in the operation closure.
+    /// - Parameters:
+    ///   - url: The url of the file to open
+    ///   - options: Options for opening the file.
+    ///   - operation: The operation to perform with the file handle
+    /// 
+    /// - Warning: DO NOT pass the file handle outside the closure
+    ///
+    /// - Note: This operation will automatically be executed on
+    /// ``FoundationPlusTaskExecutor/io`` executor
     @available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
     public func withFileHandle<R>(
         forWritingTo url: URL,
@@ -405,6 +529,14 @@ extension FileManager {
     }
 
 
+    /// Open a file handle for updating the file at the specified file path.
+    /// - Parameters:
+    ///   - path: The file path of the file to open
+    ///   - options: Options for opening the file.
+    ///     By default, it will open the file directly and throw an error if the file does not exist
+    ///
+    /// - Note: This operation will automatically be executed on
+    /// ``FoundationPlusTaskExecutor/io`` executor
     public func openFile(
         forUpdating path: FilePath,
         options: OpenFileOption = .modifyFile(createIfNeeded: false)
@@ -415,12 +547,14 @@ extension FileManager {
     }
     
     
-    /// Create a file handle for reading and writing to the file at the specific url
-    /// - Parameter url: The url of the file to create the file handle
-    /// - Returns: The file handle
+    /// Open a file handle for updating the file at the specified url.
+    /// - Parameters:
+    ///   - url: The url of the file to open
+    ///   - options: Options for opening the file.
+    ///     By default, it will open the file directly and throw an error if the file does not exist
     ///
     /// - Note: This operation will automatically be executed on
-    /// ``DefaultTaskExecutor/io`` executor
+    /// ``FoundationPlusTaskExecutor/io`` executor
     public func openFile(
         forUpdating url: URL,
         options: OpenFileOption = .modifyFile(createIfNeeded: false)
@@ -431,6 +565,17 @@ extension FileManager {
     }
 
 
+    /// Open a file handle for updating the file at the specified file path, and use
+    /// it immediately in the operation closure.
+    /// - Parameters:
+    ///   - path: The file path of the file to open
+    ///   - options: Options for opening the file.
+    ///   - operation: The operation to perform with the file handle
+    ///
+    /// - Warning: DO NOT pass the file handle outside the closure 
+    ///
+    /// - Note: This operation will automatically be executed on
+    /// ``FoundationPlusTaskExecutor/io`` executor
     public func withFileHandle<R>(
         forUpdating path: FilePath,
         options: OpenFileOption = .modifyFile(createIfNeeded: false),
@@ -444,6 +589,17 @@ extension FileManager {
     }
 
 
+    /// Open a file handle for updating the file at the specified file path, and use
+    /// it immediately in the operation closure.
+    /// - Parameters:
+    ///   - path: The file path of the file to open
+    ///   - options: Options for opening the file.
+    ///   - operation: The operation to perform with the file handle
+    ///
+    /// - Warning: DO NOT pass the file handle outside the closure 
+    ///
+    /// - Note: This operation will automatically be executed on
+    /// ``FoundationPlusTaskExecutor/io`` executor
     @available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
     public func withFileHandle<R>(
         forUpdating path: FilePath,
@@ -458,19 +614,17 @@ extension FileManager {
     }
     
     
-    /// Create a file handle for reading and writing to the file at the specific url
+    /// Open a file handle for updating the file at the specified url, and use
+    /// it immediately in the operation closure.
     /// - Parameters:
-    ///   - url: The url of the file to create the file handle
-    ///   - operation: operations on the file handle
+    ///   - url: The url of the file to open
+    ///   - options: Options for opening the file.
+    ///   - operation: The operation to perform with the file handle
     ///
-    /// - Warning: Any operation on the file handle MUST happen within the `operation` closure.
-    /// NEVER try to pass the handle outside the closure
-    ///
-    /// - Attention: The handle will automatically be closed after the closure returns, so no
-    /// need to close it manually
+    /// - Warning: DO NOT pass the file handle outside the closure 
     ///
     /// - Note: This operation will automatically be executed on
-    /// ``DefaultTaskExecutor/io`` executor
+    /// ``FoundationPlusTaskExecutor/io`` executor
     public func withFileHandle<R>(
         forUpdating url: URL,
         options: OpenFileOption = .modifyFile(createIfNeeded: false),
@@ -484,6 +638,17 @@ extension FileManager {
     }
 
 
+    /// Open a file handle for updating the file at the specified url, and use
+    /// it immediately in the operation closure.
+    /// - Parameters:
+    ///   - url: The url of the file to open
+    ///   - options: Options for opening the file.
+    ///   - operation: The operation to perform with the file handle
+    ///
+    /// - Warning: DO NOT pass the file handle outside the closure 
+    ///
+    /// - Note: This operation will automatically be executed on
+    /// ``FoundationPlusTaskExecutor/io`` executor
     @available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
     public func withFileHandle<R>(
         forUpdating url: URL,

@@ -4,178 +4,178 @@ import WinSDK
 import Foundation
 
 
-public protocol WindowsIntConstant {
+protocol WindowsIntConstant {
     var rawValue: DWORD { get }
     init(_ rawValue: DWORD)
 }
 
 
 extension WindowsIntConstant {
-    public init(_ rawValue: Int32) {
+    init(_ rawValue: Int32) {
         self.init(DWORD(rawValue))
     }
 }
 
 
-public protocol WindowsMergeableIntConstant: WindowsIntConstant {}
+protocol WindowsMergeableIntConstant: WindowsIntConstant {}
 
 
 extension WindowsMergeableIntConstant {
-    public static func | (lhs: Self, rhs: Self) -> Self {
+    static func | (lhs: Self, rhs: Self) -> Self {
         return .init(lhs.rawValue | rhs.rawValue)
     }
 }
 
 
 extension Collection where Element: WindowsMergeableIntConstant {
-    public var combinedRawValue: DWORD {
+    var combinedRawValue: DWORD {
         reduce(0) { $0 | $1.rawValue }
     }
 }
 
 
-public struct WindowsFileAccessMode: Sendable, WindowsMergeableIntConstant {
+struct WindowsFileAccessMode: Sendable, WindowsMergeableIntConstant {
 
-    public let rawValue: DWORD
+    let rawValue: DWORD
 
-    public init(_ rawValue: DWORD) {
+    init(_ rawValue: DWORD) {
         self.rawValue = rawValue
     }
 
-    public static let genericRead: WindowsFileAccessMode = .init(GENERIC_READ)
-    public static let genericWrite: WindowsFileAccessMode = .init(GENERIC_WRITE)
-    public static let genericExecute: WindowsFileAccessMode = .init(GENERIC_EXECUTE)
-    public static let genericAll: WindowsFileAccessMode = .init(GENERIC_ALL)
-    public static let delete: WindowsFileAccessMode = .init(DELETE)
-    public static let synchronize: WindowsFileAccessMode = .init(SYNCHRONIZE)
-    public static let fileReadAttributes: WindowsFileAccessMode = .init(FILE_READ_ATTRIBUTES)
-    public static let fileWriteAttributes: WindowsFileAccessMode = .init(FILE_WRITE_ATTRIBUTES)
-    public static let fileDeleteChild: WindowsFileAccessMode = .init(FILE_DELETE_CHILD)
-    public static let fileExecute: WindowsFileAccessMode = .init(FILE_EXECUTE)
-    public static let fileReadEA: WindowsFileAccessMode = .init(FILE_READ_EA)
-    public static let fileWriteEA: WindowsFileAccessMode = .init(FILE_WRITE_EA)
-    public static let fileAppendData: WindowsFileAccessMode = .init(FILE_APPEND_DATA)
-    public static let fileWriteData: WindowsFileAccessMode = .init(FILE_WRITE_DATA)
-    public static let fileAddSubdirectory: WindowsFileAccessMode = .init(FILE_ADD_SUBDIRECTORY)
-    public static let fileAddFile: WindowsFileAccessMode = .init(FILE_ADD_FILE)
-    public static let fileListDirectory: WindowsFileAccessMode = .init(FILE_LIST_DIRECTORY)
+    static let genericRead: WindowsFileAccessMode = .init(GENERIC_READ)
+    static let genericWrite: WindowsFileAccessMode = .init(GENERIC_WRITE)
+    static let genericExecute: WindowsFileAccessMode = .init(GENERIC_EXECUTE)
+    static let genericAll: WindowsFileAccessMode = .init(GENERIC_ALL)
+    static let delete: WindowsFileAccessMode = .init(DELETE)
+    static let synchronize: WindowsFileAccessMode = .init(SYNCHRONIZE)
+    static let fileReadAttributes: WindowsFileAccessMode = .init(FILE_READ_ATTRIBUTES)
+    static let fileWriteAttributes: WindowsFileAccessMode = .init(FILE_WRITE_ATTRIBUTES)
+    static let fileDeleteChild: WindowsFileAccessMode = .init(FILE_DELETE_CHILD)
+    static let fileExecute: WindowsFileAccessMode = .init(FILE_EXECUTE)
+    static let fileReadEA: WindowsFileAccessMode = .init(FILE_READ_EA)
+    static let fileWriteEA: WindowsFileAccessMode = .init(FILE_WRITE_EA)
+    static let fileAppendData: WindowsFileAccessMode = .init(FILE_APPEND_DATA)
+    static let fileWriteData: WindowsFileAccessMode = .init(FILE_WRITE_DATA)
+    static let fileAddSubdirectory: WindowsFileAccessMode = .init(FILE_ADD_SUBDIRECTORY)
+    static let fileAddFile: WindowsFileAccessMode = .init(FILE_ADD_FILE)
+    static let fileListDirectory: WindowsFileAccessMode = .init(FILE_LIST_DIRECTORY)
 
 }
 
 
-public struct WindowsFileShareMode: Sendable, WindowsMergeableIntConstant {
+struct WindowsFileShareMode: Sendable, WindowsMergeableIntConstant {
 
-    public let rawValue: DWORD
+    let rawValue: DWORD
 
-    public init(_ rawValue: DWORD) {
+    init(_ rawValue: DWORD) {
         self.rawValue = rawValue
     }
 
-    public static let none: WindowsFileShareMode = .init(0)
-    public static let shareDelete: WindowsFileShareMode = .init(FILE_SHARE_DELETE)
-    public static let shareRead: WindowsFileShareMode = .init(FILE_SHARE_READ)
-    public static let shareWrite: WindowsFileShareMode = .init(FILE_SHARE_WRITE)
+    static let none: WindowsFileShareMode = .init(0)
+    static let shareDelete: WindowsFileShareMode = .init(FILE_SHARE_DELETE)
+    static let shareRead: WindowsFileShareMode = .init(FILE_SHARE_READ)
+    static let shareWrite: WindowsFileShareMode = .init(FILE_SHARE_WRITE)
 
 }
 
 
-public struct WindowsFileCreationMode: Sendable, WindowsIntConstant {
-    public let rawValue: DWORD
+struct WindowsFileCreationMode: Sendable, WindowsIntConstant {
+    let rawValue: DWORD
 
-    public init(_ rawValue: DWORD) {
+    init(_ rawValue: DWORD) {
         self.rawValue = rawValue
     }
 
-    public static let createNew: WindowsFileCreationMode = .init(CREATE_NEW)
-    public static let createAlways: WindowsFileCreationMode = .init(CREATE_ALWAYS)
-    public static let openExisting: WindowsFileCreationMode = .init(OPEN_EXISTING) 
-    public static let openAlways: WindowsFileCreationMode = .init(OPEN_ALWAYS)
-    public static let truncateExisting: WindowsFileCreationMode = .init(TRUNCATE_EXISTING)
+    static let createNew: WindowsFileCreationMode = .init(CREATE_NEW)
+    static let createAlways: WindowsFileCreationMode = .init(CREATE_ALWAYS)
+    static let openExisting: WindowsFileCreationMode = .init(OPEN_EXISTING) 
+    static let openAlways: WindowsFileCreationMode = .init(OPEN_ALWAYS)
+    static let truncateExisting: WindowsFileCreationMode = .init(TRUNCATE_EXISTING)
 }
 
 
-public protocol WindowsFileFlagsAndAttributes: WindowsMergeableIntConstant {}
+protocol WindowsFileFlagsAndAttributes: WindowsMergeableIntConstant {}
 
 
 extension WindowsFileFlagsAndAttributes {
-    public static func | <Operant: WindowsFileFlagsAndAttributes> (lhs: Self, rhs: Operant) -> AnyWindowsFileFlagsAndAttributes {
+    static func | <Operant: WindowsFileFlagsAndAttributes> (lhs: Self, rhs: Operant) -> AnyWindowsFileFlagsAndAttributes {
         return .init(lhs.rawValue | rhs.rawValue)
     }
 }
 
 
-public struct AnyWindowsFileFlagsAndAttributes: WindowsFileFlagsAndAttributes {
-    public let rawValue: DWORD
-    public init(_ rawValue: DWORD) {
+struct AnyWindowsFileFlagsAndAttributes: WindowsFileFlagsAndAttributes {
+    let rawValue: DWORD
+    init(_ rawValue: DWORD) {
         self.rawValue = rawValue
     }
 }
 
 
-public struct WindowsFileAttributeOption: Sendable, WindowsFileFlagsAndAttributes {
-    public let rawValue: DWORD
+struct WindowsFileAttributeOption: Sendable, WindowsFileFlagsAndAttributes {
+    let rawValue: DWORD
 
-    public init(_ rawValue: DWORD) {
+    init(_ rawValue: DWORD) {
         self.rawValue = rawValue
     }
 
-    public static let archive: WindowsFileAttributeOption = .init(FILE_ATTRIBUTE_ARCHIVE)
-    public static let encrypted: WindowsFileAttributeOption = .init(FILE_ATTRIBUTE_ENCRYPTED)
-    public static let hidden: WindowsFileAttributeOption = .init(FILE_ATTRIBUTE_HIDDEN)
-    public static let normal: WindowsFileAttributeOption = .init(FILE_ATTRIBUTE_NORMAL)
-    public static let offline: WindowsFileAttributeOption = .init(FILE_ATTRIBUTE_OFFLINE)
-    public static let readonly: WindowsFileAttributeOption = .init(FILE_ATTRIBUTE_READONLY)
-    public static let system: WindowsFileAttributeOption = .init(FILE_ATTRIBUTE_SYSTEM)
-    public static let temporary: WindowsFileAttributeOption = .init(FILE_ATTRIBUTE_TEMPORARY)
+    static let archive: WindowsFileAttributeOption = .init(FILE_ATTRIBUTE_ARCHIVE)
+    static let encrypted: WindowsFileAttributeOption = .init(FILE_ATTRIBUTE_ENCRYPTED)
+    static let hidden: WindowsFileAttributeOption = .init(FILE_ATTRIBUTE_HIDDEN)
+    static let normal: WindowsFileAttributeOption = .init(FILE_ATTRIBUTE_NORMAL)
+    static let offline: WindowsFileAttributeOption = .init(FILE_ATTRIBUTE_OFFLINE)
+    static let readonly: WindowsFileAttributeOption = .init(FILE_ATTRIBUTE_READONLY)
+    static let system: WindowsFileAttributeOption = .init(FILE_ATTRIBUTE_SYSTEM)
+    static let temporary: WindowsFileAttributeOption = .init(FILE_ATTRIBUTE_TEMPORARY)
 }
 
 
 extension WindowsFileFlagsAndAttributes where Self == WindowsFileAttributeOption {
-    public static var fileAttributeOptions: WindowsFileAttributeOption.Type { WindowsFileAttributeOption.self }
+    static var fileAttributeOptions: WindowsFileAttributeOption.Type { WindowsFileAttributeOption.self }
 }
 
 
-public struct WindowsFileFlag: Sendable, WindowsFileFlagsAndAttributes {
-    public let rawValue: DWORD
+struct WindowsFileFlag: Sendable, WindowsFileFlagsAndAttributes {
+    let rawValue: DWORD
 
-    public init(_ rawValue: DWORD) {
+    init(_ rawValue: DWORD) {
         self.rawValue = rawValue
     }
 
-    public static let backupSemantics: WindowsFileFlag = .init(FILE_FLAG_BACKUP_SEMANTICS)
-    public static let deleteOnClose: WindowsFileFlag = .init(FILE_FLAG_DELETE_ON_CLOSE)
-    public static let noBuffering: WindowsFileFlag = .init(FILE_FLAG_NO_BUFFERING)
-    public static let openReparsePoint: WindowsFileFlag = .init(FILE_FLAG_OPEN_REPARSE_POINT)
-    public static let openNoRecall: WindowsFileFlag = .init(FILE_FLAG_OPEN_NO_RECALL)
-    public static let overlapped: WindowsFileFlag = .init(FILE_FLAG_OVERLAPPED)
-    public static let posixSemantics: WindowsFileFlag = .init(FILE_FLAG_POSIX_SEMANTICS)
-    public static let randomAccess: WindowsFileFlag = .init(FILE_FLAG_RANDOM_ACCESS)
-    public static let sessionAware: WindowsFileFlag = .init(FILE_FLAG_SESSION_AWARE)
-    public static let sequentialScan: WindowsFileFlag = .init(FILE_FLAG_SEQUENTIAL_SCAN)
-    public static let writeThrough: WindowsFileFlag = .init(FILE_FLAG_WRITE_THROUGH)
+    static let backupSemantics: WindowsFileFlag = .init(FILE_FLAG_BACKUP_SEMANTICS)
+    static let deleteOnClose: WindowsFileFlag = .init(FILE_FLAG_DELETE_ON_CLOSE)
+    static let noBuffering: WindowsFileFlag = .init(FILE_FLAG_NO_BUFFERING)
+    static let openReparsePoint: WindowsFileFlag = .init(FILE_FLAG_OPEN_REPARSE_POINT)
+    static let openNoRecall: WindowsFileFlag = .init(FILE_FLAG_OPEN_NO_RECALL)
+    static let overlapped: WindowsFileFlag = .init(FILE_FLAG_OVERLAPPED)
+    static let posixSemantics: WindowsFileFlag = .init(FILE_FLAG_POSIX_SEMANTICS)
+    static let randomAccess: WindowsFileFlag = .init(FILE_FLAG_RANDOM_ACCESS)
+    static let sessionAware: WindowsFileFlag = .init(FILE_FLAG_SESSION_AWARE)
+    static let sequentialScan: WindowsFileFlag = .init(FILE_FLAG_SEQUENTIAL_SCAN)
+    static let writeThrough: WindowsFileFlag = .init(FILE_FLAG_WRITE_THROUGH)
 }
 
 
 extension WindowsFileFlagsAndAttributes where Self == WindowsFileFlag {
-    public static var fileFlags: WindowsFileFlag.Type { WindowsFileFlag.self }
+    static var fileFlags: WindowsFileFlag.Type { WindowsFileFlag.self }
 }
 
 
-public struct WindowsFileSecurityQualityOfService: Sendable, WindowsFileFlagsAndAttributes {
-    public let rawValue: DWORD
+struct WindowsFileSecurityQualityOfService: Sendable, WindowsFileFlagsAndAttributes {
+    let rawValue: DWORD
     
-    public init(_ rawValue: DWORD) {
+    init(_ rawValue: DWORD) {
         self.rawValue = rawValue
     }
     
-    public static let sqosPresent: WindowsFileSecurityQualityOfService = .init(SECURITY_SQOS_PRESENT)
-    public static let contextTracking: WindowsFileSecurityQualityOfService = .init(SECURITY_CONTEXT_TRACKING)
-    public static let effectiveOnly: WindowsFileSecurityQualityOfService = .init(SECURITY_EFFECTIVE_ONLY)
+    static let sqosPresent: WindowsFileSecurityQualityOfService = .init(SECURITY_SQOS_PRESENT)
+    static let contextTracking: WindowsFileSecurityQualityOfService = .init(SECURITY_CONTEXT_TRACKING)
+    static let effectiveOnly: WindowsFileSecurityQualityOfService = .init(SECURITY_EFFECTIVE_ONLY)
 }
 
 
 extension WindowsFileFlagsAndAttributes where Self == WindowsFileSecurityQualityOfService {
-    public static var fileSecurityQualityOfService: WindowsFileSecurityQualityOfService.Type { WindowsFileSecurityQualityOfService.self }
+    static var fileSecurityQualityOfService: WindowsFileSecurityQualityOfService.Type { WindowsFileSecurityQualityOfService.self }
 }
 
 #endif 

@@ -11,6 +11,7 @@ import SystemPackage
 
 extension FileManager {
 
+    /// Remove the item at the specified path
     public func removeItem(at path: FilePath) throws {
         try self.removeItem(at: path.toURL())
     }
@@ -18,6 +19,9 @@ extension FileManager {
 
 #if canImport(Darwin) 
 
+    /// Move the item at the specified path to trash
+    /// - Returns: The path of the item in trash
+    @discardableResult
     public func trashItem(at path: FilePath) throws -> FilePath? {
         var newUrl: NSURL?
         try self.trashItem(at: path.toURL(), resultingItemURL: &newUrl)
@@ -25,6 +29,9 @@ extension FileManager {
     }
 
 
+    /// Move the item at the specified url to trash
+    /// - Returns: The url of the item in trash
+    @discardableResult
     public func trashItem(at url: URL) throws -> URL? {
         var newUrl: NSURL?
         try self.trashItem(at: url, resultingItemURL: &newUrl)
@@ -36,9 +43,13 @@ extension FileManager {
 }
 
 
-@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+
 extension FileManager {
 
+    /// Remove the item at the specified path
+    /// 
+    /// - Note: This operation will automatically be executed on
+    /// ``DefaultTaskExecutor/io`` executor
     public func removeItem(at path: FilePath) async throws {
         try await Self.runOnIOQueue {
             try self.removeItem(at: path)
@@ -46,9 +57,8 @@ extension FileManager {
     }
 
     
-    /// Delete a file / directory at the specified url
-    /// - Parameter url: The url of the file / directory to delete
-    ///
+    /// Remove the item at the specified url
+    /// 
     /// - Note: This operation will automatically be executed on
     /// ``DefaultTaskExecutor/io`` executor
     public func removeItem(at url: URL) async throws {
@@ -60,6 +70,8 @@ extension FileManager {
     
 #if canImport(Darwin) 
 
+    /// Move the item at the specified path to trash
+    /// - Returns: The path of the item in trash
     @discardableResult
     public func trashItem(at path: FilePath) async throws -> FilePath? {
         try await Self.runOnIOQueue {
@@ -68,9 +80,8 @@ extension FileManager {
     }
 
 
-    /// Move a file / directory at the specified url to trash
-    /// - Parameter url: The url of the file / directory to move to trash
-    /// - Returns: The url of the file / directory in trash
+    /// Move the item at the specified url to trash
+    /// - Returns: The url of the item in trash
     @discardableResult
     public func trashItem(at url: URL) async throws -> URL? {
         try await Self.runOnIOQueue {

@@ -4,26 +4,42 @@ import SystemPackage
 
 extension FileManager {
 
+    /// Read the content of the file at the specified path 
     public func contents(at path: FilePath) throws -> Data {
         try Data(contentsOf: path.toURL())
     }
 
 
+    /// Read the content of the file at the specified url
     public func contents(at url: URL) throws -> Data {
         try Data(contentsOf: url)
     }
 
 
+    /// Write data into the file at the specified path
+    /// - Parameters:
+    ///   - content: The data to be written into the file
+    ///   - path: The path of the file that the data will be written into
+    ///   - replaceExisting: Whether to replace existing file, default to `true`
     public func write(_ content: Data, to path: FilePath, replaceExisting: Bool = true) throws {
         try content.write(to: path.toURL(), options: replaceExisting ? [] : .withoutOverwriting)
     }
 
 
+    /// Write data into the file at the specified url
+    /// - Parameters:
+    ///   - content: The data to be written into the file
+    ///   - url: The url of the file that the data will be written into
+    ///   - replaceExisting: Whether to replace existing file, default to `true`
     public func write(_ content: Data, to url: URL, replaceExisting: Bool = true) throws {
         try content.write(to: url, options: replaceExisting ? [] : .withoutOverwriting)
     }
 
 
+    /// Append data into the file at the specified path
+    /// - Parameters:
+    ///   - content: The data to be appended into the file
+    ///   - path: The path of the file that the data will be appended to
     public func append(_ content: Data, to path: FilePath) throws {
         let handle = try FileHandle(forWritingTo: path)
         defer { try? handle.close() }
@@ -37,6 +53,10 @@ extension FileManager {
     }
 
 
+    /// Append data into the file at the specified url
+    /// - Parameters:
+    ///   - content: The data to be appended into the file
+    ///   - url: The url of the file that the data will be appended to
     public func append(_ content: Data, to url: URL) throws {
         let handle = try FileHandle(forWritingTo: url)
         defer { try? handle.close() }
@@ -50,6 +70,10 @@ extension FileManager {
     }
 
 
+    /// Get entries of the directory at the specified path as an array of FilePaths
+    /// - Parameters:
+    ///   - path: The path of the directory
+    ///   - options: Options for enumerating the directory 
     public func contentsOfDirectory(
         at path: FilePath,
         options: DirectoryEnumerationOptions = []
@@ -61,9 +85,11 @@ extension FileManager {
 }
 
 
+
 extension FileManager {
 
-    public final class FilePathdDirectoryEnumerator: Sequence, AsyncSequence, AsyncIteratorProtocol, IteratorProtocol {
+    // MARK: TODO
+    final class FilePathdDirectoryEnumerator: Sequence, AsyncSequence, AsyncIteratorProtocol, IteratorProtocol {
 
         public typealias AsyncIterator = FilePathdDirectoryEnumerator 
 
@@ -99,7 +125,8 @@ extension FileManager {
     }
 
 
-    public final class URLDirectoryEnumerator: Sequence, IteratorProtocol {
+    // MARK: TODO
+    final class URLDirectoryEnumerator: Sequence, IteratorProtocol {
 
         private let enumerator: FileManager.DirectoryEnumerator
 
@@ -129,9 +156,13 @@ extension FileManager {
 }
 
 
-@available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
+
 extension FileManager {
 
+    /// Read the content of the file at the specified path 
+    /// 
+    /// - Note: This operation will automatically be executed on
+    /// ``FoundationPlusTaskExecutor/io`` executor
     public func contents(at path: FilePath) async throws -> Data {
         try await Self.runOnIOQueue {
             try self.contents(at: path)
@@ -139,12 +170,10 @@ extension FileManager {
     }
 
     
-    /// Read the content of the file at the provided `URL` and return as `Data`
-    /// - Parameter url: The `URL` of the resource to be read
-    /// - Returns: The content of the file at the url
+    /// Read the content of the file at the specified url
     ///
     /// - Note: This operation will automatically be executed on
-    /// ``DefaultTaskExecutor/io`` executor
+    /// ``FoundationPlusTaskExecutor/io`` executor
     public func contents(at url: URL) async throws -> Data {
         try await Self.runOnIOQueue {
             try self.contents(at: url)
@@ -152,6 +181,14 @@ extension FileManager {
     }
 
 
+    /// Write data into the file at the specified path
+    /// - Parameters:
+    ///   - content: The data to be written into the file
+    ///   - path: The path of the file that the data will be written into
+    ///   - replaceExisting: Whether to replace existing file, default to `true`
+    /// 
+    /// - Note: This operation will automatically be executed on
+    /// ``FoundationPlusTaskExecutor/io`` executor
     public func write(_ content: Data, to path: FilePath, replaceExisting: Bool = true) async throws {
         try await Self.runOnIOQueue {
             try self.write(content, to: path, replaceExisting: replaceExisting)
@@ -159,14 +196,14 @@ extension FileManager {
     }
     
     
-    /// Write the provided data into the file at the provided `URL`
+    /// Write data into the file at the specified url
     /// - Parameters:
-    ///   - content: The content to be written
+    ///   - content: The data to be written into the file
     ///   - url: The url of the file that the data will be written into
-    ///   - replaceExisting: Whether to replace the existing file, default is `true`
-    ///
+    ///   - replaceExisting: Whether to replace existing file, default to `true`
+    /// 
     /// - Note: This operation will automatically be executed on
-    /// ``DefaultTaskExecutor/io`` executor
+    /// ``FoundationPlusTaskExecutor/io`` executor
     public func write(_ content: Data, to url: URL, replaceExisting: Bool = true) async throws {
         try await Self.runOnIOQueue {
             try self.write(content, to: url, replaceExisting: replaceExisting)
@@ -174,6 +211,13 @@ extension FileManager {
     }
 
 
+    /// Append data into the file at the specified path
+    /// - Parameters:
+    ///   - content: The data to be appended into the file
+    ///   - path: The path of the file that the data will be appended to
+    /// 
+    /// - Note: This operation will automatically be executed on
+    /// ``FoundationPlusTaskExecutor/io`` executor
     public func append(_ content: Data, to path: FilePath) async throws {
         try await Self.runOnIOQueue {
             try self.append(content, to: path)
@@ -181,13 +225,13 @@ extension FileManager {
     }
     
     
-    /// Append the provided data into the file at the provided url
+    /// Append data into the file at the specified url
     /// - Parameters:
-    ///   - content: The content to be appended into the file
-    ///   - url: The url of the file that the content will be appended to
+    ///   - content: The data to be appended into the file
+    ///   - url: The url of the file that the data will be appended to
     ///
     /// - Note: This operation will automatically be executed on
-    /// ``DefaultTaskExecutor/io`` executor
+    /// ``FoundationPlusTaskExecutor/io`` executor
     public func append(_ content: Data, to url: URL) async throws {
         try await Self.runOnIOQueue {
             try self.append(content, to: url)
@@ -195,6 +239,13 @@ extension FileManager {
     }
 
 
+    /// Get entries of the directory at the specified path as an array of FilePaths
+    /// - Parameters:
+    ///   - path: The path of the directory
+    ///   - options: Options for enumerating the directory 
+    /// 
+    /// - Note: This operation will automatically be executed on
+    /// ``FoundationPlusTaskExecutor/io`` executor
     public func contentsOfDirectory(
         at path: FilePath,
         options: DirectoryEnumerationOptions = []
@@ -205,12 +256,13 @@ extension FileManager {
     }
     
     
-    /// Get entries of the directory at the specified url as an array of urls
-    /// - Parameter url: The url of the directory
-    /// - Returns: Entries of the directory as an array of urls
+    /// Get entries of the directory at the specified path as an array of FilePaths
+    /// - Parameters:
+    ///   - path: The path of the directory
+    ///   - options: Options for enumerating the directory 
     ///
     /// - Note: This operation will automatically be executed on
-    /// ``DefaultTaskExecutor/io`` executor
+    /// ``FoundationPlusTaskExecutor/io`` executor
     public func contentsOfDirectory(
         at url: URL,
         options: DirectoryEnumerationOptions = []

@@ -63,7 +63,7 @@ extension FileManagerTest.CreateFileTest {
         let content = Data("test".utf8)
         defer { try? manager.removeItem(atPath: path.string) }
         
-        try await manager.createFile(at: path, replaceExisting: true, with: content)
+        try await manager.createFile(at: path, with: content, replaceExisting: true)
         
         #expect(throws: Never.self) {
             try #expect(self.contentOfFile(at: path) == content)
@@ -78,7 +78,7 @@ extension FileManagerTest.CreateFileTest {
         try await withFileAtPath(content: "test1") { path, _ in
 
             let content = Data("test".utf8)
-            try await manager.createFile(at: path, replaceExisting: true, with: content)
+            try await manager.createFile(at: path, with: content, replaceExisting: true)
             
             try #expect(self.contentOfFile(at: path) == content)
             

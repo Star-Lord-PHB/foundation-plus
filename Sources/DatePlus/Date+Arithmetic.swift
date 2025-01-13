@@ -8,14 +8,14 @@
 import Foundation
 
 
-/// A type that wraps a `Calendar.MeasurableComponent` and an integer
-///
-/// Used for date calculation, can be created using a set of static methods
-/// ```swift
-/// let newDate = Date().adding(.day(1))
-/// ```
 extension Calendar {
     
+    /// A type that wraps a `Calendar.MeasurableComponent` and an integer
+    ///
+    /// Used for date calculation, can be created using a set of static methods
+    /// ```swift
+    /// let newDate = Date().adding(.day(1))
+    /// ```
     public struct ComponentValue: Sendable {
         public var value: Int
         public var unit: Calendar.MeasurableComponent

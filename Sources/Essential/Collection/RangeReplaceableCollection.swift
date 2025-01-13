@@ -22,6 +22,8 @@ extension RangeReplaceableCollection {
     }
 
 
+    /// Remove `suffix` from the end of the collection.
+    /// - Parameter suffix: The collection to remove from this collection.
     @inlinable
     public mutating func trimSuffix<Suffix: Collection>(_ suffix: Suffix) 
     where Element: Equatable, Element == Suffix.Element {
@@ -45,6 +47,8 @@ extension RangeReplaceableCollection where Self: BidirectionalCollection {
     }
 
 
+    /// Remove `suffix` from the end of the collection.
+    /// - Parameter suffix: The collection to remove from this collection.
     public mutating func trimSuffix<Suffix: Collection>(_ suffix: Suffix) 
     where Element: Equatable, Element == Suffix.Element {
         self.removeSubrange(_startIndexOfSuffix(suffix)...)

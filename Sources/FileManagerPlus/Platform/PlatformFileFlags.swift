@@ -8,6 +8,17 @@ import Glibc
 
 extension FileManager {
 
+    /// A type representing platform-specific file flags.
+    /// 
+    /// - On Windows, it is the `dwFileAttributes` field 
+    /// - On Darwin, it is the `st_flags` field in the `stat` structure
+    /// - On Linux, it is get by the `ioctl` system call with `FS_IOC_GETFLAGS` request.
+    /// 
+    /// - Attention: On Linux, the flags are not available for symbolic links and may not
+    /// be available for all file systems.
+    /// 
+    /// - Attention: The properties of this type are highly platform-specific. So be careful
+    /// when using them on different platforms.
     public struct PlatformFileFlags: Sendable {
 
 #if os(Windows)

@@ -4,6 +4,7 @@ import Foundation
 
 extension FileManager {
 
+    /// A type representing POSIX permission.
     public struct PosixPermission: Sendable {
 
         public fileprivate(set) var bits: UInt16
@@ -40,36 +41,37 @@ extension FileManager.PosixPermission {
 
 #if !os(Windows)
 
+    /// - Note: Not available on Windows.
     public var groupReadable: Bool {
         get { bits & 0o40 != 0 }
         set { setBits(at: 0o40, to: newValue) }
     }
 
-
+    /// - Note: Not available on Windows.
     public var groupWritable: Bool {
         get { bits & 0o20 != 0 }
         set { setBits(at: 0o20, to: newValue) }
     }
 
-
+    /// - Note: Not available on Windows.
     public var groupExecutable: Bool {
         get { bits & 0o10 != 0 }
         set { setBits(at: 0o10, to: newValue) }
     }
 
-
+    /// - Note: Not available on Windows.
     public var otherReadable: Bool {
         get { bits & 0o4 != 0 }
         set { setBits(at: 0o4, to: newValue) }
     }
 
-
+    /// - Note: Not available on Windows.
     public var otherWritable: Bool {
         get { bits & 0o2 != 0 }
         set { setBits(at: 0o2, to: newValue) }
     }
 
-
+    /// - Note: Not available on Windows.
     public var otherExecutable: Bool {
         get { bits & 0o1 != 0 }
         set { setBits(at: 0o1, to: newValue) }

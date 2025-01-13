@@ -5,14 +5,25 @@ import FoundationPlusEssential
 import WinSDK
 #endif
 
+
 extension URL {
 
-    func toFilePath() -> FilePath? {
+    /// Convert the URL to a FilePath
+    /// 
+    /// - Returns: The FilePath representation of the URL. 
+    /// If the url cannot be interpreted as a file url, return nil
+    public func toFilePath() -> FilePath? {
         guard self.isFileURL else { return nil  }
         return .init(self.compatPath(percentEncoded: false))
     }
 
-    func assertAsFilePath() throws -> FilePath {
+
+    /// Convert the URL to a FilePath
+    /// 
+    /// - Returns: The FilePath representation of the URL. 
+    /// - Throws: If the url cannot be interpreted as a file url, 
+    /// throw an `URLError` with `unsupportedURL` code
+    public func assertAsFilePath() throws -> FilePath {
         guard let path = self.toFilePath() else {
             throw URLError(
                 .unsupportedURL, 
@@ -33,7 +44,8 @@ extension URL {
 
 extension FilePath {
 
-    func toURL() -> URL {
+    /// Convert the FilePath to a URL
+    public func toURL() -> URL {
         if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
             .init(filePath: self.string)
         } else {

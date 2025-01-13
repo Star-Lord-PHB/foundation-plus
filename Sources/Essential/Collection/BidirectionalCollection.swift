@@ -49,6 +49,9 @@ extension BidirectionalCollection {
     }
 
 
+    /// Returns a new collection of the same type by removing `suffix` from the end of the collection.
+    /// - Parameter suffix: The collection to remove from this collection.
+    /// - Returns: A collection containing the elements of the collection that are not removed by `suffix`.
     @inlinable
     public func trimmingSuffix<Suffix: BidirectionalCollection>(_ suffix: Suffix) -> SubSequence 
     where Element: Equatable, Suffix.Element == Element {

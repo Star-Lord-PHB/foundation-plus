@@ -14,10 +14,15 @@ import SystemPackage
 
 extension FileManager {
 
+    /// Create a new file at the specified file path
+    /// - Parameters:
+    ///   - path: the file path for the new file
+    ///   - content: contents that will be written into the new file
+    ///   - replaceExisting: whether to replace the already existed file
     public func createFile(
         at path: FilePath, 
-        replaceExisting: Bool = false, 
-        with content: Data? = nil
+        with content: Data? = nil,
+        replaceExisting: Bool = false
     ) throws {
         if !replaceExisting && self.fileExists(atPath: path.string) {
             throw CocoaError.fileError(.fileWriteFileExists, path: path)
@@ -28,15 +33,26 @@ extension FileManager {
     }
 
 
+    /// Create a new file at the specified url
+    /// - Parameters:
+    ///   - url: the url for the new file
+    ///   - content: contents that will be written into the new file
+    ///   - replaceExisting: whether to replace the already existed file
     public func createFile(
         at url: URL,
-        replaceExisting: Bool = false, 
-        with content: Data? = nil
+        with content: Data? = nil,
+        replaceExisting: Bool = false
     ) throws {
-        try self.createFile(at: url.assertAsFilePath(), replaceExisting: replaceExisting, with: content)
+        try self.createFile(at: url.assertAsFilePath(), with: content, replaceExisting: replaceExisting)
     }
 
 
+    /// Create a new directory at the specified file path
+    /// - Parameters:
+    ///   - path: The file path for the new directory
+    ///   - withIntermediateDirectories: Whether to create necessary intermediate directories
+    ///   if they does not present. If set to false, the method will also throws if the directory
+    ///   already exist
     public func createDirectory(
         at path: FilePath, 
         withIntermediateDirectories: Bool = false
@@ -48,6 +64,12 @@ extension FileManager {
     }
 
 
+    /// Create a new directory at the specified url
+    /// - Parameters:
+    ///   - url: The url for the new directory
+    ///   - withIntermediateDirectories: Whether to create necessary intermediate directories
+    ///   if they does not present. If set to false, the method will also throws if the directory
+    ///   already exist
     public func createDirectory(
         at url: URL, 
         withIntermediateDirectories: Bool = false
@@ -62,13 +84,21 @@ extension FileManager {
 @available(macOS 10.15, iOS 13.0, watchOS 6.0, tvOS 13.0, *)
 extension FileManager {
 
+    /// Create a new file at the specified file path
+    /// - Parameters:
+    ///   - path: the file path for the new file
+    ///   - content: contents that will be written into the new file
+    ///   - replaceExisting: whether to replace the already existed file
+    ///
+    /// - Note: This operation will automatically be executed on
+    /// ``FoundationPlusTaskExecutor/io`` executor
     public func createFile(
         at path: FilePath, 
-        replaceExisting: Bool = false, 
-        with content: Data? = nil
+        with content: Data? = nil,
+        replaceExisting: Bool = false
     ) async throws {
         try await Self.runOnIOQueue {
-            try self.createFile(at: path, replaceExisting: replaceExisting, with: content)
+            try self.createFile(at: path, with: content, replaceExisting: replaceExisting)
         }
     }
 
@@ -80,18 +110,27 @@ extension FileManager {
     ///   - content: contents that will be written into the new file
     ///
     /// - Note: This operation will automatically be executed on
-    /// ``DefaultTaskExecutor/io`` executor
+    /// ``FoundationPlusTaskExecutor/io`` executor
     public func createFile(
         at url: URL,
-        replaceExisting: Bool = false,
-        with content: Data? = nil
+        with content: Data? = nil,
+        replaceExisting: Bool = false
     ) async throws {
         try await Self.runOnIOQueue {
-            try self.createFile(at: url, replaceExisting: replaceExisting, with: content)
+            try self.createFile(at: url, with: content, replaceExisting: replaceExisting)
         }
     }
 
 
+    /// Create a new directory at the specified file path
+    /// - Parameters:
+    ///   - path: The file path for the new directory
+    ///   - withIntermediateDirectories: Whether to create necessary intermediate directories
+    ///   if they does not present. If set to false, the method will also throws if the directory
+    ///   already exist
+    ///
+    /// - Note: This operation will automatically be executed on
+    /// ``FoundationPlusTaskExecutor/io`` executor
     public func createDirectory(
         at path: FilePath,
         withIntermediateDirectories: Bool = false
@@ -110,7 +149,7 @@ extension FileManager {
     ///   already exist
     ///
     /// - Note: This operation will automatically be executed on
-    /// ``DefaultTaskExecutor/io`` executor
+    /// ``FoundationPlusTaskExecutor/io`` executor
     public func createDirectory(
         at url: URL,
         withIntermediateDirectories: Bool = false

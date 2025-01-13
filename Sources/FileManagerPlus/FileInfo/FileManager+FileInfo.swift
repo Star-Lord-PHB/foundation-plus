@@ -17,13 +17,8 @@ extension FileManager {
     
     /// A type holding common attributes of a file
     ///
-    /// It contains only a subset of [`URLResourceValues`] and it will not record which attributes
-    /// are modified
-    ///
     /// - Note: Whenever possible, use this instead of `FileAttributes` or
     /// `[FileAttributeKey: Any]`
-    ///
-    /// [`URLResourceValues`]: https://developer.apple.com/documentation/foundation/urlresourcevalues
     public struct FileInfo: Sendable {
         
         /// The path of the file
@@ -53,20 +48,30 @@ extension FileManager {
         var lastAccessDateChanged: Bool { lastAccessDate != originalLastAccessDate }
         var modificationDateChanged: Bool { modificationDate != originalModificationDate }
 
+        /// Additional platform-specific file flags
         public var fileFlags: PlatformFileFlags
         private var originalFileFlags: PlatformFileFlags
         var fileFlagsChanged: Bool { fileFlags != originalFileFlags }
 
+        /// The name of the file, if it is the root directory, it will be an empty string
         public var name: String { path.lastComponent?.string ?? "" }
+        /// Whether the file is a regular file
         public var isRegularFile: Bool { type == .typeRegular }
+        /// Whether the file is a directory
         public var isDirectory: Bool { type == .typeDirectory }
+        /// Whether the file is a symbolic link
         public var isSymbolicLink: Bool { type == .typeSymbolicLink }
 
 #if os(Windows)
         private(set) var originalCreationDate: FileManager.FileTimeStamp
         var creationDateChanged: Bool { creationDate != originalCreationDate }
+        /// The security identifier of the owner of the file
+        /// - Attention: Windows only
         public let sid: String
-        public let isExecutable: Bool 
+        /// Whether the file is executable
+        /// - Attention: Windows only
+        public let isExecutable: Bool
+        /// Bits representing the POSIX permission of the file
         public var posixPermissionBits: UInt16 {
             var poxisPermissions = UInt16(_S_IREAD)
             if !fileFlags.isReadOnly {
@@ -77,14 +82,21 @@ extension FileManager {
             }
             return poxisPermissions
         }
+        /// The POSIX permission of the file
         public var posixPermissions: FileManager.PosixPermission { .init(bits: posixPermissionBits) }
 #else
-        /// file’s owner UID
+        /// File’s owner UID
+        /// - Attention: Not available on Windows
         public let ownerUID: UInt32
-        /// file’s group owner GID
+        /// File’s group owner GID
+        /// - Attention: Not available on Windows
         public let ownerGID: UInt32
+        /// Bits representing the file type
+        /// - Attention: Not available on Windows
         public let typeBits: UInt16
+        /// The POSIX permission of the file
         public var posixPermissions: FileManager.PosixPermission
+        /// Bits representing the POSIX permission of the file
         public var posixPermissionBits: UInt16 { 
             get { posixPermissions.bits }
             set { posixPermissions = .init(bits: newValue) }
@@ -181,6 +193,8 @@ extension FileManager {
 #endif
 
 
+        /// Update the creation date of the file
+        /// - Attention: Windows only
 #if !os(Windows)
         @available(*, unavailable, message: "Only support changing creation date on Windows")
 #endif
@@ -245,6 +259,9 @@ extension FileManager.FileInfo: Equatable, Hashable {
 #if os(Windows)
 extension FileManager.FileInfo {
 
+    /// Load the ACL of the file
+    /// - Returns: An array of ACE if the file has an ACL, otherwise `nil`
+    /// - Attention: Windows only
     public func loadACL() throws -> [AccessPermissionACE]? {
 
         try WindowsFileUtils.interceptWindowsErrorAsCocorError(path: path, reading: true) {
@@ -270,6 +287,9 @@ extension FileManager.FileInfo {
     }
 
 
+    /// Load the ACL of the file
+    /// - Returns: An array of ACE if the file has an ACL, otherwise `nil`
+    /// - Attention: Windows only
     public func loadACL() async throws -> [AccessPermissionACE]? {
         try await FileManager.runOnIOQueue {
             try self.loadACL()
@@ -283,9 +303,14 @@ extension FileManager.FileInfo {
 #if os(Windows)
 extension FileManager.FileInfo {
 
+    /// A type representing an access control entry (ACE), 
+    /// which are the elements in an access control list (ACL)
     public struct AccessPermissionACE: Sendable, Equatable, Hashable {
+        /// The security identifier of a user or a group
         public let sid: String
+        /// The access permission mask of the ACE
         public let mask: DWORD
+        /// The type of the ACE
         public let type: AccessPermissionACEType
         public init(sid: String, mask: DWORD, type: AccessPermissionACEType) {
             self.sid = sid
@@ -314,6 +339,9 @@ extension FileManager.FileInfo {
         }
     }
 
+    /// A type representing the type of an ``ACE``
+    /// 
+    /// Two pre-defined types are `allow` and `deny`
     public struct AccessPermissionACEType: Sendable, Equatable, Hashable {
         public let rawValue: DWORD
         public init(_ rawValue: DWORD) {

@@ -20,9 +20,10 @@ extension CocoaError {
     /// - Parameters:
     ///   - code: The error code
     ///   - url: The url that cause the error
-    ///   - description: Description of the error
-    ///   - underlyingError: Some underlying error, if any (e.g.: a POSIXError)
-    ///   - otherUserInfo: Some other required user info
+    ///   - underlyingError: The underlying error causing this error (e.g.: POSIXError or WindowsError)
+    ///   - variant: A variant of the error message
+    ///   - source: The source file path (if any)
+    ///   - destination: The destination file path (if any)
     /// 
     /// - Note: Implementation based on https://github.com/swiftlang/swift-foundation/blob/main/Sources/FoundationEssentials/Error/CocoaError%2BFilePath.swift
     public static func fileError(
@@ -46,10 +47,11 @@ extension CocoaError {
     /// Create a CocoaError specific for errors related to files
     /// - Parameters:
     ///   - code: The error code
-    ///   - url: The url that cause the error
-    ///   - description: Description of the error
-    ///   - underlyingError: Some underlying error, if any (e.g.: a POSIXError)
-    ///   - otherUserInfo: Some other required user info
+    ///   - path: The file path that cause the error
+    ///   - underlyingError: The underlying error causing this error (e.g.: POSIXError or WindowsError)
+    ///   - variant: A variant of the error message
+    ///   - source: The source file path (if any)
+    ///   - destination: The destination file path (if any)
     /// 
     /// - Note: Implementation based on https://github.com/swiftlang/swift-foundation/blob/main/Sources/FoundationEssentials/Error/CocoaError%2BFilePath.swift
     public static func fileError(
@@ -70,6 +72,16 @@ extension CocoaError {
     }
 
 
+    /// Create a CocoaError with an POSIX error as the underlying error
+    /// - Parameters:
+    ///   - path: The file path that cause the error
+    ///   - posixError: The causing POSIX error
+    ///   - reading: Whether the error is caused by actions related to reading files
+    ///   - variant: A variant of the error message
+    ///   - source: The source file path (if any)
+    ///   - destination: The destination file path (if any)
+    /// 
+    /// - Note: Implementation based on https://github.com/swiftlang/swift-foundation/blob/main/Sources/FoundationEssentials/Error/CocoaError%2BFilePath.swift
     public static func posixError(
         path: FilePath,
         posixError: POSIXError,
@@ -83,6 +95,16 @@ extension CocoaError {
     }
 
 
+    /// Create a CocoaError with an POSIX error as the underlying error
+    /// - Parameters:
+    ///   - url: The url that cause the error
+    ///   - posixError: The causing POSIX error
+    ///   - reading: Whether the error is caused by actions related to reading files
+    ///   - variant: A variant of the error message
+    ///   - source: The source file path (if any)
+    ///   - destination: The destination file path (if any)
+    /// 
+    /// - Note: Implementation based on https://github.com/swiftlang/swift-foundation/blob/main/Sources/FoundationEssentials/Error/CocoaError%2BFilePath.swift
     public static func posixError(
         url: URL,
         posixError: POSIXError,
@@ -96,6 +118,14 @@ extension CocoaError {
     }
 
 
+    /// Create a CocoaError with the last POSIX error as the underlying error
+    /// - Parameters:
+    ///   - path: The file path that cause the error
+    ///   - reading: Whether the error is caused by actions related to reading files
+    ///   - variant: A variant of the error message
+    ///   - source: The source file path (if any)
+    ///   - destination: The destination file path (if any)
+    ///
     /// - Note: Implementation based on https://github.com/swiftlang/swift-foundation/blob/main/Sources/FoundationEssentials/Error/CocoaError%2BFilePath.swift
     public static func lastPosixError(
         path: FilePath, 
@@ -110,6 +140,14 @@ extension CocoaError {
     }
 
 
+    /// Create a CocoaError with the last POSIX error as the underlying error
+    /// - Parameters:
+    ///   - url: The url that cause the error
+    ///   - reading: Whether the error is caused by actions related to reading files
+    ///   - variant: A variant of the error message
+    ///   - source: The source file path (if any)
+    ///   - destination: The destination file path (if any)
+    /// 
     /// - Note: Implementation based on https://github.com/swiftlang/swift-foundation/blob/main/Sources/FoundationEssentials/Error/CocoaError%2BFilePath.swift
     public static func lastPosixError(
         url: URL, 
@@ -126,6 +164,16 @@ extension CocoaError {
 
 #if os(Windows)
 
+    /// Create a CocoaError with a WindowsError as the underlying error
+    /// - Parameters:
+    ///   - path: The file path that cause the error
+    ///   - win32Error: The causing WindowsError
+    ///   - reading: Whether the error is caused by actions related to reading files
+    ///   - variant: A variant of the error message
+    ///   - source: The source file path (if any)
+    ///   - destination: The destination file path (if any)
+    ///
+    /// - Note: Implementation based on https://github.com/swiftlang/swift-foundation/blob/main/Sources/FoundationEssentials/Error/CocoaError%2BFilePath.swift
     public static func win32Error(
         path: FilePath,
         win32Error: WindowsError,
@@ -139,6 +187,16 @@ extension CocoaError {
     }
 
 
+    /// Create a CocoaError with a WindowsError as the underlying error
+    /// - Parameters:
+    ///   - url: The url that cause the error
+    ///   - win32Error: The causing WindowsError
+    ///   - reading: Whether the error is caused by actions related to reading files
+    ///   - variant: A variant of the error message
+    ///   - source: The source file path (if any)
+    ///   - destination: The destination file path (if any)
+    ///
+    /// - Note: Implementation based on https://github.com/swiftlang/swift-foundation/blob/main/Sources/FoundationEssentials/Error/CocoaError%2BFilePath.swift
     public static func win32Error(
         url: URL,
         win32Error: WindowsError,
@@ -152,6 +210,14 @@ extension CocoaError {
     }
 
 
+    /// Create a CocoaError with the last WindowsError as the underlying error
+    /// - Parameters:
+    ///   - path: The file path that cause the error
+    ///   - reading: Whether the error is caused by actions related to reading files
+    ///   - variant: A variant of the error message
+    ///   - source: The source file path (if any)
+    ///   - destination: The destination file path (if any)
+    ///
     /// - Note: Implementation based on https://github.com/swiftlang/swift-foundation/blob/main/Sources/FoundationEssentials/Error/CocoaError%2BFilePath.swift
     public static func lastWin32Error(
         path: FilePath, 
@@ -167,6 +233,14 @@ extension CocoaError {
     }
 
 
+    /// Create a CocoaError with the last WindowsError as the underlying error
+    /// - Parameters:
+    ///   - url: The url that cause the error
+    ///   - reading: Whether the error is caused by actions related to reading files
+    ///   - variant: A variant of the error message
+    ///   - source: The source file path (if any)
+    ///   - destination: The destination file path (if any)
+    ///
     /// - Note: Implementation based on https://github.com/swiftlang/swift-foundation/blob/main/Sources/FoundationEssentials/Error/CocoaError%2BFilePath.swift
     public static func lastWin32Error(
         url: URL, 
@@ -189,6 +263,7 @@ extension CocoaError {
 
 extension CocoaError.Code {
 
+    /// Create a CocoaError.Code from a POSIX error code
     /// - Note: Implementation based on https://github.com/swiftlang/swift-foundation/blob/main/Sources/FoundationEssentials/Error/CocoaError%2BFilePath.swift
     public init(fileErrno: Int32, reading: Bool) {
         self = if reading {
@@ -218,6 +293,7 @@ extension CocoaError.Code {
 
 #if os(Windows)
 
+    /// Create a CocoaError.Code from a Windows error code
     /// - Note: Implementation based on https://github.com/swiftlang/swift-foundation/blob/main/Sources/FoundationEssentials/Error/CocoaError%2BFilePath.swift
     init(win32: DWORD, reading: Bool, emptyPath: Bool? = nil) {
 
