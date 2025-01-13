@@ -28,26 +28,30 @@ extension Task<Never, Never> {
     public static func launch<R, E: Error>(
         on executor: FoundationPlusTaskExecutor = .default, 
         isolation: isolated (any Actor)? = #isolation,
-        operation: @escaping () throws(E) -> R,
+        operation: () throws(E) -> R,
         onCancel cancelOperation: @Sendable () -> Void = {}
     ) async throws(E) -> R {
 
         do {
 
             return try await withTaskCancellationHandler {
+
+                try await withoutActuallyEscaping(operation) { escapingClosure in
            
-                try await withCheckedThrowingContinuation { continuation in
+                    try await withCheckedThrowingContinuation { continuation in
 
-                    let work = DispatchWorkItem {
-                        do {
-                            let result = try operation()
-                            continuation.resume(returning: result)
-                        } catch {
-                            continuation.resume(throwing: error)
+                        let work = DispatchWorkItem {
+                            do {
+                                let result = try escapingClosure()
+                                continuation.resume(returning: result)
+                            } catch {
+                                continuation.resume(throwing: error)
+                            }
                         }
-                    }
 
-                    executor.queue.async(execute: work)
+                        executor.queue.async(execute: work)
+
+                    }
 
                 }
 
