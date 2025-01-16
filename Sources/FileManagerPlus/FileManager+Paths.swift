@@ -17,12 +17,20 @@ extension FileManager {
 
 
     /// Get the Home Directory for the Current User as a FilePath
+    @available(iOS, unavailable)
+    @available(watchOS, unavailable)
+    @available(tvOS, unavailable)
+    @available(visionOS, unavailable)
     public var homeDirectoryFilePathForCurrentUser: FilePath {
         self.homeDirectoryForCurrentUser.toFilePath()!
     }
 
 
     /// Get the Home Directory for the specified user as a FilePath
+    @available(iOS, unavailable)
+    @available(watchOS, unavailable)
+    @available(tvOS, unavailable)
+    @available(visionOS, unavailable)
     public func homeDirectoryFilePath(forUser username: String) -> FilePath? {
         self.homeDirectory(forUser: username)?.toFilePath()
     }
