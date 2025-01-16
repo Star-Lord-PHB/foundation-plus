@@ -4,28 +4,87 @@ import Foundation
 
 extension Task<Never, Never> {
 
+    private final class ClosureHolder<R, E> {
+        @usableFromInline var closure: (() throws(E) -> R)?
+        init(closure: (() throws(E) -> R)?) {
+            self.closure = closure
+        }
+    }
+
+    private struct SendableWrapper<T>: @unchecked Sendable {
+        @usableFromInline var value: T
+        init(value: T) {
+            self.value = value
+        }
+    }
+
+
     /// Execute long running / blocking tasks on an ``DefaultTaskExecutor``
     /// - Parameters:
     ///   - executor: The executor for running the task, default is ``DefaultTaskExecutor/default``
-    ///   - block: The operation of the task
+    ///   - operation: The operation of the task
+    ///   - cancelOperation: The operation to be executed when the task is cancelled
     /// - Returns: The result of the operation
     ///
     /// This is basically a replacement for [`withTaskExecutorPreference(_:isolation:operation:)`].
     /// The ``DefaultTaskExecutor`` holds a GCD queue for running tasks so that the long running /
     /// blocking operations will not block threads in the global concurrent executor.
+    /// 
+    /// The main usecase is to quickly adopt a long running / blocking operation to async context. 
+    /// Otherwise, consider using [`withTaskExecutorPreference(_:isolation:operation:)`]
     ///
     /// - Warning: Unlike [`withTaskExecutorPreference(_:isolation:operation:)`], the task
     /// CANNOT contains `async` operations
     ///
-    /// - Seealso: ``DefaultTaskExecutor``
+    /// - Seealso: ``FoundationPlusTaskExecutor``
     ///
     /// [`withTaskExecutorPreference(_:isolation:operation:)`]: https://developer.apple.com/documentation/swift/withtaskexecutorpreference(_:isolation:operation:)
-    @available(macOS, introduced: 10.15, deprecated: 15, message: "use `withTaskExecutorPreference` instead")
-    @available(iOS, introduced: 13.0, deprecated: 18, message: "use `withTaskExecutorPreference` instead")
-    @available(watchOS, introduced: 6.0, deprecated: 11, message: "use `withTaskExecutorPreference` instead")
-    @available(tvOS, introduced: 13.0, deprecated: 18, message: "use `withTaskExecutorPreference` instead")
-    @available(visionOS, introduced: 1.0, deprecated: 2.0, message: "use `withTaskExecutorPreference` instead")
     public static func launch<R, E: Error>(
+        on executor: FoundationPlusTaskExecutor = .default, 
+        isolation: isolated (any Actor)? = #isolation,
+        operation: () throws(E) -> R,
+        onCancel cancelOperation: @Sendable () -> Void = {}
+    ) async throws(E) -> R {
+
+        if #available(macOS 15, iOS 18, watchOS 11, tvOS 18, visionOS 2, *) {
+            try await launchNew(on: executor, operation: operation, onCancel: cancelOperation)
+        } else {
+            try await launchCompat(on: executor, operation: operation, onCancel: cancelOperation)
+        }
+
+    } 
+
+
+    @available(macOS 15, iOS 18, watchOS 11, tvOS 18, visionOS 2, *)
+    static func launchNew<R, E: Error>(
+        on executor: FoundationPlusTaskExecutor = .default, 
+        isolation: isolated (any Actor)? = #isolation,
+        operation: () throws(E) -> R,
+        onCancel cancelOperation: @Sendable () -> Void = {}
+    ) async throws(E) -> R {
+
+        do {
+            return try await withTaskExecutorPreference(executor) {
+                try await withTaskCancellationHandler {
+                    try operation()
+                } onCancel: {
+                    cancelOperation()
+                }
+            }
+        } catch let error as E {
+            throw error
+        } catch {
+            fatalError("""
+                Unexpected error: \(error)
+                Expect error to be of type \(E.self)
+                """
+            )
+        }
+
+    }
+
+
+    static func launchCompat<R, E: Error>(
         on executor: FoundationPlusTaskExecutor = .default, 
         isolation: isolated (any Actor)? = #isolation,
         operation: () throws(E) -> R,
@@ -37,19 +96,27 @@ extension Task<Never, Never> {
             return try await withTaskCancellationHandler {
 
                 try await withoutActuallyEscaping(operation) { escapingClosure in
-           
-                    try await withCheckedThrowingContinuation { continuation in
 
-                        let work = DispatchWorkItem {
+                    let holderPtr = UnsafeMutablePointer<ClosureHolder<R, E>>.allocate(capacity: 1)
+                    holderPtr.initialize(to: .init(closure: nil))
+                    holderPtr.pointee.closure = escapingClosure
+
+                    let wrapped = SendableWrapper(value: holderPtr)
+                
+                    return try await withCheckedThrowingContinuation { continuation in
+
+                        executor.queue.async {
                             do {
-                                let result = try escapingClosure()
+                                let result = try wrapped.value.pointee.closure!()
+                                wrapped.value.deinitialize(count: 1)
+                                wrapped.value.deallocate()
                                 continuation.resume(returning: result)
                             } catch {
+                                wrapped.value.deinitialize(count: 1)
+                                wrapped.value.deallocate()
                                 continuation.resume(throwing: error)
                             }
                         }
-
-                        executor.queue.async(execute: work)
 
                     }
 
@@ -62,10 +129,14 @@ extension Task<Never, Never> {
         } catch let error as E {
             throw error
         } catch {
-            fatalError("Unexpected error: \(error)")
+            fatalError("""
+                Unexpected error: \(error)
+                Expect error to be of type \(E.self)
+                """
+            )
         }
 
-    } 
+    }
 
 }
 

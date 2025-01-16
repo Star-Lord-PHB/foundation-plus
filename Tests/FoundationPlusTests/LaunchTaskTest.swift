@@ -27,7 +27,7 @@ struct LaunchTaskTest {
         }
 
         await #expect(throws: Error.self) {
-            try await Task.launch(on: .main) {
+            try await Task.launch(on: .io) {
                 print("Task launched")
                 if Int.random(in: 0 ... 1) == 0 {
                     throw CancellationError()
@@ -36,6 +36,24 @@ struct LaunchTaskTest {
                 }
             }
         }
+
+    }
+
+
+    // Run this test multiple times 
+    @Test
+    func launchTask3() async throws {
+
+        let r = try? await Task.launchCompat(on: .io) {
+            dispatchPrecondition(condition: .onQueue(FoundationPlusTaskExecutor.io.queue))
+            return if Bool.random() {
+                Double.random(in: 0 ... 1)
+            } else {
+                throw NSError(domain: "", code: 1)
+            }
+        }
+
+        print(r ?? "error")
 
     }
 
