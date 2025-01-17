@@ -13,8 +13,12 @@ extension URL {
     /// - Returns: The FilePath representation of the URL. 
     /// If the url cannot be interpreted as a file url, return nil
     public func toFilePath() -> FilePath? {
-        guard self.isFileURL else { return nil  }
-        return .init(self.compatPath(percentEncoded: false))
+        guard self.isFileURL else { return nil }
+#if canImport(Darwin)
+        return .init(self.standardizedFileURL.compatPath(percentEncoded: false))
+#else 
+        return .init(self.standardizedFileURL.path)
+#endif
     }
 
 
