@@ -4,21 +4,6 @@ import Foundation
 
 extension Task<Never, Never> {
 
-    private final class ClosureHolder<R, E> {
-        @usableFromInline var closure: (() throws(E) -> R)?
-        init(closure: (() throws(E) -> R)?) {
-            self.closure = closure
-        }
-    }
-
-    private struct SendableWrapper<T>: @unchecked Sendable {
-        @usableFromInline var value: T
-        init(value: T) {
-            self.value = value
-        }
-    }
-
-
     /// Execute long running / blocking tasks on an ``DefaultTaskExecutor``
     /// - Parameters:
     ///   - executor: The executor for running the task, default is ``DefaultTaskExecutor/default``
@@ -43,15 +28,41 @@ extension Task<Never, Never> {
         on executor: FoundationPlusTaskExecutor = .default, 
         isolation: isolated (any Actor)? = #isolation,
         operation: () throws(E) -> R,
-        onCancel cancelOperation: @Sendable () -> Void = {}
+        onCancel cancelOperation: sending () -> Void
     ) async throws(E) -> R {
-
         if #available(macOS 15, iOS 18, watchOS 11, tvOS 18, visionOS 2, *) {
             try await launchNew(on: executor, operation: operation, onCancel: cancelOperation)
         } else {
             try await launchCompat(on: executor, operation: operation, onCancel: cancelOperation)
         }
+    } 
 
+
+    /// Execute long running / blocking tasks on an ``DefaultTaskExecutor``
+    /// - Parameters:
+    ///   - executor: The executor for running the task, default is ``DefaultTaskExecutor/default``
+    ///   - operation: The operation of the task
+    /// - Returns: The result of the operation
+    ///
+    /// This is basically a replacement for [`withTaskExecutorPreference(_:isolation:operation:)`].
+    /// The ``DefaultTaskExecutor`` holds a GCD queue for running tasks so that the long running /
+    /// blocking operations will not block threads in the global concurrent executor.
+    /// 
+    /// The main usecase is to quickly adopt a long running / blocking operation to async context. 
+    /// Otherwise, consider using [`withTaskExecutorPreference(_:isolation:operation:)`]
+    ///
+    /// - Warning: Unlike [`withTaskExecutorPreference(_:isolation:operation:)`], the task
+    /// CANNOT contains `async` operations
+    ///
+    /// - Seealso: ``FoundationPlusTaskExecutor``
+    ///
+    /// [`withTaskExecutorPreference(_:isolation:operation:)`]: https://developer.apple.com/documentation/swift/withtaskexecutorpreference(_:isolation:operation:)
+    public static func launch<R, E: Error>(
+        on executor: FoundationPlusTaskExecutor = .default, 
+        isolation: isolated (any Actor)? = #isolation,
+        operation: () throws(E) -> R
+    ) async throws(E) -> R {
+        try await launch(on: executor, operation: operation, onCancel: {})
     } 
 
 
@@ -60,16 +71,16 @@ extension Task<Never, Never> {
         on executor: FoundationPlusTaskExecutor = .default, 
         isolation: isolated (any Actor)? = #isolation,
         operation: () throws(E) -> R,
-        onCancel cancelOperation: @Sendable () -> Void = {}
+        onCancel cancelOperation: sending () -> Void
     ) async throws(E) -> R {
 
         do {
+            nonisolated(unsafe) let cancelOperation = cancelOperation
             return try await withTaskExecutorPreference(executor) {
-                try await withTaskCancellationHandler {
-                    try operation()
-                } onCancel: {
-                    cancelOperation()
-                }
+                try await withTaskCancellationHandler(
+                    operation: operation, 
+                    onCancel: { cancelOperation() }
+                )
             }
         } catch let error as E {
             throw error
@@ -88,32 +99,26 @@ extension Task<Never, Never> {
         on executor: FoundationPlusTaskExecutor = .default, 
         isolation: isolated (any Actor)? = #isolation,
         operation: () throws(E) -> R,
-        onCancel cancelOperation: @Sendable () -> Void = {}
+        onCancel cancelOperation: sending () -> Void
     ) async throws(E) -> R {
 
         do {
 
+            nonisolated(unsafe) let cancelOperation = cancelOperation
+
             return try await withTaskCancellationHandler {
 
                 try await withoutActuallyEscaping(operation) { escapingClosure in
-
-                    let holderPtr = UnsafeMutablePointer<ClosureHolder<R, E>>.allocate(capacity: 1)
-                    holderPtr.initialize(to: .init(closure: nil))
-                    holderPtr.pointee.closure = escapingClosure
-
-                    let wrapped = SendableWrapper(value: holderPtr)
                 
                     return try await withCheckedThrowingContinuation { continuation in
 
+                        nonisolated(unsafe) let escapingClosure = consume escapingClosure
+
                         executor.queue.async {
                             do {
-                                let result = try wrapped.value.pointee.closure!()
-                                wrapped.value.deinitialize(count: 1)
-                                wrapped.value.deallocate()
+                                let result = try escapingClosure()
                                 continuation.resume(returning: result)
                             } catch {
-                                wrapped.value.deinitialize(count: 1)
-                                wrapped.value.deallocate()
                                 continuation.resume(throwing: error)
                             }
                         }

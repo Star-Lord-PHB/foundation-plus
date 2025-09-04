@@ -1,5 +1,7 @@
 import Testing
 import Foundation
+
+@testable import FoundationPlus
 @testable import ConcurrencyPlus
 
 
@@ -7,7 +9,7 @@ import Foundation
 struct LaunchTaskTest {
 
     @Test 
-    func launchTask1() async throws {
+    func launchTaskSuccess() async throws {
         
         await Task.launch(on: .global) {
             print("Task launched")
@@ -17,7 +19,7 @@ struct LaunchTaskTest {
 
 
     @Test
-    func launchTask2() async throws {
+    func launchTaskError() async throws {
         
         await #expect(throws: CancellationError.self) {
             try await Task.launch(on: .main) {
@@ -40,9 +42,37 @@ struct LaunchTaskTest {
     }
 
 
+    @Test(.timeLimit(TimeLimitTrait.Duration.minutes(1)))
+    func launchTaskCancel() async throws {
+        
+        let canceller = Canceller()
+        
+        let task = Task {
+            
+            try await Task.launch {
+                var sum = 0
+                while true {
+                    sum += 1
+                    guard !canceller.isCancelled else { throw CancellationError() }
+                }
+            } onCancel: {
+                canceller.cancel()
+            }
+            
+        }
+        
+        task.cancel()
+        
+        await #expect(throws: CancellationError.self) {
+            try await task.waitThrowing()
+        }
+        
+    }
+
+
     // Run this test multiple times 
     @Test
-    func launchTask3() async throws {
+    func launchTaskCompatStability() async throws {
 
         let r = try? await Task.launchCompat(on: .io) {
             dispatchPrecondition(condition: .onQueue(FoundationPlusTaskExecutor.io.queue))
@@ -51,7 +81,7 @@ struct LaunchTaskTest {
             } else {
                 throw NSError(domain: "", code: 1)
             }
-        }
+        } onCancel: { }
 
         print(r ?? "error")
 

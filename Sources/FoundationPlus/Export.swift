@@ -6,6 +6,5 @@
 //
 
 @_exported import FoundationPlusEssential
-@_exported import FileManagerPlus
 @_exported import ConcurrencyPlus
 @_exported import DatePlus

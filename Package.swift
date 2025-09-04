@@ -21,10 +21,8 @@ let package = Package(
         // Targets can depend on other targets in this package and products from dependencies.
         .foundationPlus,
         .foundationPlusEssential,
-        .fileManagerPlus,
         .concurrencyPlus,
         .datePlus,
-        .glibcInterop,
         .foundationPlusTests,
     ]
 )
@@ -42,7 +40,7 @@ extension Target {
 
     static let foundationPlus: Target = .target(
         name: "FoundationPlus",
-        dependencies: [.foundationPlusEssential, .fileManagerPlus, .concurrencyPlus, .datePlus]
+        dependencies: [.foundationPlusEssential, .concurrencyPlus, .datePlus]
     )
 
     static let foundationPlusEssential: Target = .target(
@@ -50,20 +48,6 @@ extension Target {
         dependencies: [.concurrencyPlus],
         path: "Sources/Essential"
     )
-
-#if canImport(Glibc)
-    static let fileManagerPlus: Target = .target(
-        name: "FileManagerPlus",
-        dependencies: [.concurrencyPlus, .foundationPlusEssential, .swiftSystem, .glibcInterop],
-        path: "Sources/FileManagerPlus"
-    )
-#else
-    static let fileManagerPlus: Target = .target(
-        name: "FileManagerPlus",
-        dependencies: [.concurrencyPlus, .foundationPlusEssential, .swiftSystem],
-        path: "Sources/FileManagerPlus"
-    )
-#endif
 
     static let concurrencyPlus: Target = .target(
         name: "ConcurrencyPlus",
@@ -73,13 +57,6 @@ extension Target {
     static let datePlus: Target = .target(
         name: "DatePlus",
         path: "Sources/DatePlus"
-    )
-
-    static let glibcInterop: Target = .target(
-        name: "GlibcInterop", 
-        path: "Sources/GlibcInterop",
-        publicHeadersPath: ".",
-        cSettings: [.headerSearchPath(".")]
     )
 
     static let foundationPlusTests: Target = .testTarget(
@@ -97,14 +74,10 @@ extension Target.Dependency {
 
     static var concurrencyPlus: Self = "ConcurrencyPlus"
 
-    static var fileManagerPlus: Self = "FileManagerPlus"
-
     static var datePlus: Self = "DatePlus"
 
     static var foundationPlus: Self = "FoundationPlus"
 
     static var swiftSystem: Self = .product(name: "SystemPackage", package: "swift-system")
-
-    static var glibcInterop: Self = "GlibcInterop"
 
 }
