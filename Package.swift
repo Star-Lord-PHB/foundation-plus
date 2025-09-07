@@ -15,7 +15,8 @@ let package = Package(
             targets: ["FoundationPlus"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/apple/swift-system.git", from: "1.4.0"),],
+        .package(url: "https://github.com/apple/swift-collections", from: "1.2.0"),
+    ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
@@ -51,6 +52,7 @@ extension Target {
 
     static let concurrencyPlus: Target = .target(
         name: "ConcurrencyPlus",
+        dependencies: [.deque],
         path: "Sources/ConcurrencyPlus"
     )
 
@@ -78,6 +80,6 @@ extension Target.Dependency {
 
     static var foundationPlus: Self = "FoundationPlus"
 
-    static var swiftSystem: Self = .product(name: "SystemPackage", package: "swift-system")
+    static var deque: Self = .product(name: "DequeModule", package: "swift-collections")
 
 }
