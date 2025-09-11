@@ -2,7 +2,7 @@ import Foundation
 
 
 @available(*, noasync, message: "Do NOT use this lock in async context")
-struct SyncedConditionalLock: @unchecked Sendable {
+struct SyncedConditionalLock: Sendable {
 
     private let lock: NSCondition = .init()
 

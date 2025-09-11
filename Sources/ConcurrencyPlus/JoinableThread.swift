@@ -1,7 +1,7 @@
 import Foundation
 
 
-@available(*, noasync, message: "Do NOT use this thread in async context")
+
 final class JoinableThread: Thread {
 
     private let task : () -> Void

@@ -8,34 +8,38 @@
 import Foundation
 
 
-/// An TaskExecutor for executing tasks in swift concurrency
-///
-/// It holds a GCD queue for actually running the tasks
+/// A Task Execution Context for offloading work to a GCD queue
 ///
 /// ```swift
-/// // after swift 6
-/// await withTaskExecutorPreference(.foundationPlusExecutor.io) {
-///     // task that will be executed on the executor
+/// let executor = DispatchQueueTaskExecutor(
+///     label: "foundation_plus.example",
+///     qos: .background,
+///     attributes: .concurrent
+/// )
+/// 
+/// executor.submit {
+///    // codes in this closure will be executed on the GCD queue
 /// }
-///
-/// // before swift 6
-/// await Task.launch(on: .io) {
-///     // task that will be executed on the executor
+/// 
+/// await executor.run {
+///    // codes in this closure will be executed on the GCD queue
 /// }
 /// ```
 ///
 /// Recomended to use the serveral provided executors as static properties:
-/// * ``FoundationPlusTaskExecutor/main``
-/// * ``FoundationPlusTaskExecutor/global``
-/// * ``FoundationPlusTaskExecutor/default``
-/// * ``FoundationPlusTaskExecutor/io``
-/// * ``FoundationPlusTaskExecutor/background``
-/// * ``FoundationPlusTaskExecutor/immediate``
+/// * ``FoundationPlusTaskExecutor/main``: Use the [`DispatchQueue.main`] queue
+/// * ``FoundationPlusTaskExecutor/global``: Use the [`DispatchQueue.global(qos:)`] queue with default qos
+/// * ``FoundationPlusTaskExecutor/shared``: Use a predefined concurrent queue with default qos
+/// * ``FoundationPlusTaskExecutor/background``: Use a predefined concurrent queue with background qos
 ///
 /// You can also create a new custom task executor using using the ``init(label:qos:attributes:)``
 /// initializer
-public final class FoundationPlusTaskExecutor: Sendable {
+/// 
+/// [`DispatchQueue.main`]: https://developer.apple.com/documentation/dispatch/dispatchqueue/main
+/// [`DispatchQueue.global(qos:)`]: https://developer.apple.com/documentation/dispatch/dispatchqueue/global(qos:)
+public final class DispatchQueueTaskExecutor: TaskExecutionContext {
     
+    /// The underlying GCD queue used for executing tasks
     public let queue: DispatchQueue
     
     init(queue: DispatchQueue) {
@@ -61,12 +65,18 @@ public final class FoundationPlusTaskExecutor: Sendable {
     ) {
         self.init(queue: .init(label: label, qos: qos, attributes: attributes))
     }
+
+
+    public func submit(_ task: sending @escaping () -> Void) {
+        nonisolated(unsafe) let task = task
+        queue.async { task() }
+    }
     
 }
 
 
 @available(macOS 15, iOS 18, watchOS 11, tvOS 18, visionOS 2, *)
-extension FoundationPlusTaskExecutor: TaskExecutor {
+extension DispatchQueueTaskExecutor: TaskExecutor {
     
     public func enqueue(_ job: consuming ExecutorJob) {
         let job = UnownedJob(job)
@@ -78,25 +88,18 @@ extension FoundationPlusTaskExecutor: TaskExecutor {
 }
 
 
-extension FoundationPlusTaskExecutor {
+extension DispatchQueueTaskExecutor {
     
     /// Task executor that runs on main thread
     /// - Warning: DO NOT use this task executor for blocking / long-running operations
-    public static let main: FoundationPlusTaskExecutor = .init(queue: .main)
+    public static let main: DispatchQueueTaskExecutor = .init(queue: .main)
     /// Task executor that runs on the system global GCD queue
-    public static let global: FoundationPlusTaskExecutor = .init(queue: .global())
+    public static let global: DispatchQueueTaskExecutor = .init(queue: .global())
     /// Task executor that runs on a GCD queue with background qos
-    public static let background: FoundationPlusTaskExecutor =
+    public static let background: DispatchQueueTaskExecutor =
         .init(label: "foundation_plus.default_queues.background", qos: .background, attributes: .concurrent)
-    /// Task executor specifically for io operations, runs on a GCD queue with default qos
-    public static let io: FoundationPlusTaskExecutor =
-        .init(label: "foundation_plus.default_queues.io", attributes: .concurrent)
-    /// Task executor with highest priority, runs on a GCD queue with userInteractive qos
-    /// - Warning: DO NOT use this task executor for blocking / long-running operations
-    public static let immediate: FoundationPlusTaskExecutor =
-        .init(label: "foundation_plus.default_queues.immediate", qos: .userInteractive, attributes: .concurrent)
     /// Task executor that runs on a GCD queue with default qos
-    public static let `default`: FoundationPlusTaskExecutor =
+    public static let shared: DispatchQueueTaskExecutor =
         .init(label: "foundation_plus.default_queues.default", attributes: .concurrent)
     
 }
@@ -104,8 +107,14 @@ extension FoundationPlusTaskExecutor {
 
 
 @available(macOS 15, iOS 18, watchOS 11, tvOS 18, visionOS 2, *)
-extension TaskExecutor where Self == FoundationPlusTaskExecutor {
-    
-    public static var foundationPlusTaskExecutor: FoundationPlusTaskExecutor.Type { FoundationPlusTaskExecutor.self }
-    
+extension TaskExecutor where Self == DispatchQueueTaskExecutor {
+    /// Access group of predefined ``DispatchQueueTaskExecutor`` instances
+    public static var foundationPlusDispatchExecutor: DispatchQueueTaskExecutor.Type { Self.self }
+}
+
+
+
+extension TaskExecutionContext where Self == DispatchQueueTaskExecutor {
+    /// Access group of predefined ``DispatchQueueTaskExecutor`` instances
+    public static var foundationPlusDispatchExecutor: DispatchQueueTaskExecutor.Type { Self.self }   
 }

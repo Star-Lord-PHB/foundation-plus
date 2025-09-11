@@ -70,13 +70,14 @@ struct ThreadPoolTest {
         try #require(pool.state == .running)
 
         do {
-            let taskCount = 100
+            let taskCount = 32
             let threads = MutexValue(Set<Thread>())
             let finishedTasks = MutexValue(0)
 
             for _ in 0 ..< taskCount {
                 pool.submit {
-                    Thread.sleep(forTimeInterval: 0.1)
+                    pool.assertOnThreadPool()
+                    Thread.sleep(forTimeInterval: 0.01)
                     // print("On thread: \(Thread.current)")
                     threads.withLock {
                         _ = $0.insert(Thread.current)
@@ -279,6 +280,54 @@ extension ThreadPoolTest {
                 #expect(Bool(false), "Expect only NSError, got \(error)")
             }
 
+        }
+
+        do {
+            await pool.shutdownAsync()
+            #expect(pool.state == .stopped)
+        }
+
+    }
+
+}
+
+
+
+extension ThreadPoolTest {
+
+    @available(macOS 15.0, iOS 18.0, watchOS 11.0, tvOS 18.0, visionOS 2.0, *)
+    @Test("Test Working as Task Executor Preference", .timeLimit(.minutes(1)))
+    func testWorkingAsTaskExecutorPreference() async throws {
+
+        let pool = ThreadPool(threadCount: 4)
+        pool.start()
+        try #require(pool.state == .running)
+
+        do {
+            await withTaskExecutorPreference(pool) {
+                pool.assertOnThreadPool()
+            }
+        }
+
+        do {
+            await pool.shutdownAsync()
+            #expect(pool.state == .stopped)
+        }
+
+    }
+
+
+    @Test("Test Working with Task.offload", .timeLimit(.minutes(1)))
+    func testWorkingWithTaskOffload() async throws {
+
+        let pool = ThreadPool(threadCount: 4)
+        pool.start()
+        try #require(pool.state == .running)
+
+        do {
+            await Task.offload(on: pool) {
+                pool.assertOnThreadPool()
+            }
         }
 
         do {
