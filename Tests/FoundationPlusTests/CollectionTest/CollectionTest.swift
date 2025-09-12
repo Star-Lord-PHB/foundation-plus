@@ -13,6 +13,7 @@ import XCTest
 struct CollectionTest {
 
     @Test(
+        "Test dropLast(while:) with RandomAccessCollection",
         arguments: [
             ([1,2,3,4,5], [1,2,3], 3),
             ([-1,0,1,2,3], [-1,0,1,2,3], 3),
@@ -34,6 +35,7 @@ struct CollectionTest {
 
 
     @Test(
+        "Test dropLast(while:) with BidirectionalCollection",
         arguments: [
             ("12345", "123", "3"),
             ("-0123", "-0123", "3"),
@@ -55,6 +57,7 @@ struct CollectionTest {
 
 
     @Test(
+        "Test dropLast(while:) with Non-BidirectionalCollection",
         arguments: [
             ([1,2,3,4,5], [1,2,3], 3),
             ([-1,0,1,2,3], [-1,0,1,2,3], 3),
@@ -76,6 +79,7 @@ struct CollectionTest {
 
 
     @Test(
+        "Test suffix(while:) with RandomAccessCollection",
         arguments: [
             ([1,2,3,4,5], [4,5], 3),
             ([-1,0,1,2,3], [], 3),
@@ -97,6 +101,7 @@ struct CollectionTest {
 
 
     @Test(
+        "Test suffix(while:) with BidirectionalCollection",
         arguments: [
             ("12345", "45", "3"),
             ("-0123", "", "3"),
@@ -118,6 +123,7 @@ struct CollectionTest {
 
 
     @Test(
+        "Test suffix(while:) with Non-BidirectionalCollection",
         arguments: [
             ([1,2,3,4,5], [4,5], 3),
             ([-1,0,1,2,3], [], 3),
@@ -139,6 +145,7 @@ struct CollectionTest {
 
 
     @Test(
+        "Test trimmingSuffix(while:) with RandomAccessCollection",
         arguments: [
             ([1,2,3,4,5], [1,2,3], 3),
             ([-1,0,1,2,3], [-1,0,1,2,3], 3),
@@ -160,6 +167,7 @@ struct CollectionTest {
 
 
     @Test(
+        "Test trimmingSuffix(while:) with BidirectionalCollection",
         arguments: [
             ("12345", "123", "3"),
             ("-0123", "-0123", "3"),
@@ -181,6 +189,7 @@ struct CollectionTest {
 
 
     @Test(
+        "Test trimmingSuffix(while:) with Non-BidirectionalCollection",
         arguments: [
             ([1,2,3,4,5], [1,2,3], 3),
             ([-1,0,1,2,3], [-1,0,1,2,3], 3),
@@ -202,6 +211,7 @@ struct CollectionTest {
 
 
     @Test(
+        "Test trimSuffix(while:) with RandomAccessCollection",
         arguments: [
             ([1,2,3,4,5], [1,2,3], 3),
             ([-1,0,1,2,3], [-1,0,1,2,3], 3),
@@ -224,6 +234,7 @@ struct CollectionTest {
 
 
     @Test(
+        "Test trimSuffix(while:) with BidirectionalCollection",
         arguments: [
             ("12345", "123", "3"),
             ("-0123", "-0123", "3"),
@@ -246,6 +257,7 @@ struct CollectionTest {
 
 
     @Test(
+        "Test trimSuffix(while:) with Non-BidirectionalCollection",
         arguments: [
             ([1,2,3,4,5], [1,2,3], 3),
             ([-1,0,1,2,3], [-1,0,1,2,3], 3),
@@ -267,28 +279,3 @@ struct CollectionTest {
     }
 
 }
-
-
-
-// class CollectionPerformanceTest: XCTestCase {
-
-//     func testDropLastPerformance1() {
-        
-//         let collection = Array(0..<10000000)
-//         measure {
-//             let _ = collection.dropLast { $0 < Int.max }
-//         }
-
-//     }
-
-
-//     func testSuffixPerformance1() {
-        
-//         let collection = Array(0..<10000000)
-//         measure {
-//             let _ = collection.suffix(while: { $0 < Int.max })
-//         }
-
-//     }
-
-// }

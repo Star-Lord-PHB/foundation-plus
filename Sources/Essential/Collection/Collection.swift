@@ -27,7 +27,7 @@ extension Collection {
     /// - Returns: The subsequence with the specified final elements not included
     @inlinable
     public func dropLast(while predicate: (Element) throws -> Bool) rethrows -> SubSequence {
-        try self[..<_startIndexOfContinuousElementsFromLast(where: predicate)]
+        try self[..<_startIndexOfSuffix(where: predicate)]
     }
     
     
@@ -39,7 +39,7 @@ extension Collection {
     /// - Returns: The subsequence containing the specified final elements
     @inlinable
     public func suffix(while predicate: (Element) throws -> Bool) rethrows -> SubSequence {
-        try self[_startIndexOfContinuousElementsFromLast(where: predicate)...]
+        try self[_startIndexOfSuffix(where: predicate)...]
     }
     
     
@@ -73,7 +73,7 @@ extension Collection {
 extension Collection {
 
     @inlinable
-    func _startIndexOfContinuousElementsFromLast(
+    func _startIndexOfSuffix(
         where predicate: (Element) throws -> Bool
     ) rethrows -> Index {
         
@@ -108,10 +108,6 @@ extension Collection where Element: Equatable {
     @inlinable
     func _startIndexOfSuffix<Suffix: Collection>(_ suffix: Suffix) -> Index where Suffix.Element == Element {
 
-        if let index = _suffixSeqStartIndexWithContinuousBuffer(suffix) {
-            return index
-        }
-
         let count1 = self.count
         let count2 = suffix.count
 
@@ -131,34 +127,6 @@ extension Collection where Element: Equatable {
         } else {
             suffixStartIndex
         }
-
-    }
-
-
-    @inlinable
-    func _suffixSeqStartIndexWithContinuousBuffer<Suffix: Collection>(_ suffix: Suffix) -> Index? where Element == Suffix.Element {
-
-        self.withContiguousStorageIfAvailable { buffer1 in
-            suffix.withContiguousStorageIfAvailable { buffer2 in
-                
-                guard buffer1.count >= buffer2.count else { return self.endIndex }
-
-                var i = buffer1.count - 1
-                var j = buffer2.count - 1
-
-                while j >= 0, buffer1[i] == buffer2[j] {
-                    i -= 1
-                    j -= 1
-                }
-
-                return if j >= 0 {
-                    endIndex
-                } else {
-                    self.index(startIndex, offsetBy: buffer1.count - buffer2.count)
-                }
-
-            }
-        } ?? nil as Index?
 
     }
 

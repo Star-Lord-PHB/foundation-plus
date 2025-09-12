@@ -17,8 +17,7 @@ extension RangeReplaceableCollection {
     ///                        Once the predicate returns false it will not be called again
     @inlinable
     public mutating func trimSuffix(while predicate: (Element) throws -> Bool) rethrows {
-        let startIndex = try self._startIndexOfContinuousElementsFromLast(where: predicate)
-        self.removeSubrange(startIndex...)
+        try self.removeSubrange(self._startIndexOfSuffix(where: predicate)...)
     }
 
 
@@ -42,8 +41,7 @@ extension RangeReplaceableCollection where Self: BidirectionalCollection {
     ///                        or false if it should be kept.
     ///                        Once the predicate returns false it will not be called again
     public mutating func trimSuffix(while predicate: (Element) throws -> Bool) rethrows {
-        let startIndex = try self._startIndexOfContinuousElementsFromLast(where: predicate)
-        self.removeSubrange(startIndex...)
+        try self.removeSubrange(self._startIndexOfSuffix(where: predicate)...)
     }
 
 

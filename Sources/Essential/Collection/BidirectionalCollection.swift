@@ -19,7 +19,7 @@ extension BidirectionalCollection {
     /// - Returns: The subsequence with the specified final elements not included
     @inlinable
     public func dropLast(while predicate: (Element) throws -> Bool) rethrows -> SubSequence {
-        try self[..<self._startIndexOfContinuousElementsFromLast(where: predicate)]
+        try self[..<self._startIndexOfSuffix(where: predicate)]
     }
     
     
@@ -31,7 +31,7 @@ extension BidirectionalCollection {
     /// - Returns: The subsequence containing the specified final elements
     @inlinable
     public func suffix(while predicate: (Element) throws -> Bool) rethrows -> SubSequence {
-        try self[self._startIndexOfContinuousElementsFromLast(where: predicate)...]
+        try self[self._startIndexOfSuffix(where: predicate)...]
     }
 
 
@@ -65,19 +65,7 @@ extension BidirectionalCollection {
 extension BidirectionalCollection {
 
     @inlinable
-    func _startIndexOfContinuousElementsFromLast(where predicate: (Element) throws -> Bool) rethrows -> Index {
-        
-        let startCount = try self.withContiguousStorageIfAvailable { buffer in
-            var i = buffer.count - 1
-            while i >= 0, try predicate(buffer[i]) {
-                i -= 1
-            }
-            return i + 1
-        }
-
-        if let startCount { 
-            return self.index(startIndex, offsetBy: startCount)
-        }
+    func _startIndexOfSuffix(where predicate: (Element) throws -> Bool) rethrows -> Index {
 
         guard !self.isEmpty else { return self.startIndex }
 
@@ -88,12 +76,8 @@ extension BidirectionalCollection {
             i = self.index(before: i)
         }
 
-        if i == startIndex {
-            if try predicate(self[i]) {
-                return startIndex
-            } else if self.count == 1 {
-                return self.endIndex
-            }
+        if try i == startIndex && predicate(self[i]) {
+            return startIndex
         }
 
         return self.index(after: i)
@@ -108,10 +92,6 @@ extension BidirectionalCollection where Element: Equatable {
 
     @inlinable
     func _startIndexOfSuffix<Suffix: BidirectionalCollection>(_ suffix: Suffix) -> Index where Element == Suffix.Element {
-        
-        if let index = _suffixSeqStartIndexWithContinuousBuffer(suffix) {
-            return index
-        }
 
         guard !self.isEmpty, !suffix.isEmpty else { return self.endIndex }
 
