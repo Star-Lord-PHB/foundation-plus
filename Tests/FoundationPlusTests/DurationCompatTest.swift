@@ -6,7 +6,7 @@ final class DurationCompatTest {
 
     @Test(
         arguments: [
-            (-1224065918.int64Val, 1305441957.int64Val),
+            (-1224065918.toInt64(), 1305441957.toInt64()),
         ]
     )
     @available(iOS, deprecated: 16)
@@ -35,9 +35,9 @@ final class DurationCompatTest {
     func creatingRepeat() throws {
 
         for _ in 0 ..< 10 {
-            
-            let randomSeconds = Int64.random(in: Int32.min.int64Val ... Int32.max.int64Val)
-            let randomAttoSeconds = Int64.random(in: Int32.min.int64Val ... Int32.max.int64Val)
+
+            let randomSeconds = Int64.random(in: Int32.min.toInt64() ... Int32.max.toInt64())
+            let randomAttoSeconds = Int64.random(in: Int32.min.toInt64() ... Int32.max.toInt64())
 
             let expected = Duration(secondsComponent: randomSeconds, attosecondsComponent: randomAttoSeconds)
 
@@ -56,7 +56,7 @@ final class DurationCompatTest {
 
     @Test(
         arguments: [
-            (1551283931.int64Val, 0.int64Val, (10 ** 18).int64Val)
+            (1551283931.toInt64(), 0.toInt64(), (10 ** 18).toInt64())
         ]
     )
     @available(iOS, deprecated: 16)
@@ -68,7 +68,7 @@ final class DurationCompatTest {
         let expected = Duration(secondsComponent: seconds, attosecondsComponent: attoSeconds) / factor
         
         let timeDuration1 = DurationCompat(secondsComponent: seconds, attosecondsComponent: attoSeconds)
-        let result = timeDuration1 / factor.intVal
+        let result = timeDuration1 / factor.toInt()
         
         print("seconds: \(seconds) attoSeconds: \(attoSeconds) factor: \(factor)")
         
@@ -85,16 +85,16 @@ final class DurationCompatTest {
     func divideRepeat() throws {
         
         for _ in 0 ..< 10 {
-            
-            let randomSeconds = Int64.random(in: Int32.min.int64Val ... Int32.max.int64Val)
-            let randomAttoSeconds = Int64.random(in: Int32.min.int64Val ... Int32.max.int64Val)
-            let randomFactor = Int64.random(in: Int32.min.int64Val ... Int32.max.int64Val)
-            
+
+            let randomSeconds = Int64.random(in: Int32.min.toInt64() ... Int32.max.toInt64())
+            let randomAttoSeconds = Int64.random(in: Int32.min.toInt64() ... Int32.max.toInt64())
+            let randomFactor = Int64.random(in: Int32.min.toInt64() ... Int32.max.toInt64())
+
             let expected = Duration(secondsComponent: randomSeconds, attosecondsComponent: randomAttoSeconds) / randomFactor
             
             let timeDuration1 = DurationCompat(secondsComponent: randomSeconds, attosecondsComponent: randomAttoSeconds)
-            let result = timeDuration1 / randomFactor.intVal
-            
+            let result = timeDuration1 / randomFactor.toInt()
+
             print("seconds: \(randomSeconds) attoSeconds: \(randomAttoSeconds) factor: \(randomFactor)")
             
             #expect(expected == result)
@@ -106,7 +106,7 @@ final class DurationCompatTest {
     
     @Test(
         arguments: [
-            (1741079210.int64Val, -719576355.int64Val, 1031414766.int64Val, -1427627192.int64Val)
+            (1741079210.toInt64(), -719576355.toInt64(), 1031414766.toInt64(), -1427627192.toInt64())
         ]
     )
     @available(iOS, deprecated: 16)
@@ -139,12 +139,12 @@ final class DurationCompatTest {
     func divide2Repeat() throws {
         
         for _ in 0 ..< 10 {
-            
-            let seconds1 = Int64.random(in: Int32.min.int64Val ... Int32.max.int64Val)
-            let attoSeconds1 = Int64.random(in: Int32.min.int64Val ... Int32.max.int64Val)
-            let seconds2 = Int64.random(in: Int32.min.int64Val ... Int32.max.int64Val)
-            let attoSeconds2 = Int64.random(in: Int32.min.int64Val ... Int32.max.int64Val)
-            
+
+            let seconds1 = Int64.random(in: Int32.min.toInt64() ... Int32.max.toInt64())
+            let attoSeconds1 = Int64.random(in: Int32.min.toInt64() ... Int32.max.toInt64())
+            let seconds2 = Int64.random(in: Int32.min.toInt64() ... Int32.max.toInt64())
+            let attoSeconds2 = Int64.random(in: Int32.min.toInt64() ... Int32.max.toInt64())
+
             let duration1 = Duration(secondsComponent: seconds1, attosecondsComponent: attoSeconds1)
             let duration2 = Duration(secondsComponent: seconds2, attosecondsComponent: attoSeconds2)
             let expected = duration1 / duration2
@@ -165,7 +165,7 @@ final class DurationCompatTest {
     
     @Test(
         arguments: [
-            (-1022399910.int64Val, -226561216.int64Val, -1123732875.int64Val)
+            (-1022399910.toInt64(), -226561216.toInt64(), -1123732875.toInt64())
         ]
     )
     @available(iOS, deprecated: 16)
@@ -177,13 +177,13 @@ final class DurationCompatTest {
         let expected = Duration(secondsComponent: seconds, attosecondsComponent: attoSeconds) * factor
         
         let timeDuration1 = DurationCompat(secondsComponent: seconds, attosecondsComponent: attoSeconds)
-        let result = timeDuration1 * (factor.intVal)
+        let result = timeDuration1 * (factor.toInt())
         
         print("duration: \(timeDuration1) factor: \(factor)")
         print("result: \(result)")
         
         if !(expected == result) {
-            let _ = timeDuration1 * (factor.intVal)
+            let _ = timeDuration1 * (factor.toInt())
         }
         
         #expect(expected == result)
@@ -199,21 +199,21 @@ final class DurationCompatTest {
     func multiplyRepeat() throws {
 
         for _ in 0 ..< 10 {
-            
-            let randomSeconds = Int64.random(in: Int32.min.int64Val ... Int32.max.int64Val)
-            let randomAttoSeconds = Int64.random(in: Int32.min.int64Val ... Int32.max.int64Val)
-            let randomFactor = Int64.random(in: Int32.min.int64Val ... Int32.max.int64Val)
+
+            let randomSeconds = Int64.random(in: Int32.min.toInt64() ... Int32.max.toInt64())
+            let randomAttoSeconds = Int64.random(in: Int32.min.toInt64() ... Int32.max.toInt64())
+            let randomFactor = Int64.random(in: Int32.min.toInt64() ... Int32.max.toInt64())
 
             let expected = Duration(secondsComponent: randomSeconds, attosecondsComponent: randomAttoSeconds) * randomFactor
 
             let timeDuration1 = DurationCompat(secondsComponent: randomSeconds, attosecondsComponent: randomAttoSeconds)
-            let result = timeDuration1 * (randomFactor.intVal)
+            let result = timeDuration1 * (randomFactor.toInt())
 
             print("duration: \(timeDuration1) factor: \(randomFactor)")
             print("result: \(result)")
             
             if !(expected == result) {
-                let _ = timeDuration1 * (randomFactor.intVal)	
+                let _ = timeDuration1 * (randomFactor.toInt())
             }
 
             #expect(expected == result)
@@ -239,8 +239,8 @@ final class DurationCompatTest {
         timeDuration = DurationCompat.microseconds(microseconds)
         duration = Duration.microseconds(microseconds)
         #expect(duration == timeDuration)
-        
-        let microsecondsDouble = Double.random(in: Int64.min.doubleVal ... Int64.max.doubleVal)
+
+        let microsecondsDouble = Double.random(in: Int64.min.toDouble() ... Int64.max.toDouble())
         timeDuration = DurationCompat.microseconds(microsecondsDouble)
         duration = Duration.microseconds(microsecondsDouble)
         #expect(duration == timeDuration)
@@ -249,8 +249,8 @@ final class DurationCompatTest {
         timeDuration = DurationCompat.milliseconds(milliseconds)
         duration = Duration.milliseconds(milliseconds)
         #expect(duration == timeDuration)
-        
-        let millisecondsDouble = Double.random(in: Int64.min.doubleVal ... Int64.max.doubleVal)
+
+        let millisecondsDouble = Double.random(in: Int64.min.toDouble() ... Int64.max.toDouble())
         timeDuration = DurationCompat.milliseconds(millisecondsDouble)
         duration = Duration.milliseconds(millisecondsDouble)
         #expect(duration == timeDuration)
@@ -259,8 +259,8 @@ final class DurationCompatTest {
         timeDuration = DurationCompat.seconds(seconds)
         duration = Duration.seconds(seconds)
         #expect(duration == timeDuration)
-        
-        let secondsDouble = Double.random(in: Int64.min.doubleVal ... Int64.max.doubleVal)
+
+        let secondsDouble = Double.random(in: Int64.min.toDouble() ... Int64.max.toDouble())
         timeDuration = DurationCompat.seconds(secondsDouble)
         duration = Duration.seconds(secondsDouble)
         #expect(duration == timeDuration)

@@ -32,7 +32,7 @@ public struct DurationCompat: Sendable {
     @inlinable
     public var components: (seconds: Int64, attoseconds: Int64) {
         let factor: Double = 10 ** 18
-        let (seconds, attoseconds) = self.div(factor.int64Val)
+        let (seconds, attoseconds) = self.div(factor.toInt64())
         precondition(seconds.high == 0 || seconds.high == -1)
         precondition(attoseconds.high == 0 || attoseconds.high == -1)
         return (Int64(bitPattern: seconds.low), Int64(bitPattern: attoseconds.low))
@@ -70,19 +70,19 @@ public struct DurationCompat: Sendable {
         let factor: Double = 10 ** 18
         
         let a32 = secondsComponent >> 32
-        let b = (secondsComponent & 0x00000000FFFFFFFF).uInt64Val
-        let c32 = factor.uInt64Val >> 32
-        let d = factor.uInt64Val & 0x00000000FFFFFFFF
+        let b = (secondsComponent & 0x00000000FFFFFFFF).toUInt64()
+        let c32 = factor.toUInt64() >> 32
+        let d = factor.toUInt64() & 0x00000000FFFFFFFF
         
-        let a32c32 = a32 * c32.int64Val
-        let a32d = a32 * d.int64Val
+        let a32c32 = a32 * c32.toInt64()
+        let a32d = a32 * d.toInt64()
         let bc32 = b * c32
         let bd = b * d
         
         let comp0 = bd & 0x00000000FFFFFFFF
         let overflow0 = bd >> 32
-        
-        let comp32Temp = a32d + bc32.int64Val + overflow0.int64Val
+
+        let comp32Temp = a32d + bc32.toInt64() + overflow0.toInt64()
         let comp32 = comp32Temp << 32
         let overflow32 = comp32Temp >> 32
         
@@ -96,7 +96,7 @@ public struct DurationCompat: Sendable {
         let secondLow = UInt64(bitPattern: comp32) + comp0
         
         let attosecondLow = UInt64(bitPattern: attosecondsComponent)
-        let attosecondHigh = attosecondsComponent < 0 ? -1.int64Val : 0.int64Val
+        let attosecondHigh = attosecondsComponent < 0 ? -1.toInt64() : 0.toInt64()
         
         let (low, hasOverflow) = attosecondLow.addingReportingOverflow(secondLow)
         let high = attosecondHigh + secondHigh + (hasOverflow ? 1 : 0)
@@ -118,15 +118,15 @@ extension DurationCompat {
     
     @inlinable
     public static func nanoseconds<T>(_ nanoseconds: T) -> DurationCompat where T : BinaryInteger {
-        let seconds = nanoseconds.int64Val / (10 ** 9).int64Val
-        let attoseconds = (nanoseconds.int64Val % (10 ** 9).int64Val) * (10 ** 9).int64Val
+        let seconds = nanoseconds.toInt64() / (10 ** 9).toInt64()
+        let attoseconds = (nanoseconds.toInt64() % (10 ** 9).toInt64()) * (10 ** 9).toInt64()
         return DurationCompat(secondsComponent: seconds, attosecondsComponent: attoseconds)
     }
     
     
     @inlinable
     public static func microseconds<T>(_ microseconds: T) -> DurationCompat where T : BinaryInteger {
-        .nanoseconds(microseconds.int64Val * 1000)
+        .nanoseconds(microseconds.toInt64() * 1000)
     }
     
     @inlinable
@@ -134,15 +134,15 @@ extension DurationCompat {
         let seconds = floor(microseconds / (10 ** 6))
         let attoseconds = (microseconds - seconds * (10 ** 6)) * (10 ** 12)
         return DurationCompat(
-            secondsComponent: seconds.int64Val,
-            attosecondsComponent: attoseconds.int64Val
+            secondsComponent: seconds.toInt64(),
+            attosecondsComponent: attoseconds.toInt64()
         )
     }
     
     
     @inlinable
     public static func milliseconds<T>(_ milliseconds: T) -> DurationCompat where T : BinaryInteger {
-        .microseconds(milliseconds.int64Val * 1000)
+        .microseconds(milliseconds.toInt64() * 1000)
     }
     
     @inlinable
@@ -153,7 +153,7 @@ extension DurationCompat {
     
     @inlinable
     public static func seconds<T>(_ seconds: T) -> DurationCompat where T : BinaryInteger {
-        .milliseconds(seconds.int64Val * 1000)
+        .milliseconds(seconds.toInt64() * 1000)
     }
     
     @inlinable

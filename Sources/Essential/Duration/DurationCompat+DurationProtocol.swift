@@ -18,7 +18,7 @@ extension DurationCompat: DurationProtocol {
     
     @inlinable
     public static func / (lhs: DurationCompat, rhs: Int) -> DurationCompat {
-        lhs.div(rhs.int64Val).quotient
+        lhs.div(rhs.toInt64()).quotient
     }
     
     
@@ -29,7 +29,7 @@ extension DurationCompat: DurationProtocol {
         precondition(rhs != 0, "divide by zero")
         var remainer = abs(self)
         var quotient = DurationCompat.zero
-        let divisor = DurationCompat(high: 0, low: abs(rhs).uInt64Val)
+        let divisor = DurationCompat(high: 0, low: abs(rhs).toUInt64())
         for i in stride(from: 127, through: 0, by: -1) {
             quotient = quotient << 1
             if (remainer >> i) >= divisor {
@@ -47,7 +47,7 @@ extension DurationCompat: DurationProtocol {
     
     @inlinable
     public static func * (lhs: DurationCompat, rhs: Int) -> DurationCompat {
-        mult(lhs: lhs, rhs: rhs.int64Val)
+        mult(lhs: lhs, rhs: rhs.toInt64())
     }
     
     
@@ -55,26 +55,26 @@ extension DurationCompat: DurationProtocol {
     static func mult(lhs: DurationCompat, rhs: Int64)  -> DurationCompat {
         
         let a96 = lhs.high >> 32
-        let b64 = (lhs.high & 0x00000000FFFFFFFF).uInt64Val
+        let b64 = (lhs.high & 0x00000000FFFFFFFF).toUInt64()
         let c32 = lhs.low >> 32
         let d = lhs.low & 0x00000000FFFFFFFF
         
         let e32 = rhs >> 32
-        let f = (rhs & 0x00000000FFFFFFFF).uInt64Val
+        let f = (rhs & 0x00000000FFFFFFFF).toUInt64()
         
         let a96e32 = a96 * e32
         
         // trigger overflow error
         // if a96e32 != 0 && a96e32 != -1 { let _ = a96.int32Val * e32.int32Val }
         
-        let a96f = a96 * f.int64Val
-        let b64e32 = b64.int64Val * e32
+        let a96f = a96 * f.toInt64()
+        let b64e32 = b64.toInt64() * e32
         
         let b64f = b64 * f
-        let c32e32 = c32.int64Val * e32
+        let c32e32 = c32.toInt64() * e32
         
         let c32f = c32 * f
-        let de32 = d.int64Val * e32
+        let de32 = d.toInt64() * e32
         
         let df = d * f
         
@@ -106,8 +106,8 @@ extension DurationCompat: DurationProtocol {
     
     @inlinable
     public static func / (lhs: DurationCompat, rhs: DurationCompat) -> Double {
-        let lhsDouble = lhs.high.doubleVal * (2 ** 64) + lhs.low.doubleVal
-        let rhsDouble = rhs.high.doubleVal * (2 ** 64) + rhs.low.doubleVal
+        let lhsDouble = lhs.high.toDouble() * (2 ** 64) + lhs.low.toDouble()
+        let rhsDouble = rhs.high.toDouble() * (2 ** 64) + rhs.low.toDouble()
         return lhsDouble / rhsDouble
     }
     

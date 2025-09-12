@@ -11,12 +11,12 @@ infix operator ** : PowerPrecedent
 
 
 public func ** <T: BinaryInteger>(lhs: T, rhs: T) -> Double {
-    pow(lhs.doubleVal, rhs.doubleVal)
+    pow(lhs.toDouble(), rhs.toDouble())
 }
 
 
 public func ** <T: BinaryFloatingPoint>(lhs: T, rhs: T) -> Double {
-    pow(lhs.doubleVal, rhs.doubleVal)
+    pow(lhs.toDouble(), rhs.toDouble())
 }
 
 
