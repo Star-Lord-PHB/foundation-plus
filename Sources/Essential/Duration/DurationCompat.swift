@@ -20,13 +20,16 @@ import Foundation
 @available(tvOS, deprecated: 16, message: "use Duration instead")
 public struct DurationCompat: Sendable {
     
+    @usableFromInline
     let high: Int64
+    @usableFromInline
     let low: UInt64
     
     /// The composite components of the Duration
     ///
     /// This is intended for facilitating conversions to existing time types.
     /// The attoseconds value will not exceed 1e18 or be lower than -1e18.
+    @inlinable
     public var components: (seconds: Int64, attoseconds: Int64) {
         let factor: Double = 10 ** 18
         let (seconds, attoseconds) = self.div(factor.int64Val)
@@ -102,6 +105,7 @@ public struct DurationCompat: Sendable {
         
     }
     
+    @usableFromInline
     init(high: Int64, low: UInt64) {
         self.high = high
         self.low = low
@@ -112,6 +116,7 @@ public struct DurationCompat: Sendable {
 
 extension DurationCompat {
     
+    @inlinable
     public static func nanoseconds<T>(_ nanoseconds: T) -> DurationCompat where T : BinaryInteger {
         let seconds = nanoseconds.int64Val / (10 ** 9).int64Val
         let attoseconds = (nanoseconds.int64Val % (10 ** 9).int64Val) * (10 ** 9).int64Val
@@ -119,10 +124,12 @@ extension DurationCompat {
     }
     
     
+    @inlinable
     public static func microseconds<T>(_ microseconds: T) -> DurationCompat where T : BinaryInteger {
         .nanoseconds(microseconds.int64Val * 1000)
     }
     
+    @inlinable
     public static func microseconds(_ microseconds: Double) -> DurationCompat {
         let seconds = floor(microseconds / (10 ** 6))
         let attoseconds = (microseconds - seconds * (10 ** 6)) * (10 ** 12)
@@ -133,55 +140,67 @@ extension DurationCompat {
     }
     
     
+    @inlinable
     public static func milliseconds<T>(_ milliseconds: T) -> DurationCompat where T : BinaryInteger {
         .microseconds(milliseconds.int64Val * 1000)
     }
     
+    @inlinable
     public static func milliseconds(_ milliseconds: Double) -> DurationCompat {
         .microseconds(milliseconds * 1000)
     }
     
     
+    @inlinable
     public static func seconds<T>(_ seconds: T) -> DurationCompat where T : BinaryInteger {
         .milliseconds(seconds.int64Val * 1000)
     }
     
+    @inlinable
     public static func seconds(_ seconds: Double) -> DurationCompat {
         .milliseconds(seconds * 1000)
     }
     
-    
+
+    @inlinable
     public static func minutes<T>(_ val: T) -> DurationCompat where T: BinaryInteger {
         .seconds(val * 60)
     }
     
+    @inlinable
     public static func minutes(_ val: Double) -> DurationCompat {
         .seconds(val * 60)
     }
     
     
+    @inlinable
     public static func hours<T>(_ val: T) -> DurationCompat where T: BinaryInteger {
         .minutes(val * 60)
     }
     
+    @inlinable
     public static func hours(_ val: Double) -> DurationCompat {
         .minutes(val * 60)
     }
     
     
+    @inlinable
     public static func days<T>(_ val: T) -> DurationCompat where T: BinaryInteger {
         .hours(val * 24)
     }
     
+    @inlinable
     public static func days(_ val: Double) -> DurationCompat {
         .hours(val * 24)
     }
     
     
+    @inlinable
     public static func weeks<T>(_ val: T) -> DurationCompat where T: BinaryInteger {
         .days(val * 7)
     }
     
+    @inlinable
     public static func weeks(_ val: Double) -> DurationCompat {
         .days(val * 7)
     }

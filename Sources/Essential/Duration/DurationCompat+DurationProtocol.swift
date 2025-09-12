@@ -10,16 +10,19 @@ import Foundation
 
 extension DurationCompat: DurationProtocol {
     
+    @inlinable
     public static func == (lhs: DurationCompat, rhs: DurationCompat) -> Bool {
         lhs.high == rhs.high && lhs.low == rhs.low
     }
     
     
+    @inlinable
     public static func / (lhs: DurationCompat, rhs: Int) -> DurationCompat {
         lhs.div(rhs.int64Val).quotient
     }
     
     
+    @usableFromInline
     func div(
         _ rhs: Int64
     ) -> (quotient: DurationCompat, remainer: DurationCompat) {
@@ -42,12 +45,14 @@ extension DurationCompat: DurationProtocol {
     }
     
     
+    @inlinable
     public static func * (lhs: DurationCompat, rhs: Int) -> DurationCompat {
         mult(lhs: lhs, rhs: rhs.int64Val)
     }
     
     
-    private static func mult(lhs: DurationCompat, rhs: Int64)  -> DurationCompat {
+    @usableFromInline
+    static func mult(lhs: DurationCompat, rhs: Int64)  -> DurationCompat {
         
         let a96 = lhs.high >> 32
         let b64 = (lhs.high & 0x00000000FFFFFFFF).uInt64Val
@@ -99,6 +104,7 @@ extension DurationCompat: DurationProtocol {
     }
     
     
+    @inlinable
     public static func / (lhs: DurationCompat, rhs: DurationCompat) -> Double {
         let lhsDouble = lhs.high.doubleVal * (2 ** 64) + lhs.low.doubleVal
         let rhsDouble = rhs.high.doubleVal * (2 ** 64) + rhs.low.doubleVal
@@ -109,6 +115,7 @@ extension DurationCompat: DurationProtocol {
     public static let zero: DurationCompat = .init(high: 0, low: 0)
     
     
+    @inlinable
     public static func + (lhs: DurationCompat, rhs: DurationCompat) -> DurationCompat {
         let (attoseconds, overflow) = lhs.low.addingReportingOverflow(rhs.low)
         let seconds = lhs.high + rhs.high + (overflow ? 1 : 0)
@@ -116,6 +123,7 @@ extension DurationCompat: DurationProtocol {
     }
     
     
+    @inlinable
     public static func - (lhs: DurationCompat, rhs: DurationCompat) -> DurationCompat {
         let (attoseconds, borrow) = lhs.low.subtractingReportingOverflow(rhs.low)
         let seconds = lhs.high - rhs.high - (borrow ? 1 : 0)
@@ -123,6 +131,7 @@ extension DurationCompat: DurationProtocol {
     }
     
     
+    @inlinable
     public static func < (lhs: DurationCompat, rhs: DurationCompat) -> Bool {
         lhs.high < rhs.high || (lhs.high == rhs.high && lhs.low < rhs.low)
     }
@@ -154,6 +163,7 @@ extension DurationCompat: DurationProtocol {
     }
     
     
+    @inlinable
     public static prefix func - (_ operand: DurationCompat) -> DurationCompat {
         .init(high: ~operand.high, low: ~operand.low) + .init(high: 0, low: 1)
     }
