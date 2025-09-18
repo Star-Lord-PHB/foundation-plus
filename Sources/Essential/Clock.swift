@@ -11,43 +11,65 @@
 extension Clock {
     
     /// Measure the elapsed time to execute a closure and return the result
+    /// 
+    /// - Parameter work: the code block that needs to be measured
+    /// - Returns: the result of the task and the elapsed time
     ///
     /// ```swift
     /// let (result, time) = ContinuousClock().measureExpr {
     ///     // some task
     /// }
     /// ```
-    public func measureExpr<R>(_ work: () throws -> R) rethrows -> (result: R, time: Duration) {
-        var result: R?
-        let time = try measure {
-            result = try work()
+    @inlinable
+    public func measureExpr<R, E: Error>(_ work: () throws(E) -> R) throws(E) -> (result: R, time: Duration) {
+        do {
+            var result: R?
+            let time = try measure {
+                result = try work()
+            }
+            return (result.unsafelyUnwrapped, time)
+        } catch let error as E {
+            throw error
+        } catch {
+            fatalError("Expect error to be of type \(E.self), but got \(error)")
         }
-        return (result.unsafelyUnwrapped, time)
     }
     
     
     /// Measure the elapsed time to execute a closure and return the result
+    /// 
+    /// - Parameter isolation: the actor isolation context, default to the current context
+    /// - Parameter work: the code block that needs to be measured
+    /// - Returns: the result of the task and the elapsed time
     ///
     /// ```swift
     /// let (result, time) = await ContinuousClock().measureExpr {
     ///     // some async task
     /// }
     /// ```
-    public func measureExpr<R>(
-        _ work: () async throws -> R
-    ) async rethrows -> (result: R, time: Duration) {
-        var result: R?
-        let time = try await measure {
-            result = try await work()
+    @inlinable
+    public func measureExpr<R, E: Error>(
+        isolation: isolated (any Actor)? = #isolation,
+        _ work: () async throws(E) -> R
+    ) async throws(E) -> (result: R, time: Duration) {
+        do {
+            var result: R?
+            let time = try await measure {
+                result = try await work()
+            }
+            return (result.unsafelyUnwrapped, time)
+        } catch let error as E {
+            throw error
+        } catch {
+            fatalError("Expect error to be of type \(E.self), but got \(error)")
         }
-        return (result.unsafelyUnwrapped, time)
     }
     
     
     /// Measure the elapsed time to execute a closure and return the result
     ///
     /// - Parameter clockType: the type of clock to use for measuring, default is ``ClockType/continuous``
-    /// - Parameter work: the task that needs to be measured
+    /// - Parameter work: the code block that needs to be measured
     /// - Returns: the result of the task and the elapsed time
     ///
     /// It choose clock to use base on the `clockType` parameter:
@@ -67,29 +89,25 @@ extension Clock {
     ///
     /// [`ContinuousClock`]: https://developer.apple.com/documentation/swift/continuousclock
     /// [`SuspendingClock`]: https://developer.apple.com/documentation/swift/suspendingclock
-    public static func measureExpr<R>(
+    @inlinable
+    public static func measureExpr<R, E: Error>(
         withClock clockType: ClockType = .continuous,
-        _ work: () throws -> R
-    ) rethrows -> (result: R, time: Swift.Duration) {
-        var result: R?
-        let time = switch clockType {
+        _ work: () throws(E) -> R
+    ) throws(E) -> (result: R, time: Swift.Duration) {
+        switch clockType {
             case .continuous:
-                try ContinuousClock.continuous.measure {
-                    result = try work()
-                }
+                try ContinuousClock.continuous.measureExpr(work)
             case .suspending:
-                try SuspendingClock.suspending.measure {
-                    result = try work()
-                }
+                try SuspendingClock.suspending.measureExpr(work)
         }
-        return (result.unsafelyUnwrapped, time)
     }
     
     
     /// Measure the elapsed time to execute a closure and return the result
     ///
     /// - Parameter clockType: the type of clock to use for measuring, default is ``ClockType/continuous``
-    /// - Parameter work: the task that needs to be measured
+    /// - Parameter isolation: the actor isolation context, default to the current context
+    /// - Parameter work: the code block that needs to be measured
     /// - Returns: the result of the task and the elapsed time
     ///
     /// It choose clock to use base on the `clockType` parameter:
@@ -109,22 +127,18 @@ extension Clock {
     ///
     /// [`ContinuousClock`]: https://developer.apple.com/documentation/swift/continuousclock
     /// [`SuspendingClock`]: https://developer.apple.com/documentation/swift/suspendingclock
-    public static func measureExpr<R>(
+    @inlinable
+    public static func measureExpr<R, E: Error>(
         withClock clockType: ClockType = .continuous,
-        _ work: () async throws -> R
-    ) async rethrows -> (result: R, time: Swift.Duration) {
-        var result: R?
-        let time = switch clockType {
+        isolation: isolated (any Actor)? = #isolation,
+        _ work: () async throws(E) -> R
+    ) async throws(E) -> (result: R, time: Swift.Duration) {
+        switch clockType {
             case .continuous:
-                try await ContinuousClock.continuous.measure {
-                    result = try await work()
-                }
+                try await ContinuousClock.continuous.measureExpr(work)
             case .suspending:
-                try await SuspendingClock.suspending.measure {
-                    result = try await work()
-                }
+                try await SuspendingClock.suspending.measureExpr(work)
         }
-        return (result.unsafelyUnwrapped, time)
     }
     
 }
@@ -140,26 +154,36 @@ extension ContinuousClock {
     
     /// Measure the elapsed time to execute a closure and return the result
     ///
+    /// - Parameter work: the code block that needs to be measured
+    /// - Returns: the result of the task and the elapsed time
+    ///
     /// ```swift
     /// let (result, time) = ContinuousClock.measureExpr {
     ///     // some task
     /// }
     /// ```
-    public static func measureExpr<R>(_ work: () throws -> R) rethrows -> (result: R, time: Duration) {
+    @inlinable
+    public static func measureExpr<R, E: Error>(_ work: () throws(E) -> R) throws(E) -> (result: R, time: Duration) {
         try ContinuousClock.continuous.measureExpr(work)
     }
     
     
     /// Measure the elapsed time to execute a closure and return the result
+    /// 
+    /// - Parameter isolation: the actor isolation context, default to the current context
+    /// - Parameter work: the code block that needs to be measured
+    /// - Returns: the result of the task and the elapsed time
     ///
     /// ```swift
     /// let (result, time) = await ContinuousClock.measureExpr {
     ///     // some async task
     /// }
     /// ```
-    public static func measureExpr<R>(
-        _ work: () async throws -> R
-    ) async rethrows -> (result: R, time: Duration) {
+    @inlinable
+    public static func measureExpr<R, E: Error>(
+        isolation: isolated (any Actor)? = #isolation,
+        _ work: () async throws(E) -> R
+    ) async throws(E) -> (result: R, time: Duration) {
         try await ContinuousClock.continuous.measureExpr(work)
     }
     
@@ -172,26 +196,36 @@ extension SuspendingClock {
     
     /// Measure the elapsed time to execute a closure and return the result
     ///
+    /// - Parameter work: the code block that needs to be measured
+    /// - Returns: the result of the task and the elapsed time
+    ///
     /// ```swift
     /// let (result, time) = SuspendingClock.measureExpr {
     ///     // some task
     /// }
     /// ```
-    public static func measureExpr<R>(_ work: () throws -> R) rethrows -> (result: R, time: Duration) {
+    @inlinable
+    public static func measureExpr<R, E: Error>(_ work: () throws(E) -> R) throws(E) -> (result: R, time: Duration) {
         try SuspendingClock.suspending.measureExpr(work)
     }
     
     
     /// Measure the elapsed time to execute a closure and return the result
+    /// 
+    /// - Parameter isolation: the actor isolation context, default to the current context
+    /// - Parameter work: the code block that needs to be measured
+    /// - Returns: the result of the task and the elapsed time
     ///
     /// ```swift
     /// let (result, time) = await SuspendingClock.measureExpr {
     ///     // some async task
     /// }
     /// ```
-    public static func measureExpr<R>(
-        _ work: () async throws -> R
-    ) async rethrows -> (result: R, time: Duration) {
+    @inlinable
+    public static func measureExpr<R, E: Error>(
+        isolation: isolated (any Actor)? = #isolation,
+        _ work: () async throws(E) -> R
+    ) async throws(E) -> (result: R, time: Duration) {
         try await SuspendingClock.suspending.measureExpr(work)
     }
     
