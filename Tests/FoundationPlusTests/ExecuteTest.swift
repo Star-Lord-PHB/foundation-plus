@@ -9,47 +9,84 @@ import Testing
 @testable import FoundationPlus
 
 
+@Suite("Test Execute")
 struct ExecuteTest {
     
-    actor TestActor {}
+    @globalActor
+    actor TestActor {
+        static let shared = TestActor()
+    }
+
+    class NonSendable {}
     
-    @Test
-    func testIsolationAsync() async throws {
+    @Test("Test Isolated Execute Async")
+    func testIsolatedExecuteAsync() async throws {
         
         let actor = TestActor()
         
-        await executeAsync(isolatedOn: actor) { a in
-            
+        await execute(isolatedOn: actor) { a in
             actor.assertIsolated()
-            
-            execute(isolatedOn: a) {
+            await execute(isolatedOn: a) { _ in
                 actor.assertIsolated()
             }
-            
-            await executeAsync(isolatedOn: a) { _ in
-                actor.assertIsolated()
-            }
-            
         }
         
     }
+
+
+    @Test("Test Isolated Execute Inheritance Async")
+    @TestActor
+    func testIsolatedExecuteInheritanceAsync() async throws {
+        
+        TestActor.assertIsolated()
+
+        await execute { _ in
+            TestActor.assertIsolated()
+        }
+        
+    }
+
+
+    @Test("Test Non-Isolated Execute Async")
+    func testNonIsolatedExecuteAsync() async throws {
+
+        await #expect(processExitsWith: .success, "Isolation Assertion should succeed") { @TestActor in
+            // This is to make sure that such closure does provide isolated context
+            TestActor.assertIsolated()
+        }
+
+        await #expect(processExitsWith: .failure, "Isolation Assertion should fail") { @TestActor in
+            await execute(isolatedOn: nil) { _ in
+                // Non-isolated execution
+                TestActor.assertIsolated() // This should fail
+            }
+        }
+
+    }
     
     
-    @Test
-    func testIsolation() async throws {
+    @Test("Test Isolated Execute")
+    func testIsolatedExecute() async throws {
         
         let actor = TestActor()
         
         await execute(isolatedOn: actor) { 
-            
             actor.assertIsolated()
-            
-            execute {
-                actor.assertIsolated()
-            }
-            
         }
         
+    }
+
+
+    @Test("Test Isolated Execute Inheritance")
+    @TestActor
+    func testIsolatedExecuteInheritance() async throws {
+        
+        TestActor.assertIsolated()
+
+        execute { 
+            TestActor.assertIsolated()
+        }
+
     }
     
 }
