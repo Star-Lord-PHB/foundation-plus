@@ -113,3 +113,46 @@ extension Date {
     }
 
 }
+
+
+
+extension Date {
+
+    /// Compute a sequence of dates that match (or most closely match) a given set of components 
+    /// starting from this date and invoke the given closure for each of the matched dates. 
+    /// 
+    /// - Parameter components: The components to match
+    /// - Parameter matchingPolicy: Strategy of matching when seeing an ambiguous result, 
+    ///   default to .nextTime.
+    /// - Parameter repeatedTimePolicy: Strategy of matching when seeing a Date that occurs twice on a particular day. 
+    ///   Default to .first.
+    /// - Parameter direction: The search direction, default to .forward.
+    /// - Parameter calendar: The calendar for the calculations, default to .current.
+    /// - Parameter handler: A closure that is invoked for each of the matched dates. 
+    /// 
+    /// This method will directly forward the call to the [`enumerateDates(startingAfter:matching:matchingPolicy:repeatedTimePolicy:direction:using:)`]
+    /// method of Calendar. 
+    /// 
+    /// - Seealso: [`enumerateDates(startingAfter:matching:matchingPolicy:repeatedTimePolicy:direction:using:)`]
+    /// 
+    /// [`enumerateDates(startingAfter:matching:matchingPolicy:repeatedTimePolicy:direction:using:)`]: https://developer.apple.com/documentation/foundation/calendar/enumeratedates(startingafter:matching:matchingpolicy:repeatedtimepolicy:direction:using:)
+    @inlinable
+    public func enumerate(
+        matching components: DateComponents,
+        matchingPolicy: Calendar.MatchingPolicy,
+        repeatedTimePolicy: Calendar.RepeatedTimePolicy = .first,
+        direction: Calendar.SearchDirection = .forward,
+        using calendar: Calendar = .current,
+        onResult handler: (Date?, Bool, inout Bool) -> Void
+    ) {
+        calendar.enumerateDates(
+            startingAfter: self, 
+            matching: components, 
+            matchingPolicy: matchingPolicy, 
+            repeatedTimePolicy: repeatedTimePolicy,
+            direction: direction, 
+            using: handler
+        )
+    }
+
+}

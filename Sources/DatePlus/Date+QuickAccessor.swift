@@ -112,6 +112,7 @@ extension Date {
     /// - Seealso: [`isDateInToday(_:)`]
     /// 
     /// [`isDateInToday(_:)`]: https://developer.apple.com/documentation/foundation/calendar/isdateintoday(_:)
+    @inlinable
     public func isInToday(using calendar: Calendar = .current) -> Bool {
         calendar.isDateInToday(self)
     }
@@ -122,6 +123,7 @@ extension Date {
     /// - Seealso: [`isDateInTomorrow(_:)`]
     /// 
     /// [`isDateInTomorrow(_:)`]: https://developer.apple.com/documentation/foundation/calendar/isdateintomorrow(_:)
+    @inlinable
     public func isInTomorrow(using calendar: Calendar = .current) -> Bool {
         calendar.isDateInTomorrow(self)
     }
@@ -132,6 +134,7 @@ extension Date {
     /// - Seealso: [`isDateInYesterday(_:)`]
     /// 
     /// [`isDateInYesterday(_:)`]: https://developer.apple.com/documentation/foundation/calendar/isdateinyesterday(_:)
+    @inlinable
     public func isInYesterday(using calendar: Calendar = .current) -> Bool {
         calendar.isDateInYesterday(self)
     }
@@ -142,6 +145,7 @@ extension Date {
     /// - Seealso: [`isDateInWeekend(_:)`]
     /// 
     /// [`isDateInWeekend(_:)`]: https://developer.apple.com/documentation/foundation/calendar/isdateinweekend(_:)
+    @inlinable
     public func isInWeekend(using calendar: Calendar = .current) -> Bool {
         calendar.isDateInWeekend(self)
     }
