@@ -10,23 +10,43 @@ import Foundation
 
 
 class DateTest {
+
+
+    static let gmt = TimeZone.gmt
+    static let pst = TimeZone(identifier: "America/Los_Angeles")!
+    static let en_US = Locale(identifier: "en_US")
+
+
+    var gmt: TimeZone { Self.gmt }
+    var pst: TimeZone { Self.pst }
+
+    var en_US: Locale { Self.en_US }
     
-    static let calendar: Calendar = {
-        var calendar = Calendar(identifier: .gregorian)
+
+    static func calendar(_ identifier: Calendar.Identifier = .gregorian, in timeZone: TimeZone = gmt, locale: Locale = en_US) -> Calendar {
+        var calendar = Calendar(identifier: identifier)
         calendar.timeZone = timeZone
+        calendar.locale = locale
         return calendar
-    }()
-    static let timeZone: TimeZone = .gmt
-    static let locale: Locale = .autoupdatingCurrent
-    
-    var calendar: Calendar { Self.calendar }
-    var timeZone: TimeZone { Self.timeZone }
-    var locale: Locale { Self.locale }
+    }
+
+
+    static func gregorianCalendar(in timeZone: TimeZone = gmt, locale: Locale = en_US) -> Calendar {
+        calendar(.gregorian, in: timeZone, locale: locale)
+    }
+
+
+    func calendar(_ identifier: Calendar.Identifier = .gregorian, in timeZone: TimeZone = gmt, locale: Locale = en_US) -> Calendar {
+        Self.calendar(identifier, in: timeZone, locale: locale)
+    }
+
+
+    func gregorianCalendar(in timeZone: TimeZone = gmt, locale: Locale = en_US) -> Calendar {
+        Self.gregorianCalendar(in: timeZone, locale: locale)
+    }
     
     
     static func date(
-        calendar: Calendar = calendar,
-        timeZone: TimeZone = timeZone,
         era: Int? = nil,
         year: Int? = nil,
         month: Int? = nil,
@@ -40,12 +60,13 @@ class DateTest {
         quarter: Int? = nil,
         weekOfMonth: Int? = nil,
         weekOfYear: Int? = nil,
-        yearForWeekOfYear: Int? = nil
+        yearForWeekOfYear: Int? = nil,
+        using calendar: Calendar = calendar(),
     ) -> Date {
         calendar.date(
             from: .init(
                 calendar: calendar,
-                timeZone: timeZone,
+                timeZone: calendar.timeZone,
                 era: era,
                 year: year,
                 month: month,
@@ -66,8 +87,6 @@ class DateTest {
     
     
     func date(
-        calendar: Calendar = calendar,
-        timeZone: TimeZone = timeZone,
         era: Int? = nil,
         year: Int? = nil,
         month: Int? = nil,
@@ -81,11 +100,10 @@ class DateTest {
         quarter: Int? = nil,
         weekOfMonth: Int? = nil,
         weekOfYear: Int? = nil,
-        yearForWeekOfYear: Int? = nil
+        yearForWeekOfYear: Int? = nil,
+        using calendar: Calendar = calendar(),
     ) -> Date {
         Self.date(
-            calendar: calendar,
-            timeZone: timeZone,
             era: era,
             year: year,
             month: month,
@@ -99,7 +117,8 @@ class DateTest {
             quarter: quarter,
             weekOfMonth: weekOfMonth,
             weekOfYear: weekOfYear,
-            yearForWeekOfYear: yearForWeekOfYear
+            yearForWeekOfYear: yearForWeekOfYear,
+            using: calendar,
         )
     }
     

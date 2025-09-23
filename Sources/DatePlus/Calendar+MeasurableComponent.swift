@@ -16,7 +16,7 @@ extension Calendar {
     /// For example, `.year`, `.hour` are measurable, but `.calendar`, `.isLeapMonth` are not
     ///
     /// [`Calendar.Component`]: https://developer.apple.com/documentation/foundation/calendar/component
-    public enum MeasurableComponent: Sendable {
+    public enum MeasurableComponent: RawRepresentable, Sendable {
         
         /// Identifier for the era unit.
         case era
@@ -71,7 +71,8 @@ extension Calendar {
         /// Get the actual [`Calendar.Component`] instance
         ///
         /// [`Calendar.Component`]: https://developer.apple.com/documentation/foundation/calendar/component
-        public var component: Component {
+        @inlinable
+        public var rawValue: Component {
             if #available(macOS 15, iOS 18, tvOS 18, watchOS 11, *) {
                 switch self {
                     case .era: .era
@@ -112,6 +113,7 @@ extension Calendar {
         }
         
         
+        @inlinable
         public var granularity: Granularity {
             switch self {
                 case .era, .year: .year
@@ -123,6 +125,48 @@ extension Calendar {
                 case .nanosecond: .nanosecond
             }
         }
+
+
+        public init?(rawValue: Component) {
+            if #available(macOS 15, iOS 18, tvOS 18, watchOS 11, *) {
+            switch rawValue {
+                case .era: self = .era
+                case .year: self = .year
+                case .month: self = .month
+                case .day: self = .day
+                case .hour: self = .hour
+                case .minute: self = .minute
+                case .second: self = .second
+                case .weekday: self = .weekday
+                case .weekdayOrdinal: self = .weekdayOrdinal
+                case .quarter: self = .quarter
+                case .weekOfMonth: self = .weekOfMonth
+                case .weekOfYear: self = .weekOfYear
+                case .yearForWeekOfYear: self = .yearForWeekOfYear
+                case .nanosecond: self = .nanosecond
+                case .dayOfYear: self = .dayOfYear
+                default: return nil
+            }
+        } else {
+            switch rawValue {
+                case .era: self = .era
+                case .year: self = .year
+                case .month: self = .month
+                case .day: self = .day
+                case .hour: self = .hour
+                case .minute: self = .minute
+                case .second: self = .second
+                case .weekday: self = .weekday
+                case .weekdayOrdinal: self = .weekdayOrdinal
+                case .quarter: self = .quarter
+                case .weekOfMonth: self = .weekOfMonth
+                case .weekOfYear: self = .weekOfYear
+                case .yearForWeekOfYear: self = .yearForWeekOfYear
+                case .nanosecond: self = .nanosecond
+                default: return nil
+            }
+        }
+        }
         
     }
     
@@ -131,45 +175,20 @@ extension Calendar {
 
 extension Calendar.Component {
     
+    @inlinable
     public func toMeasurable() -> Calendar.MeasurableComponent? {
-        if #available(macOS 15, iOS 18, tvOS 18, watchOS 11, *) {
-            switch self {
-                case .era: .era
-                case .year: .year
-                case .month: .month
-                case .day: .day
-                case .hour: .hour
-                case .minute: .minute
-                case .second: .second
-                case .weekday: .weekday
-                case .weekdayOrdinal: .weekdayOrdinal
-                case .quarter: .quarter
-                case .weekOfMonth: .weekOfMonth
-                case .weekOfYear: .weekOfYear
-                case .yearForWeekOfYear: .yearForWeekOfYear
-                case .nanosecond: .nanosecond
-                case .dayOfYear: .dayOfYear
-                default: nil
-            }
-        } else {
-            switch self {
-                case .era: .era
-                case .year: .year
-                case .month: .month
-                case .day: .day
-                case .hour: .hour
-                case .minute: .minute
-                case .second: .second
-                case .weekday: .weekday
-                case .weekdayOrdinal: .weekdayOrdinal
-                case .quarter: .quarter
-                case .weekOfMonth: .weekOfMonth
-                case .weekOfYear: .weekOfYear
-                case .yearForWeekOfYear: .yearForWeekOfYear
-                case .nanosecond: .nanosecond
-                default: nil
-            }
-        }
+        return .init(rawValue: self)
+    }
+    
+}
+
+
+
+extension Set<Calendar.MeasurableComponent> {
+    
+    @inlinable
+    public var rawComponents: Set<Calendar.Component> {
+        .init(self.map(\.rawValue))
     }
     
 }
@@ -214,4 +233,15 @@ extension Calendar.MeasurableComponent {
         
     }
     
+}
+
+
+
+extension DateComponents {
+
+    @inlinable
+    public func value(for component: Calendar.MeasurableComponent) -> Int {
+        return self.value(for: component.rawValue) ?? 0
+    }
+
 }

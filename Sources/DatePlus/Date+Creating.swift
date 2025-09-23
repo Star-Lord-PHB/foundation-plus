@@ -11,9 +11,9 @@ import Foundation
 extension Date {
     
     /// Initializes a date instance, optionally specifying values for the components.
-    public init(
-        calendar: Calendar = .autoupdatingCurrent,
-        timeZone: TimeZone = .autoupdatingCurrent,
+    public init?(
+        calendar: Calendar = .current,
+        timeZone: TimeZone = .current,
         era: Int? = nil,
         year: Int? = nil,
         month: Int? = nil,
@@ -56,19 +56,19 @@ extension Date {
     /// Create a Date instance by parsing the date string based on the provided format string
     /// - Parameters:
     ///   - string: The string representing a date to parse
-    ///   - format: The format for parsing the string
+    ///   - formatString: The format for parsing the string
     ///   - timeZone: The time zone to use for the created date
     ///   - locale: The locale to use for the created date
     ///   - calendar: The calendar to create the date
     public init(
         _ string: String,
-        format: String,
+        formatString: String,
         timeZone: TimeZone? = nil,
         locale: Locale? = nil,
-        calendar: Calendar = .autoupdatingCurrent
+        calendar: Calendar = .current
     ) throws {
         let formatter = DateFormatter()
-        formatter.dateFormat = format
+        formatter.dateFormat = formatString
         formatter.timeZone = timeZone ?? calendar.timeZone
         formatter.locale = locale ?? calendar.locale
         formatter.calendar = calendar
@@ -97,7 +97,7 @@ extension Date {
         format: FormatString,
         timeZone: TimeZone? = nil,
         locale: Locale? = nil,
-        calendar: Calendar = .autoupdatingCurrent
+        calendar: Calendar = .current
     ) throws {
         let strategy = ParseStrategy(
             format: format,
@@ -113,8 +113,11 @@ extension Date {
     /// - Parameters:
     ///   - components: The components for creating the date
     ///   - calendar: The calendar to create the date
-    public init(components: DateComponents, calendar: Calendar = .autoupdatingCurrent) {
-        self = calendar.date(from: components)!
+    public init?(components: DateComponents, calendar: Calendar = .current) {
+        guard let date = calendar.date(from: components) else {
+            return nil
+        }
+        self = date
     }
     
     
@@ -122,6 +125,7 @@ extension Date {
     /// - Parameters:
     ///   - string: The string representing a date to parse
     ///   - timeZone: The time zone to used for the created date
+    @inlinable
     public static func iso8601Parse(
         _ string: String,
         timeZone: TimeZone = .init(secondsFromGMT: 0)!
@@ -147,7 +151,8 @@ extension Date {
 
 extension DateComponents {
     /// Create a date instance from the Components
-    public func toDate(using calendar: Calendar = .autoupdatingCurrent) -> Date {
+    @inlinable
+    public func toDate(using calendar: Calendar = .current) -> Date {
         calendar.date(from: self)!
     }
 }
@@ -159,25 +164,29 @@ extension Date.FormatStyle.Symbol.VerbatimHour {
     
     /// Creates a custom format style portraying two digits with 24h clock that represent the hour.
     /// - Parameter hourCycle: The start of the clock representation.
+    @inlinable
     public static func twoDigits24(hourCycle: Date.FormatStyle.Symbol.VerbatimHour.HourCycle = .oneBased) -> Self {
         .twoDigits(clock: .twentyFourHour, hourCycle: hourCycle)
     }
     
     /// Creates a custom format style portraying two digits with 12h clock that represent the hour.
     /// - Parameter hourCycle: The start of the clock representation.
+    @inlinable
     public static func twoDigits12(hourCycle: Date.FormatStyle.Symbol.VerbatimHour.HourCycle = .oneBased) -> Self {
         .twoDigits(clock: .twelveHour, hourCycle: hourCycle)
     }
     
     /// Creates a custom format style portraying the minimum number of digits that represents the hour with 24h clock.
     /// - Parameter hourCycle: The start of the clock representation.
-    public static func defaultDegits24(hourCycle: Date.FormatStyle.Symbol.VerbatimHour.HourCycle = .oneBased) -> Self {
+    @inlinable
+    public static func defaultDigits24(hourCycle: Date.FormatStyle.Symbol.VerbatimHour.HourCycle = .oneBased) -> Self {
         .defaultDigits(clock: .twentyFourHour, hourCycle: hourCycle)
     }
     
     /// Creates a custom format style portraying the minimum number of digits that represents the hour with 12h clock.
     /// - Parameter hourCycle: The start of the clock representation.
-    public static func defaultDegits12(hourCycle: Date.FormatStyle.Symbol.VerbatimHour.HourCycle = .oneBased) -> Self {
+    @inlinable
+    public static func defaultDigits12(hourCycle: Date.FormatStyle.Symbol.VerbatimHour.HourCycle = .oneBased) -> Self {
         .defaultDigits(clock: .twelveHour, hourCycle: hourCycle)
     }
     

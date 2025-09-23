@@ -16,35 +16,31 @@ extension Date {
     ///   - timeZone: The time zone for calculating the component value
     ///   - calendar: The calendar for the computation
     /// - Returns: The value for the component.
+    @inlinable
     public func component(
         _ component: Calendar.Component,
         in timeZone: TimeZone? = nil,
-        using calendar: Calendar = .autoupdatingCurrent
+        using calendar: Calendar = .current
     ) -> Int {
-        var calendar = calendar
         if let timeZone {
-            calendar.timeZone = timeZone
+            return calendar.dateComponents(in: timeZone, from: self).value(for: component) ?? 0
+        } else {
+            return calendar.component(component, from: self)
         }
-        return calendar.component(component, from: self)
     }
     
     
     /// Returns all the specified date components of a date.
     /// - Parameters:
     ///   - components: The set of components to get.
-    ///   - timeZone: The time zone for calculating the component value
     ///   - calendar: The calendar for the calculation
     /// - Returns: The values for the required components
+    @inlinable
     public func components(
         _ components: Set<Calendar.Component>,
-        in timeZone: TimeZone? = nil,
-        using calendar: Calendar = .autoupdatingCurrent
+        using calendar: Calendar = .current
     ) -> DateComponents {
-        var calendar = calendar
-        if let timeZone {
-            calendar.timeZone = timeZone
-        }
-        return calendar.dateComponents(components, from: self)
+        calendar.dateComponents(components, from: self)
     }
     
     
@@ -53,9 +49,10 @@ extension Date {
     ///   - timeZone: The time zone for calculating the component value
     ///   - calendar: The calendar for the calculation
     /// - Returns: The values for the required components
-    public func allComponents(
+    @inlinable
+    public func components(
         in timeZone: TimeZone? = nil,
-        using calendar: Calendar = .autoupdatingCurrent
+        using calendar: Calendar = .current
     ) -> DateComponents {
         calendar.dateComponents(in: timeZone ?? calendar.timeZone, from: self)
     }
@@ -68,13 +65,15 @@ extension Date {
     ///   - component: The component to compare as ``Foundation/Calendar/MeasurableComponent``
     ///   - calendar: The calendar for the calculation
     /// - Returns: The difference from the date to the current date
+    @inlinable
     public func diffs(
         since date: Date,
         in component: Calendar.MeasurableComponent,
-        using calendar: Calendar = .autoupdatingCurrent
+        using calendar: Calendar = .current
     ) -> Int {
-        calendar.dateComponents([component.component], from: date, to: self)
-            .value(for: component.component)!
+        let rawComponent = component.rawValue
+        return calendar.dateComponents([rawComponent], from: date, to: self)
+            .value(for: rawComponent)!
     }
     
     
@@ -85,119 +84,50 @@ extension Date {
     ///   - components: The set of components to compare as ``Foundation/Calendar/MeasurableComponent``
     ///   - calendar: The calendar for the calculation
     /// - Returns: The difference from the date to the current date
+    @inlinable
     public func diffs(
         since date: Date,
         in components: Set<Calendar.MeasurableComponent>,
-        using calendar: Calendar = .autoupdatingCurrent
+        using calendar: Calendar = .current
     ) -> DateComponents {
-        calendar.dateComponents(Set(components.map { $0.component }), from: date, to: self)
+        calendar.dateComponents(components.rawComponents, from: date, to: self)
     }
-    
-}
 
 
-extension Date {
-    
-    /// Set a specific component to the current date, and trying to keep lower components the same.
+    /// Returns the difference from the current date to a date in the specified component
+    /// as ``Foundation/Calendar/MeasurableComponent``
     /// - Parameters:
-    ///   - component: The component to set
-    ///   - value: The new value for the component
-    ///   - matchPolicy: Specifies the technique the search algorithm uses to find results.
-    ///   Default value is .strict.
-    ///   - timeZone: The time zone for setting the component value
+    ///   - date: The **to** date for calculating the difference
+    ///   - component: The component to compare as ``Foundation/Calendar/MeasurableComponent``
     ///   - calendar: The calendar for the calculation
-    ///
-    /// - Seealso: [`date(bySetting:value:of:)`](https://developer.apple.com/documentation/foundation/calendar/2292915-date)
-    public mutating func set(
-        _ component: Calendar.MeasurableComponent,
-        to value: Int,
-        matchPolicy: Calendar.MatchingPolicy = .strict,
-        in timeZone: TimeZone? = nil,
-        using calendar: Calendar = .autoupdatingCurrent
-    ) {
-        self = self.setting(component, to: value, matchPolicy: matchPolicy, in: timeZone, using: calendar)
+    /// - Returns: The difference from the current date to the date
+    @inlinable
+    public func diffs(
+        to date: Date,
+        in component: Calendar.MeasurableComponent,
+        using calendar: Calendar = .current
+    ) -> Int {
+        calendar.dateComponents([component.rawValue], from: self, to: date)
+            .value(for: component.rawValue)!
     }
-    
-    
-    /// Returns a new Date representing the date calculated by setting a specific component to
-    /// the current date, and trying to keep lower components the same.
+
+
+    /// Returns the difference from the current date to a date in the specified set of components
+    /// as ``Foundation/Calendar/MeasurableComponent``
     /// - Parameters:
-    ///   - component: The component to set
-    ///   - value: The new value for the component
-    ///   - matchPolicy: Specifies the technique the search algorithm uses to find results.
-    ///   Default value is .strict.
-    ///   - timeZone: The time zone for setting the component value
-    ///   - calendar: The calendar for the calculation
-    ///
-    /// - Seealso: [`date(bySetting:value:of:)`](https://developer.apple.com/documentation/foundation/calendar/2292915-date)
-    public func setting(
-        _ component: Calendar.MeasurableComponent,
-        to value: Int,
-        matchPolicy: Calendar.MatchingPolicy = .strict,
-        in timeZone: TimeZone? = nil,
-        using calendar: Calendar = .autoupdatingCurrent
-    ) -> Date {
-        
-        var calendar = calendar
-        if let timeZone {
-            calendar.timeZone = timeZone
-        }
-        
-        guard calendar.component(component.component, from: self) != value else { return self }
-        
-        var dateComponents = calendar.dateComponents(
-            component.granularity.smallerNecessaryComponents,
-            from: self
-        )
-        dateComponents.setValue(value, for: component.component)
-        
-        return calendar.nextDate(
-            after: self,
-            matching: dateComponents,
-            matchingPolicy: matchPolicy
-        )!
-        
+    ///  - date: The **to** date for calculating the difference
+    ///  - components: The set of components to compare as ``Foundation/Calendar/MeasurableComponent``
+    /// - calendar: The calendar for the calculation
+    /// - Returns: The difference from the current date to the date
+    @inlinable
+    public func diffs(
+        to date: Date,
+        in components: Set<Calendar.MeasurableComponent>,
+        using calendar: Calendar = .current
+    ) -> DateComponents {
+        calendar.dateComponents(components.rawComponents, from: self, to: date)
     }
-    
-    
-    /// Set a specific component to the current date, and trying to keep lower components the same.
-    /// - Parameters:
-    ///   - value: The new value as a ``Foundation/Calendar/ComponentValue``
-    ///   - matchPolicy: Specifies the technique the search algorithm uses to find results.
-    ///   Default value is .strict.
-    ///   - timeZone: The time zone for setting the component value
-    ///   - calendar: The calendar for the calculation
-    ///
-    /// - Seealso: [`date(bySetting:value:of:)`](https://developer.apple.com/documentation/foundation/calendar/2292915-date)
-    public mutating func set(
-        _ value: Calendar.ComponentValue,
-        matchPolicy: Calendar.MatchingPolicy = .strict,
-        in timeZone: TimeZone? = nil,
-        using calendar: Calendar = .autoupdatingCurrent
-    ) {
-        self.set(value.unit, to: value.value, matchPolicy: matchPolicy, in: timeZone, using: calendar)
-    }
-    
-    
-    /// Returns a new Date representing the date calculated by setting a specific component to
-    /// the current date, and trying to keep lower components the same.
-    /// - Parameters:
-    ///   - value: The new value as a ``Foundation/Calendar/ComponentValue``
-    ///   - matchPolicy: Specifies the technique the search algorithm uses to find results.
-    ///   Default value is .strict.
-    ///   - timeZone: The time zone for setting the component value
-    ///   - calendar: The calendar for the calculation
-    ///
-    /// - Seealso: [`date(bySetting:value:of:)`](https://developer.apple.com/documentation/foundation/calendar/2292915-date)
-    public func setting(
-        _ value: Calendar.ComponentValue,
-        matchPolicy: Calendar.MatchingPolicy = .strict,
-        in timeZone: TimeZone? = nil,
-        using calendar: Calendar = .autoupdatingCurrent
-    ) -> Date {
-        self.setting(value.unit, to: value.value, matchPolicy: matchPolicy, in: timeZone, using: calendar)
-    }
-    
+
 }
 
 
@@ -211,84 +141,95 @@ extension Date {
     /// - Attention: Setting with `.calendar`, `.timeZone` and `.isLeapMonth` will have no effect
     ///
     /// [`.strict`]: https://developer.apple.com/documentation/foundation/calendar/matchingpolicy/strict
+    @inlinable
     public subscript(
         _ component: Calendar.Component,
         in timeZone: TimeZone? = nil,
-        using calendar: Calendar = .autoupdatingCurrent
+        using calendar: Calendar = .current
     ) -> Int {
-        get {
-            self.component(component, in: timeZone, using: calendar)
-        }
-        set {
-            guard let measurableComponent = component.toMeasurable() else { return }
-            self.set(measurableComponent, to: newValue, in: timeZone, using: calendar)
-        }
+        self.component(component, in: timeZone, using: calendar)
     }
     
     
-    public func era(in timeZone: TimeZone? = nil, using calendar: Calendar = .autoupdatingCurrent) -> Int {
+    @inlinable
+    public func era(in timeZone: TimeZone? = nil, using calendar: Calendar = .current) -> Int {
         self.component(.era, in: timeZone, using: calendar)
     }
     
-    public func year(in timeZone: TimeZone? = nil, using calendar: Calendar = .autoupdatingCurrent) -> Int {
+    @inlinable
+    public func year(in timeZone: TimeZone? = nil, using calendar: Calendar = .current) -> Int {
         self.component(.year, in: timeZone, using: calendar)
     }
-    
-    public func month(in timeZone: TimeZone? = nil, using calendar: Calendar = .autoupdatingCurrent) -> Int {
+
+    @inlinable
+    public func month(in timeZone: TimeZone? = nil, using calendar: Calendar = .current) -> Int {
         self.component(.month, in: timeZone, using: calendar)
     }
-    
-    public func day(in timeZone: TimeZone? = nil, using calendar: Calendar = .autoupdatingCurrent) -> Int {
+
+    @inlinable
+    public func day(in timeZone: TimeZone? = nil, using calendar: Calendar = .current) -> Int {
         self.component(.day, in: timeZone, using: calendar)
     }
     
-    public func hour(in timeZone: TimeZone? = nil, using calendar: Calendar = .autoupdatingCurrent) -> Int {
+    @inlinable
+    public func hour(in timeZone: TimeZone? = nil, using calendar: Calendar = .current) -> Int {
         self.component(.hour, in: timeZone, using: calendar)
     }
-    
-    public func minute(in timeZone: TimeZone? = nil, using calendar: Calendar = .autoupdatingCurrent) -> Int {
+
+    @inlinable
+    public func minute(in timeZone: TimeZone? = nil, using calendar: Calendar = .current) -> Int {
         self.component(.minute, in: timeZone, using: calendar)
     }
-    
-    public func second(in timeZone: TimeZone? = nil, using calendar: Calendar = .autoupdatingCurrent) -> Int {
+
+    @inlinable
+    public func second(in timeZone: TimeZone? = nil, using calendar: Calendar = .current) -> Int {
         self.component(.second, in: timeZone, using: calendar)
     }
-    
-    public func weekday(in timeZone: TimeZone? = nil, using calendar: Calendar = .autoupdatingCurrent) -> Int {
+
+    @inlinable
+    public func weekday(in timeZone: TimeZone? = nil, using calendar: Calendar = .current) -> Int {
         self.component(.weekday, in: timeZone, using: calendar)
     }
-    
-    public func weekdayOrdinal(in timeZone: TimeZone? = nil, using calendar: Calendar = .autoupdatingCurrent) -> Int {
+
+    @inlinable
+    public func weekdayOrdinal(in timeZone: TimeZone? = nil, using calendar: Calendar = .current) -> Int {
         self.component(.weekdayOrdinal, in: timeZone, using: calendar)
     }
-    
-    public func quarter(in timeZone: TimeZone? = nil, using calendar: Calendar = .autoupdatingCurrent) -> Int {
+
+    @inlinable
+    public func quarter(in timeZone: TimeZone? = nil, using calendar: Calendar = .current) -> Int {
         self.component(.quarter, in: timeZone, using: calendar)
     }
-    
-    public func weekOfMonth(in timeZone: TimeZone? = nil, using calendar: Calendar = .autoupdatingCurrent) -> Int {
+
+    @inlinable
+    public func weekOfMonth(in timeZone: TimeZone? = nil, using calendar: Calendar = .current) -> Int {
         self.component(.weekOfMonth, in: timeZone, using: calendar)
     }
-    
-    public func weekOfYear(in timeZone: TimeZone? = nil, using calendar: Calendar = .autoupdatingCurrent) -> Int {
+
+    @inlinable
+    public func weekOfYear(in timeZone: TimeZone? = nil, using calendar: Calendar = .current) -> Int {
         self.component(.weekOfYear, in: timeZone, using: calendar)
     }
     
-    public func yearForWeekOfYear(in timeZone: TimeZone? = nil, using calendar: Calendar = .autoupdatingCurrent) -> Int {
+    @inlinable
+    public func yearForWeekOfYear(in timeZone: TimeZone? = nil, using calendar: Calendar = .current) -> Int {
         self.component(.yearForWeekOfYear, in: timeZone, using: calendar)
     }
     
-    public func nanosecond(in timeZone: TimeZone? = nil, using calendar: Calendar = .autoupdatingCurrent) -> Int {
+    @inlinable
+    public func nanosecond(in timeZone: TimeZone? = nil, using calendar: Calendar = .current) -> Int {
         self.component(.nanosecond, in: timeZone, using: calendar)
     }
     
+    @inlinable
     @available(macOS 14, iOS 17, tvOS 17, watchOS 10, *)
-    public func isLeapMonth(in timeZone: TimeZone? = nil, using calendar: Calendar = .autoupdatingCurrent) -> Bool {
+    public func isLeapMonth(in timeZone: TimeZone? = nil, using calendar: Calendar = .current) -> Bool {
         self.component(.isLeapMonth, in: timeZone, using: calendar) == 1
     }
     
+    @inlinable
     @available(macOS 15, iOS 18, tvOS 18, watchOS 11, *)
-    public func dayOfYear(in timeZone: TimeZone? = nil, using calendar: Calendar = .autoupdatingCurrent) -> Int {
+    public func dayOfYear(in timeZone: TimeZone? = nil, using calendar: Calendar = .current) -> Int {
         self.component(.dayOfYear, in: timeZone, using: calendar)
     }
     

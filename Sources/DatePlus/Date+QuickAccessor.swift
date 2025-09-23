@@ -11,34 +11,33 @@ import Foundation
 extension Date {
     
     /// Returns the first moment of the day of the Date.
-    public func startOfDay(using calendar: Calendar = .autoupdatingCurrent) -> Date {
+    @inlinable
+    public func startOfDay(using calendar: Calendar = .current) -> Date {
         calendar.startOfDay(for: self)
     }
     
     
     /// Returns the first moment of the week of the Date.
-    public func startOfWeek(using calendar: Calendar = .autoupdatingCurrent) -> Date {
-        calendar.date(
-            from: calendar.dateComponents(
-                [.yearForWeekOfYear, .weekOfYear],
-                from: self
-            )
-        )!
+    @inlinable
+    public func startOfWeek(using calendar: Calendar = .current) -> Date {
+        calendar.dateInterval(of: .weekOfYear, for: self)!.start
     }
     
     
     /// Returns the first moment of the month of the Date.
-    public func startOfMonth(using calendar: Calendar = .autoupdatingCurrent) -> Date {
-        calendar.date(from: calendar.dateComponents([.year, .month], from: self))!
+    @inlinable
+    public func startOfMonth(using calendar: Calendar = .current) -> Date {
+        calendar.dateInterval(of: .month, for: self)!.start
     }
     
     
     /// Returns the first moment of the specified component of the Date.
+    @inlinable
     public func trimming(
         to component: Calendar.MeasurableComponent,
-        using calendar: Calendar = .autoupdatingCurrent
+        using calendar: Calendar = .current
     ) -> Date {
-        calendar.dateInterval(of: component.component, for: self)!.start
+        calendar.dateInterval(of: component.rawValue, for: self)!.start
     }
     
     
@@ -47,30 +46,34 @@ extension Date {
     ///   - component: The component to calculate as ``Foundation/Calendar/MeasurableComponent``
     ///   - calendar: The calendar for the calculation
     /// - Returns: A `DateInterval`
+    @inlinable
     public func interval(
         of component: Calendar.MeasurableComponent,
-        using calendar: Calendar = .autoupdatingCurrent
+        using calendar: Calendar = .current
     ) -> DateInterval {
-        calendar.dateInterval(of: component.component, for: self)!
+        calendar.dateInterval(of: component.rawValue, for: self)!
     }
     
     
     /// Computes the next date which matches (or most closely matches) a given set of components.
+    /// 
     /// - Parameters:
-    ///   - components: The components to search for.
+    ///   - components: The components to match.
     ///   - matchingPolicy: Specifies the technique the search algorithm uses to find results.
-    ///   Default value is .nextTime.
+    ///     Default value is .nextTime.
     ///   - repeatedTimePolicy: Specifies the behavior when multiple matches are found.
-    ///   Default value is .first.
+    ///     Default value is .first.
     ///   - direction: Specifies the direction in time to search. Default is .forward.
     ///   - calendar: The calendar for the calculation
+    /// 
     /// - Returns: A Date representing the result of the search, or nil if a result could not be found.
+    @inlinable
     public func nextDate(
         matching components: DateComponents,
         matchingPolicy: Calendar.MatchingPolicy = .nextTime,
         repeatedTimePolicy: Calendar.RepeatedTimePolicy = .first,
         direction: Calendar.SearchDirection = .forward,
-        using calendar: Calendar = .autoupdatingCurrent
+        using calendar: Calendar = .current
     ) -> Date? {
         calendar.nextDate(
             after: self,
@@ -78,70 +81,6 @@ extension Date {
             matchingPolicy: matchingPolicy,
             repeatedTimePolicy: repeatedTimePolicy,
             direction: direction
-        )
-    }
-    
-    
-    /// Computes the next date which matches (or most closely matches) the specified component and
-    /// its smaller components.
-    /// - Parameters:
-    ///   - component: The component to search for.
-    ///   - value: The value of the component to search for.
-    ///   - matchingPolicy: Specifies the technique the search algorithm uses to find results.
-    ///   Default value is .nextTime.
-    ///   - repeatedTimePolicy: Specifies the behavior when multiple matches are found.
-    ///   Default value is .first.
-    ///   - direction: Specifies the direction in time to search. Default is .forward.
-    ///   - calendar: The calendar for the calculation
-    /// - Returns: A Date representing the result of the search, or nil if a result could not be found.
-    public func nextDate(
-        matchingUpTo component: Calendar.MeasurableComponent,
-        value: Int,
-        matchingPolicy: Calendar.MatchingPolicy = .nextTime,
-        repeatedTimePolicy: Calendar.RepeatedTimePolicy = .first,
-        direction: Calendar.SearchDirection = .forward,
-        using calendar: Calendar = .autoupdatingCurrent
-    ) -> Date? {
-        
-        var components = calendar.dateComponents(component.granularity.smallerNecessaryComponents, from: self)
-        components.setValue(value, for: component.component)
-        
-        return calendar.nextDate(
-            after: self,
-            matching: components,
-            matchingPolicy: matchingPolicy,
-            repeatedTimePolicy: repeatedTimePolicy,
-            direction: direction
-        )
-        
-    }
-    
-    
-    /// Computes the next date which matches (or most closely matches) the specified component and
-    /// its smaller components.
-    /// - Parameters:
-    ///   - component: The component to search for.
-    ///   - matchingPolicy: Specifies the technique the search algorithm uses to find results.
-    ///   Default value is .nextTime.
-    ///   - repeatedTimePolicy: Specifies the behavior when multiple matches are found.
-    ///   Default value is .first.
-    ///   - direction: Specifies the direction in time to search. Default is .forward.
-    ///   - calendar: The calendar for the calculation
-    /// - Returns: A Date representing the result of the search, or nil if a result could not be found.
-    public func nextDate(
-        matchingUpTo component: Calendar.ComponentValue,
-        matchingPolicy: Calendar.MatchingPolicy = .nextTime,
-        repeatedTimePolicy: Calendar.RepeatedTimePolicy = .first,
-        direction: Calendar.SearchDirection = .forward,
-        using calendar: Calendar = .autoupdatingCurrent
-    ) -> Date? {
-        self.nextDate(
-            matchingUpTo: component.unit,
-            value: component.value,
-            matchingPolicy: matchingPolicy,
-            repeatedTimePolicy: repeatedTimePolicy,
-            direction: direction,
-            using: calendar
         )
     }
     
