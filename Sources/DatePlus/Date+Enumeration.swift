@@ -1,7 +1,175 @@
 import Foundation
 
 
+extension Calendar {
+
+    /// An iterator producing Dates that match (or most closely match) a given set of components
+    /// 
+    /// This is the iterator for supporting ``Calendar/DateMatchingEnumerationSequence``, which brings the sequence
+    /// for matching dates to older OS versions that do not support it.
+    /// 
+    /// - SeeAlso: ``Calendar/DateMatchingEnumerationSequence``
+    /// - SeeAlso: [`dates(byMatching:startingAt:in:matchingPolicy:repeatedTimePolicy:direction:)`]
+    /// 
+    /// [`dates(byMatching:startingAt:in:matchingPolicy:repeatedTimePolicy:direction:)`]: https://developer.apple.com/documentation/foundation/calendar/dates(bymatching:startingat:in:matchingpolicy:repeatedtimepolicy:direction:)
+    public struct DateEnumerationIterator: IteratorProtocol, Sendable {
+
+        public let matchingComponents: DateComponents
+        public let matchingPolicy: Calendar.MatchingPolicy
+        public let repeatedTimePolicy: Calendar.RepeatedTimePolicy
+        public let direction: Calendar.SearchDirection
+        public let calendar: Calendar
+        public let range: Range<Date>?
+
+        private var currentDate: Date
+
+        public init(
+            startingDate: Date,
+            range: Range<Date>?,
+            matchingComponents: DateComponents, 
+            matchingPolicy: Calendar.MatchingPolicy, 
+            repeatedTimePolicy: Calendar.RepeatedTimePolicy, 
+            direction: Calendar.SearchDirection, 
+            calendar: Calendar, 
+        ) {
+            self.currentDate = startingDate
+            self.matchingComponents = matchingComponents
+            self.matchingPolicy = matchingPolicy
+            self.repeatedTimePolicy = repeatedTimePolicy
+            self.direction = direction
+            self.calendar = calendar
+            self.range = range
+        }
+
+
+        public mutating func next() -> Date? {
+
+            let date = calendar.nextDate(
+                after: currentDate, 
+                matching: matchingComponents, 
+                matchingPolicy: matchingPolicy, 
+                repeatedTimePolicy: repeatedTimePolicy, 
+                direction: direction
+            )
+
+            guard let date else { return nil }
+
+            if let range, !range.contains(date) {
+                return nil
+            }
+
+            currentDate = date
+            return date
+
+        }
+
+    }
+
+
+    /// A sequence of Dates that match (or most closely match) a given set of components
+    /// 
+    /// This type is a reimplementation of the sequence returned by the
+    /// [`dates(byMatching:startingAt:in:matchingPolicy:repeatedTimePolicy:direction:)`] method of Calendar
+    /// for older OS versions that do not support it.
+    /// 
+    /// - SeeAlso: [`dates(byMatching:startingAt:in:matchingPolicy:repeatedTimePolicy:direction:)`]
+    /// 
+    /// [`dates(byMatching:startingAt:in:matchingPolicy:repeatedTimePolicy:direction:)`]: https://developer.apple.com/documentation/foundation/calendar/dates(bymatching:startingat:in:matchingpolicy:repeatedtimepolicy:direction:)
+    public struct DateMatchingEnumerationSequence: Sequence, Sendable {
+
+        /// The starting date for calculating elements of the sequence.
+        public let startingDate: Date
+        /// The components to match.
+        public let matchingComponents: DateComponents
+        /// Strategy of matching when seeing an ambiguous result
+        public let matchingPolicy: Calendar.MatchingPolicy
+        /// Strategy of matching when seeing a Date that occurs twice on a particular day
+        public let repeatedTimePolicy: Calendar.RepeatedTimePolicy
+        /// The search direction
+        public let direction: Calendar.SearchDirection
+        /// The calendar for calculation
+        public let calendar: Calendar
+        /// The range of dates to allow in the sequence.
+        public let range: Range<Date>?
+
+        public init(
+            startingDate: Date,
+            matchingComponents: DateComponents, 
+            range: Range<Date>? = nil,
+            matchingPolicy: Calendar.MatchingPolicy, 
+            repeatedTimePolicy: Calendar.RepeatedTimePolicy, 
+            direction: Calendar.SearchDirection, 
+            calendar: Calendar = .current, 
+        ) {
+            self.startingDate = startingDate
+            self.matchingComponents = matchingComponents
+            self.matchingPolicy = matchingPolicy
+            self.repeatedTimePolicy = repeatedTimePolicy
+            self.direction = direction
+            self.calendar = calendar
+            self.range = range
+        }
+
+        @inlinable
+        public func makeIterator() -> DateEnumerationIterator {
+            .init(
+                startingDate: startingDate, 
+                range: range,
+                matchingComponents: matchingComponents, 
+                matchingPolicy: matchingPolicy, 
+                repeatedTimePolicy: repeatedTimePolicy, 
+                direction: direction, 
+                calendar: calendar
+            )
+        }
+
+    }
+
+}
+
+
+
 extension Date {
+
+    /// Returns a sequence of Dates, calculated by adding certain value to a component of a starting Date. 
+    /// 
+    /// This method is a reimplementation of the [`dates(byAdding:value:startingAt:in:wrappingComponents:)`] method of Calendar 
+    /// for older OS versions that do not support it.
+    /// 
+    /// - Parameter component: A component to add or subtract.
+    /// - Parameter value: The value of the specified component to add or subtract. Default to 1. 
+    /// - Parameter range: The range of dates to allow in the result.
+    /// - Parameter wrappingComponents: Whether the component should be wrap around to zero/one on overflow without 
+    ///   causing higher components to be incremented. Default to false.
+    /// - Parameter calendar: The calendar to use for the calculations. Default to the current calendar.
+    /// 
+    /// - SeeAlso: [`dates(byAdding:value:startingAt:in:wrappingComponents:)`]
+    /// 
+    /// [`dates(byAdding:value:startingAt:in:wrappingComponents:)`]: https://developer.apple.com/documentation/foundation/calendar/dates(byadding:value:startingat:in:wrappingcomponents:)/
+    @available(macOS, deprecated: 15, message: "Use nextDates(byMatching:in:matchingPolicy:repeatedTimePolicy:direction:using:) instead")
+    @available(iOS, deprecated: 18, message: "Use nextDates(byMatching:in:matchingPolicy:repeatedTimePolicy:direction:using:) instead")
+    @available(tvOS, deprecated: 18, message: "Use nextDates(byMatching:in:matchingPolicy:repeatedTimePolicy:direction:using:) instead")
+    @available(watchOS, deprecated: 11, message: "Use nextDates(byMatching:in:matchingPolicy:repeatedTimePolicy:direction:using:) instead")
+    @inlinable
+    public func nextDatesCompat(
+        byMatching components: DateComponents,
+        in range: Range<Date>? = nil,
+        matchingPolicy: Calendar.MatchingPolicy = .nextTime,
+        repeatedTimePolicy: Calendar.RepeatedTimePolicy = .first,
+        direction: Calendar.SearchDirection = .forward,
+        using calendar: Calendar = .current
+    ) -> some Sendable & Sequence<Date> {
+        Calendar.DateMatchingEnumerationSequence(
+            startingDate: self, 
+            matchingComponents: components, 
+            range: range,
+            matchingPolicy: matchingPolicy, 
+            repeatedTimePolicy: repeatedTimePolicy, 
+            direction: direction, 
+            calendar: calendar
+        )
+    }
+
 
     /// Returns a sequence of Dates, calculated by adding certain value to a component of a starting Date. 
     /// 
@@ -26,8 +194,7 @@ extension Date {
         wrappingComponents: Bool = false, 
         using calendar: Calendar = .current
     ) -> some Sendable & Sequence<Date> {
-        calendar.enumerateDates(startingAfter: self, matching: .init(), matchingPolicy: .nextTime, using: { result, exactMatch, stop in })
-        return calendar.dates(byAdding: component.rawValue, value: value, startingAt: self, in: range, wrappingComponents: wrappingComponents)
+        calendar.dates(byAdding: component.rawValue, value: value, startingAt: self, in: range, wrappingComponents: wrappingComponents)
     }
 
 
