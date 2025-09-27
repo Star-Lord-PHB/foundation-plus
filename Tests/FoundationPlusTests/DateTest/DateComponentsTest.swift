@@ -223,6 +223,12 @@ extension DateTest.DateComponentsTest {
                 date(year: 2025, month: 3, day: 9, hour: 1, minute: 30, second: 5, using: calendar(in: pst)),
                 calendar(in: pst)
             ),
+            (
+                date(year: 2025, month: 3, day: 8, hour: 2, minute: 30, second: 5, using: calendar(in: pst)),
+                .day(9), .strict, .auto, .first,
+                date(year: 2025, month: 4, day: 9, hour: 2, minute: 30, second: 5, using: calendar(in: pst)),
+                calendar(in: pst)
+            ),
         ] as [(Date, Calendar.ComponentValue, Calendar.MatchingPolicy, Calendar.SetDateComponentSearchDirection, Calendar.RepeatedTimePolicy, Date?, Calendar)]
     )
     func component2(

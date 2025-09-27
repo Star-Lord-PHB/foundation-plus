@@ -104,12 +104,12 @@ extension Calendar {
 
         guard self.component(component.rawValue, from: date) != value else { return date }
 
-        var componentsForMatching = component.granularity.smallerNecessaryComponents
+        var componentsForMatching = component.smallerNecessaryComponents
         componentsForMatching.insert(component.rawValue)
         
         var dateComponents = self.dateComponents(componentsForMatching, from: date)
 
-        let oldValue = dateComponents.value(for: component)
+        let oldValue = dateComponents.value(for: component) ?? 0
         if oldValue == value { return date }
 
         let direction = switch direction {
