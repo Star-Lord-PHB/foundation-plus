@@ -22,7 +22,7 @@ final class DurationCompatTest {
         print("calclated: \(timeDuration)")
         print("expected: \(expected.components)")
 
-        #expect(expected == timeDuration)
+        #expect(expected.components == timeDuration.components)
 
     }
 
@@ -47,7 +47,7 @@ final class DurationCompatTest {
             print("calclated: \(timeDuration)")
             print("expected: \(expected.components)")
 
-            #expect(expected == timeDuration)
+            #expect(expected.components == timeDuration.components)
             
         }
 
@@ -72,7 +72,7 @@ final class DurationCompatTest {
         
         print("seconds: \(seconds) attoSeconds: \(attoSeconds) factor: \(factor)")
         
-        #expect(expected == result)
+        #expect(expected.components == result.components)
         
     }
 
@@ -97,7 +97,7 @@ final class DurationCompatTest {
 
             print("seconds: \(randomSeconds) attoSeconds: \(randomAttoSeconds) factor: \(randomFactor)")
             
-            #expect(expected == result)
+            #expect(expected.components == result.components)
             
         }
         
@@ -182,11 +182,11 @@ final class DurationCompatTest {
         print("duration: \(timeDuration1) factor: \(factor)")
         print("result: \(result)")
         
-        if !(expected == result) {
+        if !(expected.components == result.components) {
             let _ = timeDuration1 * (factor.toInt())
         }
         
-        #expect(expected == result)
+        #expect(expected.components == result.components)
         
     }
 
@@ -212,11 +212,11 @@ final class DurationCompatTest {
             print("duration: \(timeDuration1) factor: \(randomFactor)")
             print("result: \(result)")
             
-            if !(expected == result) {
+            if !(expected.components == result.components) {
                 let _ = timeDuration1 * (randomFactor.toInt())
             }
 
-            #expect(expected == result)
+            #expect(expected.components == result.components)
             
         }
 
@@ -233,37 +233,37 @@ final class DurationCompatTest {
         let nanoseconds = Int64.random(in: Int64.min ... Int64.max)
         var timeDuration = DurationCompat.nanoseconds(nanoseconds)
         var duration = Duration.nanoseconds(nanoseconds)
-        #expect(duration == timeDuration)
+        #expect(duration.components == timeDuration.components)
         
         let microseconds = Int32.random(in: Int32.min ... Int32.max)
         timeDuration = DurationCompat.microseconds(microseconds)
         duration = Duration.microseconds(microseconds)
-        #expect(duration == timeDuration)
+        #expect(duration.components == timeDuration.components)
 
         let microsecondsDouble = Double.random(in: Int64.min.toDouble() ... Int64.max.toDouble())
         timeDuration = DurationCompat.microseconds(microsecondsDouble)
         duration = Duration.microseconds(microsecondsDouble)
-        #expect(duration == timeDuration)
+        #expect(duration.components == timeDuration.components)
         
         let milliseconds = Int32.random(in: Int32.min ... Int32.max)
         timeDuration = DurationCompat.milliseconds(milliseconds)
         duration = Duration.milliseconds(milliseconds)
-        #expect(duration == timeDuration)
+        #expect(duration.components == timeDuration.components)
 
         let millisecondsDouble = Double.random(in: Int64.min.toDouble() ... Int64.max.toDouble())
         timeDuration = DurationCompat.milliseconds(millisecondsDouble)
         duration = Duration.milliseconds(millisecondsDouble)
-        #expect(duration == timeDuration)
+        #expect(duration.components == timeDuration.components)
         
         let seconds = Int32.random(in: Int32.min ... Int32.max)
         timeDuration = DurationCompat.seconds(seconds)
         duration = Duration.seconds(seconds)
-        #expect(duration == timeDuration)
+        #expect(duration.components == timeDuration.components)
 
         let secondsDouble = Double.random(in: Int64.min.toDouble() ... Int64.max.toDouble())
         timeDuration = DurationCompat.seconds(secondsDouble)
         duration = Duration.seconds(secondsDouble)
-        #expect(duration == timeDuration)
+        #expect(duration.components == timeDuration.components)
         
     }
 
