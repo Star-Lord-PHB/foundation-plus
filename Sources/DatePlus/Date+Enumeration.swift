@@ -36,7 +36,7 @@ extension Calendar {
             matchingPolicy: Calendar.MatchingPolicy, 
             repeatedTimePolicy: Calendar.RepeatedTimePolicy, 
             direction: Calendar.SearchDirection, 
-            calendar: Calendar = .current, 
+            calendar: Calendar = .current
         ) {
             self.startingDate = startingDate
             self.matchingComponents = matchingComponents
@@ -104,7 +104,7 @@ extension Calendar.DateMatchingEnumerationSequence {
             matchingPolicy: Calendar.MatchingPolicy, 
             repeatedTimePolicy: Calendar.RepeatedTimePolicy, 
             direction: Calendar.SearchDirection, 
-            calendar: Calendar, 
+            calendar: Calendar
         ) {
 
             self.startingDateComponents = calendar.dateComponents(in: calendar.timeZone, from: startingDate)

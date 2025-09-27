@@ -50,6 +50,8 @@ struct ExecuteTest {
     @Test("Test Non-Isolated Execute Async")
     func testNonIsolatedExecuteAsync() async throws {
 
+        #if compiler(>=6.2)
+
         await #expect(processExitsWith: .success, "Isolation Assertion should succeed") { @TestActor in
             // This is to make sure that such closure does provide isolated context
             TestActor.assertIsolated()
@@ -61,6 +63,24 @@ struct ExecuteTest {
                 TestActor.assertIsolated() // This should fail
             }
         }
+
+        #else 
+
+        try await { @TestActor in
+
+            // This is to make sure that such closure does provide isolated context
+            let actor = #isolation
+            try #require(actor === TestActor.shared)
+
+            await execute(isolatedOn: nil) { _ in
+                // Non-isolated execution
+                let actor = #isolation
+                #expect(actor == nil)
+            }
+            
+        }()
+
+        #endif
 
     }
     

@@ -7,15 +7,30 @@ import Foundation
 @Suite("Test LaunchTask")
 struct LaunchTaskTest {
 
-    @MainActor
     @Test("Test Offloading Task")
     func testOffloadingTask() async throws {
-        await #expect(processExitsWith: .failure, observing: [\.exitStatus], "Should fail the isolation check") {
-            await Task.offload { @Sendable in
+
+        #if compiler(>=6.2)
+
+        await #expect(processExitsWith: .failure, observing: [\.exitStatus], "Should fail the isolation check") { @MainActor in 
+            await Task.offload { @Sendable in 
                 print("Task offloaded to thread: \(Thread.current)")
                 MainActor.preconditionIsolated()
             }
         }
+
+        #else 
+
+        await { @MainActor in 
+            await Task.offload { @Sendable in 
+                print("Task offloaded to thread: \(Thread.current)")
+                let actor = #isolation
+                #expect(actor == nil, "Isolation context should be nil")
+            }
+        }()
+
+        #endif
+
     }
 
 
@@ -74,6 +89,9 @@ struct LaunchTaskTest {
     // This test is specifically created to check that.
     @Test("Test Stability")
     func testStability() async throws {
+
+        #if compiler(>=6.2)
+
         await #expect(
             processExitsWith: .success, 
             #"The process must not crash due to "closure argument was escaped in withoutActuallyEscaping block""#
@@ -86,6 +104,19 @@ struct LaunchTaskTest {
                 }
             }
         }
+
+        #else
+
+        await withTaskGroup(of: Void.self) { group in 
+            for _ in 0 ..< 100 {
+                group.addTask {
+                    await Task.offload { _ = pow(2, 10000) }
+                }
+            }
+        }
+
+        #endif
+        
     }
 
 }
