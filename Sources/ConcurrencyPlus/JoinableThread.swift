@@ -1,5 +1,9 @@
 import Foundation
 
+#if os(Linux)
+internal import CoreFoundation
+#endif
+
 
 
 final class JoinableThread: Thread {
