@@ -11,7 +11,7 @@ struct TaskExecutorTest {
         .timeLimit(.minutes(1)),
         arguments: [
             .main, .global, .background, .shared,
-        ] as [DispatchQueueTaskExecutor],
+        ] as [DispatchQueueTaskExecutor]
     )
     func testTaskSubmission(_ executor: DispatchQueueTaskExecutor) async throws {
         let finished = MutexValue(false)

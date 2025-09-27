@@ -61,7 +61,7 @@ class DateTest {
         weekOfMonth: Int? = nil,
         weekOfYear: Int? = nil,
         yearForWeekOfYear: Int? = nil,
-        using calendar: Calendar = calendar(),
+        using calendar: Calendar = calendar()
     ) -> Date {
         calendar.date(
             from: .init(
@@ -101,7 +101,7 @@ class DateTest {
         weekOfMonth: Int? = nil,
         weekOfYear: Int? = nil,
         yearForWeekOfYear: Int? = nil,
-        using calendar: Calendar = calendar(),
+        using calendar: Calendar = calendar()
     ) -> Date {
         Self.date(
             era: era,
@@ -118,7 +118,7 @@ class DateTest {
             weekOfMonth: weekOfMonth,
             weekOfYear: weekOfYear,
             yearForWeekOfYear: yearForWeekOfYear,
-            using: calendar,
+            using: calendar
         )
     }
     

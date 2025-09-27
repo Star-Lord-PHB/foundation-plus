@@ -9,13 +9,14 @@ import Testing
 @testable import FoundationPlus
 
 
+@globalActor
+fileprivate actor TestActor {
+    static let shared = TestActor()
+}
+
+
 @Suite("Test Execute")
 struct ExecuteTest {
-    
-    @globalActor
-    actor TestActor {
-        static let shared = TestActor()
-    }
 
     class NonSendable {}
     
