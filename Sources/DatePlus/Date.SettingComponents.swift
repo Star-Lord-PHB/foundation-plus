@@ -77,8 +77,8 @@ extension Calendar {
     /// 
     /// - Returns: The updated date if a valid date could be found
     /// 
-    /// - Throws: ``SetDateComponentError`` if no valid date could be found after updating the component.
-    /// 
+    /// - Throws: ``Calendar/SetDateComponentError`` if no valid date could be found after updating the component.
+    ///
     /// This method is a reimplementation of [`date(bySetting:value:of:)`]. Instead of always searching forward for 
     /// a valid updated date, it allows specifying the search strategy, including matching policy, repeated time policy, 
     /// and search direction. 
@@ -251,9 +251,9 @@ extension Date {
     /// - Parameter value: The new value for the component.
     /// - Parameter matchPolicy: The matching policy to use when searching for the new date. Default to `.strict`.
     /// - Parameter repeatedTimePolicy: The repeated time policy to use when searching for the new date. Default to `.first`.
-    /// - Parameter direction: The search direction to use when searching for the new date. Default to ``SetDateComponentSearchDirection/auto``.
+    /// - Parameter direction: The search direction to use when searching for the new date. Default to ``Calendar/SetDateComponentSearchDirection/auto``.
     /// - Parameter calendar: The calendar used for the calculation. Default to `.current`.
-    /// 
+    ///
     /// - Throws: ``Calendar/SetDateComponentError`` if no valid date could be found after updating the component.
     /// 
     /// - Seealso: ``Calendar/date(bySetting:to:for:matchPolicy:repeatedTimePolicy:direction:)``
@@ -281,7 +281,7 @@ extension Date {
     /// - Parameter value: The new value for the component.
     /// - Parameter matchPolicy: The matching policy to use when searching for the new date. Default to `.strict`.
     /// - Parameter repeatedTimePolicy: The repeated time policy to use when searching for the new date. Default to `.first`.
-    /// - Parameter direction: The search direction to use when searching for the new date. Default to ``SetDateComponentSearchDirection/auto``.
+    /// - Parameter direction: The search direction to use when searching for the new date. Default to ``Calendar/SetDateComponentSearchDirection/auto``.
     /// - Parameter calendar: The calendar used for the calculation. Default to `.current`.
     /// 
     /// - Returns: The updated date if a valid date could be found, or `nil` otherwise.
@@ -310,7 +310,7 @@ extension Date {
     /// - Parameter value: The new value for the component.
     /// - Parameter matchPolicy: The matching policy to use when searching for the new date. Default to `.strict`.
     /// - Parameter repeatedTimePolicy: The repeated time policy to use when searching for the new date. Default to `.first`.
-    /// - Parameter direction: The search direction to use when searching for the new date. Default to ``SetDateComponentSearchDirection/auto``.
+    /// - Parameter direction: The search direction to use when searching for the new date. Default to ``Calendar/SetDateComponentSearchDirection/auto``.
     /// - Parameter calendar: The calendar used for the calculation. Default to `.current`.
     /// 
     /// - Throws: ``Calendar/SetDateComponentError`` if no valid date could be found after updating the component.
@@ -329,12 +329,11 @@ extension Date {
     
     
     /// Try to update a specific component of the date to a specified value and return the resulting date if possible.
-    /// 
-    /// - Parameter component: The component to be updated.
+    ///
     /// - Parameter value: The new value for the component.
     /// - Parameter matchPolicy: The matching policy to use when searching for the new date. Default to `.strict`.
     /// - Parameter repeatedTimePolicy: The repeated time policy to use when searching for the new date. Default to `.first`.
-    /// - Parameter direction: The search direction to use when searching for the new date. Default to ``SetDateComponentSearchDirection/auto``.
+    /// - Parameter direction: The search direction to use when searching for the new date. Default to ``Calendar/SetDateComponentSearchDirection/auto``.
     /// - Parameter calendar: The calendar used for the calculation. Default to `.current`.
     /// 
     /// - Returns: The updated date if a valid date could be found, or `nil` otherwise.

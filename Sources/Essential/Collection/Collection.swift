@@ -12,9 +12,11 @@ extension Collection {
     
     /// A Boolean value indicating whether the collection is NOT empty.
     ///
-    /// It is basically the inverse of ``Collection/isEmpty``
+    /// It is basically the inverse of [`Collection/isEmpty`]
     ///
     /// - Complexity: O(1)
+    ///
+    /// [`Collection/isEmpty`]: https://developer.apple.com/documentation/swift/collection/isempty
     @inlinable
     public var isNotEmpty: Bool { !isEmpty }
     

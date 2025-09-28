@@ -4,24 +4,24 @@ import Foundation
 
 extension Task<Never, Never> {
 
-    /// Execute long running / blocking tasks on an ``DefaultTaskExecutor``
+    /// Execute long running / blocking tasks on an ``TaskExecutionContext``
     /// - Parameters:
-    ///   - executor: The executor for running the task, default is ``DefaultTaskExecutor/default``
+    ///   - executor: The executor for running the task, default is ``DispatchQueueTaskExecutor/shared``
     ///   - operation: The operation of the task
     ///   - cancelOperation: The operation to be executed when the task is cancelled
     /// - Returns: The result of the operation
     ///
-    /// This is basically a replacement for [`withTaskExecutorPreference(_:isolation:operation:)`].
-    /// The ``DefaultTaskExecutor`` holds a GCD queue for running tasks so that the long running /
-    /// blocking operations will not block threads in the global concurrent executor.
-    /// 
+    /// This is basically a replacement for [`withTaskExecutorPreference(_:isolation:operation:)`]
+    /// by offloading long running / blocking operations to the specified executor so that they will
+    /// not block threads in the global concurrent executor.
+    ///
     /// The main usecase is to quickly adopt a long running / blocking operation to async context. 
     /// Otherwise, consider using [`withTaskExecutorPreference(_:isolation:operation:)`]
     ///
     /// - Warning: Unlike [`withTaskExecutorPreference(_:isolation:operation:)`], the task
     /// CANNOT contains `async` operations
     ///
-    /// - Seealso: ``FoundationPlusTaskExecutor``
+    /// - Seealso: ``TaskExecutionContext``
     ///
     /// [`withTaskExecutorPreference(_:isolation:operation:)`]: https://developer.apple.com/documentation/swift/withtaskexecutorpreference(_:isolation:operation:)
     @available(macOS, deprecated: 15, message: "use withTaskExecutorPreference(_:isolation:operation:) instead")
@@ -90,6 +90,7 @@ extension Task<Never, Never> {
     /// - Parameters:
     ///   - condition: The condition to wait on, will wait until it returns true
     ///   - checkInterval: The time interval for checking whether the condition is true
+    ///   - isolation: The isolation context for running this method
     public static func waitUntil(
         _ condition: () -> Bool,
         checkInterval: Duration = .milliseconds(100),

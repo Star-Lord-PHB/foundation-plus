@@ -8,7 +8,7 @@ import Foundation
 /// environment than the global concurrent executor.
 /// 
 /// To implement a custom execution context, conform to this protocol and provide an implementation for the
-/// ``TaskExecutionContext/submit`` method to accept the task to be executed. Then inside an async context,
+/// ``TaskExecutionContext/submit(_:)`` method to accept the task to be executed. Then inside an async context,
 /// use ``TaskExecutionContext/run(task:)`` to offload the task to the execution context.
 /// 
 /// - Attention: After Swift 6 with iOS 18, macOS 15, watchOS 11, tvOS 18 and visionOS 2, it is more recommended

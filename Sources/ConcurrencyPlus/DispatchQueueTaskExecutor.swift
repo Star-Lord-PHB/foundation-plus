@@ -27,10 +27,10 @@ import Foundation
 /// ```
 ///
 /// Recomended to use the serveral provided executors as static properties:
-/// * ``FoundationPlusTaskExecutor/main``: Use the [`DispatchQueue.main`] queue
-/// * ``FoundationPlusTaskExecutor/global``: Use the [`DispatchQueue.global(qos:)`] queue with default qos
-/// * ``FoundationPlusTaskExecutor/shared``: Use a predefined concurrent queue with default qos
-/// * ``FoundationPlusTaskExecutor/background``: Use a predefined concurrent queue with background qos
+/// * ``DispatchQueueTaskExecutor/main``: Use the [`DispatchQueue.main`] queue
+/// * ``DispatchQueueTaskExecutor/global``: Use the [`DispatchQueue.global(qos:)`] queue with default qos
+/// * ``DispatchQueueTaskExecutor/shared``: Use a predefined concurrent queue with default qos
+/// * ``DispatchQueueTaskExecutor/background``: Use a predefined concurrent queue with background qos
 ///
 /// You can also create a new custom task executor using using the ``init(label:qos:attributes:)``
 /// initializer

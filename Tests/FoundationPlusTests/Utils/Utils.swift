@@ -19,7 +19,7 @@ final class MutexValue<V>: @unchecked Sendable {
 func waitUntil(
     timeLimit: TimeInterval? = nil, 
     sourceLocation: SourceLocation = #_sourceLocation, 
-    _ condition: @escaping () -> Bool
+    _ condition: () -> Bool
 ) async throws {
     let start = Date()
     while !condition() {
@@ -33,6 +33,33 @@ func waitUntil(
         }
         try await Task.sleep(nanoseconds: 100_000_000)
     }
+}
+
+
+
+@discardableResult
+func wait<E: Error, R: Sendable>(
+    for timeLimit: TimeInterval,
+    sourceLocation: SourceLocation = #_sourceLocation,
+    operation: sending @escaping () async throws(E) -> R
+) async throws -> R {
+    
+    let finished = MutexValue(false)
+
+    let task = Task {
+        defer { finished.withLock{ $0 = true } }
+        return try await operation()
+    }
+    
+    return try await withTaskCancellationHandler {
+        try await waitUntil(timeLimit: timeLimit, sourceLocation: sourceLocation) {
+            finished.withLock(\.self)
+        }
+        return try await task.value
+    } onCancel: {
+        task.cancel()
+    }
+
 }
 
 

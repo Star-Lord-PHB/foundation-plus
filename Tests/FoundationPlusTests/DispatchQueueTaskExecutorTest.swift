@@ -8,7 +8,6 @@ struct TaskExecutorTest {
 
     @Test(
         "Test Task Submission",
-        .timeLimit(.minutes(1)),
         arguments: [
             .main, .global, .background, .shared,
         ] as [DispatchQueueTaskExecutor]
@@ -25,44 +24,48 @@ struct TaskExecutorTest {
 
     @Test(
         "Test Async Running Tasks",
-        .timeLimit(.minutes(1)),
         arguments: [
             .main, .global, .background, .shared,
         ] as [DispatchQueueTaskExecutor]
     )
     func testRunningTasks(_ executor: DispatchQueueTaskExecutor) async throws {
 
-        let taskCount = 100
-        let expectedSum = (0 ..< taskCount).reduce(0, +)
+        try await wait(for: 20) {
+            
+            let taskCount = 100
+            let expectedSum = (0 ..< taskCount).reduce(0, +)
 
-        let sum = await withTaskGroup(of: Int.self) { group in
-            for i in 0 ..< taskCount {
-                group.addTask {
-                    await executor.run { 
-                        dispatchPrecondition(condition: .onQueue(executor.queue))
-                        return i 
+            let sum = await withTaskGroup(of: Int.self) { group in
+                for i in 0 ..< taskCount {
+                    group.addTask {
+                        await executor.run {
+                            dispatchPrecondition(condition: .onQueue(executor.queue))
+                            return i
+                        }
                     }
                 }
+                return await group.reduce(0, +)
             }
-            return await group.reduce(0, +)
-        }
 
-        try #require(sum == expectedSum)
+            try #require(sum == expectedSum)
+            
+        }
 
     }
 
 
     @Test(
-        "Test Async Running Tasks with errors", 
-        .timeLimit(.minutes(1)),
+        "Test Async Running Tasks with errors",
         arguments: [
             .main, .global, .background, .shared,
         ] as [DispatchQueueTaskExecutor]
     )
     func testAsyncRunningTasksWithErrors(_ executor: DispatchQueueTaskExecutor) async throws {
-        await #expect(throws: NSError.self, "Should throw error") {
-            try await executor.run {
-                throw NSError(domain: "foundation_plus.test", code: 1)
+        try await wait(for: 20) {
+            await #expect(throws: NSError.self, "Should throw error") {
+                try await executor.run {
+                    throw NSError(domain: "foundation_plus.test", code: 1)
+                }
             }
         }
     }
@@ -90,14 +93,15 @@ extension TaskExecutorTest {
     
     @Test(
         "Test Working with Task.offload",
-        .timeLimit(.minutes(1)),
         arguments: [
             .main, .global, .background, .shared,
         ] as [DispatchQueueTaskExecutor]
     )
     func testWorkingWithTaskOffload(_ executor: DispatchQueueTaskExecutor) async throws {
-        await Task.offload(on: executor) {
-            dispatchPrecondition(condition: .onQueue(executor.queue))
+        try await wait(for: 20) {
+            await Task.offload(on: executor) {
+                dispatchPrecondition(condition: .onQueue(executor.queue))
+            }
         }
     }
 

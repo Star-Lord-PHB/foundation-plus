@@ -177,7 +177,7 @@ public final class Canceller: @unchecked Sendable {
 /// ```
 /// 
 /// This version not just compiles under strict concurrency check, it also guarantees that the `cancel` method
-/// will always have the intended effect even if it is called before the ``TaskCanceller/prepare`` method.
+/// will always have the intended effect even if it is called before the ``TaskCanceller/prepare(with:)`` method.
 /// 
 /// [`URLSessionDataTask`]: https://developer.apple.com/documentation/foundation/urlsessiondatatask
 public final class TaskCanceller<TaskHandler: ~Copyable>: @unchecked Sendable {

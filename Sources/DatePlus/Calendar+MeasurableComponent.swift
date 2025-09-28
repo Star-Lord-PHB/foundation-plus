@@ -245,7 +245,7 @@ extension Calendar.Component {
 
 extension Set<Calendar.MeasurableComponent> {
     
-    /// Convert the set of ``Calendar/MeasurableComponent`` to a set of `Calendar.Component`
+    /// Convert the set of ``Foundation/Calendar/MeasurableComponent`` to a set of `Calendar.Component`
     @inlinable
     public var rawComponents: Set<Calendar.Component> {
         .init(self.map(\.rawValue))

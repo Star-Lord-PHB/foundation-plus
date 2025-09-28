@@ -51,192 +51,216 @@ struct TaskCancellerTest {
     }
 
 
-    @Test("Test No Cancellation (Testing the mock Task Handler)", .timeLimit(.minutes(1)))
+    @Test("Test No Cancellation (Testing the mock Task Handler)")
     func testNoCancellation() async throws {
 
-        let canceller = TaskCanceller(for: TestTaskHandler.self, onCancel: { $0.cancel() })
+        try await wait(for: 20) {
+            
+            let canceller = TaskCanceller(for: TestTaskHandler.self, onCancel: { $0.cancel() })
 
-        let taskHandler = TestTaskHandler()
-        try #require(taskHandler.state == .ready, "Task handler should be in ready state")
+            let taskHandler = TestTaskHandler()
+            try #require(taskHandler.state == .ready, "Task handler should be in ready state")
 
-        taskHandler.resume()
-        try #require(taskHandler.state == .running, "Task handler should be in running state")
+            taskHandler.resume()
+            try #require(taskHandler.state == .running, "Task handler should be in running state")
 
-        canceller.prepare(with: taskHandler)
+            canceller.prepare(with: taskHandler)
 
-        taskHandler.complete()
-        #expect(taskHandler.state == .completed, "Task handler should be in completed state")
-        #expect(taskHandler.cancellationInvokationCount == 0, "Cancellation should not be invoked")
-        
-        try canceller.unsafeWithTaskHandler { handler in
-            let handler = try #require(handler, "Task handler should be available")
-            #expect(handler.id == taskHandler.id, "The task handler should be the one managed by the canceller")
+            taskHandler.complete()
+            #expect(taskHandler.state == .completed, "Task handler should be in completed state")
+            #expect(taskHandler.cancellationInvokationCount == 0, "Cancellation should not be invoked")
+            
+            try canceller.unsafeWithTaskHandler { handler in
+                let handler = try #require(handler, "Task handler should be available")
+                #expect(handler.id == taskHandler.id, "The task handler should be the one managed by the canceller")
+            }
+            
         }
 
     }
 
 
-    @Test("Test Cancellation", .timeLimit(.minutes(1)))
+    @Test("Test Cancellation")
     func testCancellation() async throws {     // make sure that the task will never be completed normally
 
-        let canceller = TaskCanceller(for: TestTaskHandler.self, onCancel: { $0.cancel() })
-        
-        let taskHandler = TestTaskHandler()
-        try #require(taskHandler.state == .ready, "Task handler should be in ready state")
+        try await wait(for: 20) {
+            
+            let canceller = TaskCanceller(for: TestTaskHandler.self, onCancel: { $0.cancel() })
+            
+            let taskHandler = TestTaskHandler()
+            try #require(taskHandler.state == .ready, "Task handler should be in ready state")
 
-        taskHandler.resume()
-        try #require(taskHandler.state == .running, "Task handler should be in running state")
+            taskHandler.resume()
+            try #require(taskHandler.state == .running, "Task handler should be in running state")
 
-        canceller.prepare(with: taskHandler)
+            canceller.prepare(with: taskHandler)
 
-        canceller.cancel()
-        #expect(taskHandler.state == .cancelled, "Task handler should be in cancelled state")
-        #expect(taskHandler.cancellationInvokationCount == 1, "Cancellation should be invoked only once")
+            canceller.cancel()
+            #expect(taskHandler.state == .cancelled, "Task handler should be in cancelled state")
+            #expect(taskHandler.cancellationInvokationCount == 1, "Cancellation should be invoked only once")
 
-        try canceller.unsafeWithTaskHandler { handler in
-            let handler = try #require(handler, "Task handler should be available")
-            #expect(handler.id == taskHandler.id, "The task handler should be the one managed by the canceller")
+            try canceller.unsafeWithTaskHandler { handler in
+                let handler = try #require(handler, "Task handler should be available")
+                #expect(handler.id == taskHandler.id, "The task handler should be the one managed by the canceller")
+            }
+            
         }
 
     }
 
 
-    @Test("Test Cancellation Before Prepare", .timeLimit(.minutes(1)))
+    @Test("Test Cancellation Before Prepare")
     func testCancellationBeforePrepare() async throws {
 
-        let canceller = TaskCanceller(for: TestTaskHandler.self, onCancel: { $0.cancel() })
+        try await wait(for: 20) {
+            
+            let canceller = TaskCanceller(for: TestTaskHandler.self, onCancel: { $0.cancel() })
 
-        let taskHandler = TestTaskHandler()
-        try #require(taskHandler.state == .ready, "Task handler should be in ready state")
+            let taskHandler = TestTaskHandler()
+            try #require(taskHandler.state == .ready, "Task handler should be in ready state")
 
-        taskHandler.resume()
-        try #require(taskHandler.state == .running, "Task handler should be in running state")
+            taskHandler.resume()
+            try #require(taskHandler.state == .running, "Task handler should be in running state")
 
-        canceller.cancel()                          // first cancel
-        #expect(taskHandler.state == .running, "Task handler should still be in running state")
+            canceller.cancel()                          // first cancel
+            #expect(taskHandler.state == .running, "Task handler should still be in running state")
 
-        canceller.prepare(with: taskHandler)        // then prepare
-        #expect(taskHandler.state == .cancelled, "Task handler should be in cancelled state")
-        #expect(taskHandler.cancellationInvokationCount == 1, "Cancellation should be invoked only once")
+            canceller.prepare(with: taskHandler)        // then prepare
+            #expect(taskHandler.state == .cancelled, "Task handler should be in cancelled state")
+            #expect(taskHandler.cancellationInvokationCount == 1, "Cancellation should be invoked only once")
 
-        try canceller.unsafeWithTaskHandler { handler in
-            let handler = try #require(handler, "Task handler should be available")
-            #expect(handler.id == taskHandler.id, "The task handler should be the one managed by the canceller")
+            try canceller.unsafeWithTaskHandler { handler in
+                let handler = try #require(handler, "Task handler should be available")
+                #expect(handler.id == taskHandler.id, "The task handler should be the one managed by the canceller")
+            }
+            
         }
 
     }
 
 
-    @Test("Test Multiple Cancellation", .timeLimit(.minutes(1)))
+    @Test("Test Multiple Cancellation")
     func testMultipleCancellation() async throws {
 
-        let cancellationCount = 10
+        try await wait(for: 20) {
+            
+            let cancellationCount = 10
 
-        let canceller = TaskCanceller(for: TestTaskHandler.self, onCancel: { $0.cancel() })
+            let canceller = TaskCanceller(for: TestTaskHandler.self, onCancel: { $0.cancel() })
 
-        let taskHandler = TestTaskHandler()
-        try #require(taskHandler.state == .ready, "Task handler should be in ready state")
+            let taskHandler = TestTaskHandler()
+            try #require(taskHandler.state == .ready, "Task handler should be in ready state")
 
-        taskHandler.resume()
-        try #require(taskHandler.state == .running, "Task handler should be in running state")
+            taskHandler.resume()
+            try #require(taskHandler.state == .running, "Task handler should be in running state")
 
-        canceller.prepare(with: taskHandler)
+            canceller.prepare(with: taskHandler)
 
-        await withDiscardingTaskGroup { group in 
-            for _ in 0 ..< cancellationCount {
-                group.addTask {
-                    await Task.yield()
-                    canceller.cancel()
+            await withTaskGroup(of: Void.self) { group in
+                for _ in 0 ..< cancellationCount {
+                    group.addTask {
+                        await Task.yield()
+                        canceller.cancel()
+                    }
                 }
             }
-        }
 
-        #expect(taskHandler.state == .cancelled, "Task handler should be in cancelled state")
-        #expect(taskHandler.cancellationInvokationCount == 1, "Cancellation should be invoked only once")
+            #expect(taskHandler.state == .cancelled, "Task handler should be in cancelled state")
+            #expect(taskHandler.cancellationInvokationCount == 1, "Cancellation should be invoked only once")
 
-        try canceller.unsafeWithTaskHandler { handler in
-            let handler = try #require(handler, "Task handler should be available")
-            #expect(handler.id == taskHandler.id, "The task handler should be the one managed by the canceller")
+            try canceller.unsafeWithTaskHandler { handler in
+                let handler = try #require(handler, "Task handler should be available")
+                #expect(handler.id == taskHandler.id, "The task handler should be the one managed by the canceller")
+            }
+            
         }
         
     }
 
 
-    @Test("Test Multiple Prepares", .timeLimit(.minutes(1)))
+    @Test("Test Multiple Prepares")
     func testMultiplePrepares() async throws {
 
-        let canceller = TaskCanceller(for: TestTaskHandler.self, onCancel: { $0.cancel() })
+        try await wait(for: 20) {
+            
+            let canceller = TaskCanceller(for: TestTaskHandler.self, onCancel: { $0.cancel() })
 
-        let taskHandlers = (0 ..< 10).map { _ in TestTaskHandler() }
-        for taskHandler in taskHandlers {
-            try #require(taskHandler.state == .ready, "Task handler should be in ready state")
-            taskHandler.resume()
-            try #require(taskHandler.state == .running, "Task handler should be in running state")
-        }
+            let taskHandlers = (0 ..< 10).map { _ in TestTaskHandler() }
+            for taskHandler in taskHandlers {
+                try #require(taskHandler.state == .ready, "Task handler should be in ready state")
+                taskHandler.resume()
+                try #require(taskHandler.state == .running, "Task handler should be in running state")
+            }
 
-        await withDiscardingTaskGroup { group in 
-            for handler in taskHandlers {
-                group.addTask {
-                    await Task.yield()
-                    canceller.prepare(with: consume handler)
+            await withTaskGroup(of: Void.self) { group in
+                for handler in taskHandlers {
+                    group.addTask {
+                        await Task.yield()
+                        canceller.prepare(with: consume handler)
+                    }
                 }
             }
-        }
 
-        canceller.cancel()
+            canceller.cancel()
 
-        #expect(taskHandlers.filter { $0.state == .cancelled }.count == 1, "Only one task handler should be cancelled")
-        #expect(taskHandlers.filter { $0.state == .running }.count == 9, "The other task handlers should still be in running state")
+            #expect(taskHandlers.filter { $0.state == .cancelled }.count == 1, "Only one task handler should be cancelled")
+            #expect(taskHandlers.filter { $0.state == .running }.count == 9, "The other task handlers should still be in running state")
 
-        let cancelledHandler = try #require(taskHandlers.first(where: { $0.state == .cancelled }), "There must be a cancelled handler")
+            let cancelledHandler = try #require(taskHandlers.first(where: { $0.state == .cancelled }), "There must be a cancelled handler")
 
-        #expect(cancelledHandler.cancellationInvokationCount == 1, "Cancellation should be invoked only once")
+            #expect(cancelledHandler.cancellationInvokationCount == 1, "Cancellation should be invoked only once")
 
-        try canceller.unsafeWithTaskHandler { handler in
-            let handler = try #require(handler, "Task handler should be available")
-            #expect(handler.id == cancelledHandler.id, "Cancelled handler should be the one managed by the canceller")
+            try canceller.unsafeWithTaskHandler { handler in
+                let handler = try #require(handler, "Task handler should be available")
+                #expect(handler.id == cancelledHandler.id, "Cancelled handler should be the one managed by the canceller")
+            }
+            
         }
         
     }
 
 
-    @Test("Stress Test (multiple cancellations + multiple prepares)", .timeLimit(.minutes(1)))
+    @Test("Stress Test (multiple cancellations + multiple prepares)")
     func pressureTest() async throws {
 
-        let count = 100
+        try await wait(for: 20) {
+            
+            let count = 100
 
-        let canceller = TaskCanceller(for: TestTaskHandler.self, onCancel: { $0.cancel() })
+            let canceller = TaskCanceller(for: TestTaskHandler.self, onCancel: { $0.cancel() })
 
-        let taskHandlers = (0 ..< count).map { _ in TestTaskHandler() }
-        for taskHandler in taskHandlers {
-            try #require(taskHandler.state == .ready, "Task handler should be in ready state")
-            taskHandler.resume()
-            try #require(taskHandler.state == .running, "Task handler should be in running state")
-        }
+            let taskHandlers = (0 ..< count).map { _ in TestTaskHandler() }
+            for taskHandler in taskHandlers {
+                try #require(taskHandler.state == .ready, "Task handler should be in ready state")
+                taskHandler.resume()
+                try #require(taskHandler.state == .running, "Task handler should be in running state")
+            }
 
-        await withDiscardingTaskGroup { group in 
-            for handler in taskHandlers {
-                group.addTask {
-                    await Task.yield()
-                    canceller.prepare(with: consume handler)
-                }
-                group.addTask {
-                    await Task.yield()
-                    canceller.cancel()
+            await withTaskGroup(of: Void.self) { group in
+                for handler in taskHandlers {
+                    group.addTask {
+                        await Task.yield()
+                        canceller.prepare(with: consume handler)
+                    }
+                    group.addTask {
+                        await Task.yield()
+                        canceller.cancel()
+                    }
                 }
             }
-        }
 
-        #expect(taskHandlers.filter { $0.state == .cancelled }.count == 1, "Only one task handler should be cancelled")
-        #expect(taskHandlers.filter { $0.state == .running }.count == count - 1, "The other task handlers should still be in running state")
+            #expect(taskHandlers.filter { $0.state == .cancelled }.count == 1, "Only one task handler should be cancelled")
+            #expect(taskHandlers.filter { $0.state == .running }.count == count - 1, "The other task handlers should still be in running state")
 
-        let cancelledHandler = try #require(taskHandlers.first(where: { $0.state == .cancelled }), "There must be a cancelled handler")
+            let cancelledHandler = try #require(taskHandlers.first(where: { $0.state == .cancelled }), "There must be a cancelled handler")
 
-        #expect(cancelledHandler.cancellationInvokationCount == 1, "Cancellation should be invoked only once")
+            #expect(cancelledHandler.cancellationInvokationCount == 1, "Cancellation should be invoked only once")
 
-        try canceller.unsafeWithTaskHandler { handler in
-            let handler = try #require(handler, "Task handler should be available")
-            #expect(handler.id == cancelledHandler.id, "Cancelled handler should be the one managed by the canceller")
+            try canceller.unsafeWithTaskHandler { handler in
+                let handler = try #require(handler, "Task handler should be available")
+                #expect(handler.id == cancelledHandler.id, "Cancelled handler should be the one managed by the canceller")
+            }
+            
         }
 
     }
@@ -264,73 +288,81 @@ extension TaskCancellerTest {
     }
 
 
-    @Test("Test Cancelling Actual Task After Prepare", .timeLimit(.minutes(1)))
+    @Test("Test Cancelling Actual Task After Prepare")
     func testCancellingActualTaskAfterPrepare() async throws {
 
-        let barrier = SingleConsumerBarrier()
-
-        let task = Task {
-
-            let canceller = TaskCanceller(for: MockTaskHandler.self, onCancel: { $0.cancel() })
+        try await wait(for: 20) {
             
-            try await withTaskCancellationHandler {
-                try await withCheckedThrowingContinuation { continuation in 
-                    let handler = MockTaskHandler { result in
-                        continuation.resume(with: result)
+            let barrier = SingleConsumerBarrier()
+
+            let task = Task {
+
+                let canceller = TaskCanceller(for: MockTaskHandler.self, onCancel: { $0.cancel() })
+                
+                try await withTaskCancellationHandler {
+                    try await withCheckedThrowingContinuation { continuation in
+                        let handler = MockTaskHandler { result in
+                            continuation.resume(with: result)
+                        }
+                        canceller.prepare(with: consume handler)
+                        print("Task handler created and prepare method called")
+                        barrier.signal()
                     }
-                    canceller.prepare(with: consume handler)
-                    print("Task handler created and prepare method called")
-                    barrier.signal()
+                } onCancel: {
+                    canceller.cancel()
                 }
-            } onCancel: {
-                canceller.cancel()
+
             }
 
-        }
+            await barrier.wait()   // make sure that the task is created and the prepare method is called
 
-        await barrier.wait()   // make sure that the task is created and the prepare method is called
+            print("Cancelling the task")
+            task.cancel()
 
-        print("Cancelling the task")
-        task.cancel()
-
-        await #expect(throws: CancellationError.self, "Task should be cancelled") {
-            try await task.value
+            await #expect(throws: CancellationError.self, "Task should be cancelled") {
+                try await task.value
+            }
+            
         }
 
     }
 
 
-    @Test("Test Cancelling Actual Task Before Prepare", .timeLimit(.minutes(1)))
+    @Test("Test Cancelling Actual Task Before Prepare")
     func testCancellingActualTaskBeforePrepare() async throws {
 
-        let barrier = SingleConsumerBarrier()
-
-        let task = Task {
-
-            let canceller = TaskCanceller(for: MockTaskHandler.self, onCancel: { $0.cancel() })
+        try await wait(for: 20) {
             
-            try await withTaskCancellationHandler {
-                await barrier.wait()    // make sure that the cancel method is called before calling prepare
-                try await withCheckedThrowingContinuation { continuation in 
-                    print("Creating task handler")
-                    let handler = MockTaskHandler { result in
-                        continuation.resume(with: result)
+            let barrier = SingleConsumerBarrier()
+
+            let task = Task {
+
+                let canceller = TaskCanceller(for: MockTaskHandler.self, onCancel: { $0.cancel() })
+                
+                try await withTaskCancellationHandler {
+                    await barrier.wait()    // make sure that the cancel method is called before calling prepare
+                    try await withCheckedThrowingContinuation { continuation in
+                        print("Creating task handler")
+                        let handler = MockTaskHandler { result in
+                            continuation.resume(with: result)
+                        }
+                        canceller.prepare(with: consume handler)
                     }
-                    canceller.prepare(with: consume handler)
+                } onCancel: {
+                    canceller.cancel()
                 }
-            } onCancel: {
-                canceller.cancel()
+
             }
 
-        }
+            task.cancel()
+            print("Cancelled")
 
-        task.cancel()
-        print("Cancelled")
+            barrier.signal()
 
-        barrier.signal()
-
-        await #expect(throws: CancellationError.self, "Task should be cancelled") {
-            try await task.value
+            await #expect(throws: CancellationError.self, "Task should be cancelled") {
+                try await task.value
+            }
+            
         }
 
     }

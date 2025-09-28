@@ -1,5 +1,5 @@
 import Foundation
-import DequeModule
+private import DequeModule
 
 
 /// A simple thread pool for offloading work to a fixed number of threads
@@ -79,7 +79,7 @@ import DequeModule
 /// 
 /// ## Predefined Thread Pools
 ///
-/// This module provides one predefined thread pool ``ThreadPool/shared`` with 4 threads that 
+/// This module provides one predefined thread pool ``ThreadPool/shared4Thread`` with 4 threads that 
 /// cannot be stopped.
 ///
 /// [`TaskExecutor`]: https://developer.apple.com/documentation/swift/taskexecutor
@@ -216,10 +216,10 @@ extension ThreadPool {
     /// The state of the thread pool
     /// 
     /// - ``State/ready``: The pool is created but not started yet, cannot accept tasks
-    /// - ``State/running``: The pool is running and can accept and execute tasks
-    /// - ``State/stopping``: The pool is shutting down and waiting for all threads to terminate, 
+    /// - ``State/running-enum.case``: The pool is running and can accept and execute tasks
+    /// - ``State/stopping``: The pool is shutting down and waiting for all threads to terminate,
     ///                       no new tasks will be accepted
-    /// - ``State/stopped``: The pool has been shutdown, cannot accept tasks or be restarted
+    /// - ``State/stopped-enum.case``: The pool has been shutdown, cannot accept tasks or be restarted
     public enum State {
         /// The pool is created but not started yet, cannot accept tasks
         case ready 
@@ -230,14 +230,14 @@ extension ThreadPool {
         /// The pool has been shutdown, cannot accept tasks or be restarted
         case stopped
 
-        /// Whether the pool is in the ``State/running`` state
+        /// Whether the pool is in the ``State/running-property`` state
         public var running: Bool {
             switch self {
             case .running: return true
             default: return false
             }
         }
-        /// Whether the pool is in the ``State/stopped`` state
+        /// Whether the pool is in the ``State/stopped-property`` state
         public var stopped: Bool {
             switch self {
             case .stopped: return true

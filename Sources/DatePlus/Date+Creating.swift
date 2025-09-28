@@ -152,8 +152,8 @@ extension Date {
 extension DateComponents {
     /// Create a date instance from the Components
     @inlinable
-    public func toDate(using calendar: Calendar = .current) -> Date {
-        calendar.date(from: self)!
+    public func toDate(using calendar: Calendar = .current) -> Date? {
+        calendar.date(from: self)
     }
 }
 

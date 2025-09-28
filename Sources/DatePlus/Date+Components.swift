@@ -135,12 +135,7 @@ extension Date {
 extension Date {
     
     /// A subscript that is same as calling ``Foundation/Date/component(_:in:using:)`` for
-    /// getting and ``set(_:to:matchPolicy:in:using:)`` for setting
-    ///
-    /// - Attention: When doing setting, the `matchPolicy` will alwasy be [`.strict`]
-    /// - Attention: Setting with `.calendar`, `.timeZone` and `.isLeapMonth` will have no effect
-    ///
-    /// [`.strict`]: https://developer.apple.com/documentation/foundation/calendar/matchingpolicy/strict
+    /// getting value of a certain component
     @inlinable
     public subscript(
         _ component: Calendar.Component,

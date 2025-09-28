@@ -200,7 +200,7 @@ extension Date {
     
     
     /// Add an amount of a specific `MeasurableComponent` to the date,
-    /// represented by a ``DateComponentValue``.
+    /// represented by a ``Foundation/Calendar/ComponentValue``.
     /// - Parameters:
     ///   - duration: Specify the `MeasurableComponent` and the amount to add
     ///   - wrappingComponents: Whether the component should be wrap around to zero/one on overflow without
