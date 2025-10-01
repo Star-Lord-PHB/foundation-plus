@@ -126,7 +126,7 @@ extension Calendar.ComponentValue {
     }
     
     /// Create a ``Foundation/Calendar/ComponentValue`` instance of the identifier for the day of the year unit.
-    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, *)
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
     @inlinable
     public static func dayOfYear(_ value: Int) -> Self {
         .init(value: value, unit: .dayOfYear)

@@ -57,7 +57,7 @@ extension DateTest.CreateDateTest {
     }
 
 
-    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, *)
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
     @Test(
         "Create Date with DateComponents (new apis)",
         arguments: [
@@ -152,7 +152,7 @@ extension DateTest.CreateDateTest {
 
 extension DateComponents {
 
-    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, *)
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
     init(
         year: Int? = nil, 
         month: Int? = nil, 

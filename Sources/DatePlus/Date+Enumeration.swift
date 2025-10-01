@@ -241,7 +241,7 @@ extension Date {
     /// - SeeAlso: [`dates(byMatching:startingAt:in:matchingPolicy:repeatedTimePolicy:direction:)`]
     /// 
     /// [`dates(byMatching:startingAt:in:matchingPolicy:repeatedTimePolicy:direction:)`]: https://developer.apple.com/documentation/foundation/calendar/dates(bymatching:startingat:in:matchingpolicy:repeatedtimepolicy:direction:)
-    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, *)
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
     @inlinable
     public func nextDates(
         byMatching components: DateComponents,
@@ -529,7 +529,7 @@ extension Date {
     /// - SeeAlso: [`dates(byAdding:value:startingAt:in:wrappingComponents:)`]
     /// 
     /// [`dates(byAdding:value:startingAt:in:wrappingComponents:)`]: https://developer.apple.com/documentation/foundation/calendar/dates(byadding:value:startingat:in:wrappingcomponents:)/
-    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, *)
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
     @inlinable
     public func nextDates(
         byAdding component: Calendar.MeasurableComponent, 
@@ -555,7 +555,7 @@ extension Date {
     /// - SeeAlso: [`dates(byAdding:value:startingAt:in:wrappingComponents:)`]
     /// 
     /// [`dates(byAdding:value:startingAt:in:wrappingComponents:)`]: https://developer.apple.com/documentation/foundation/calendar/dates(byadding:value:startingat:in:wrappingcomponents:)/
-    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, *)
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
     @inlinable
     public func nextDates(
         byAdding component: Calendar.ComponentValue, 
@@ -578,7 +578,7 @@ extension Date {
     /// - Parameter calendar: The calendar to use for the calculations. Default to the current calendar.
     /// 
     /// [`dates(byAdding:startingAt:in:wrappingComponents:)`]: https://developer.apple.com/documentation/foundation/calendar/dates(byadding:startingat:in:wrappingcomponents:)
-    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, *)
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
     @inlinable
     public func nextDates(
         byAdding components: DateComponents, 

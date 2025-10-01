@@ -64,7 +64,7 @@ extension Calendar {
         /// Identifier for the nanosecond unit.
         case nanosecond
         
-        @available(macOS 15, iOS 18, tvOS 18, watchOS 11, *)
+        @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
         case dayOfYear
         
         
@@ -73,7 +73,7 @@ extension Calendar {
         /// [`Calendar.Component`]: https://developer.apple.com/documentation/foundation/calendar/component
         @inlinable
         public var rawValue: Component {
-            if #available(macOS 15, iOS 18, tvOS 18, watchOS 11, *) {
+            if #available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *) {
                 switch self {
                     case .era: .era
                     case .year: .year
@@ -172,7 +172,7 @@ extension Calendar {
 
 
         public init?(rawValue: Component) {
-            if #available(macOS 15, iOS 18, tvOS 18, watchOS 11, *) {
+            if #available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *) {
                 switch rawValue {
                     case .era: self = .era
                     case .year: self = .year
@@ -214,7 +214,7 @@ extension Calendar {
 
 
         public static let allCases: [Calendar.MeasurableComponent] = 
-            if #available(macOS 15, iOS 18, tvOS 18, watchOS 11, *) {
+            if #available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *) {
                 [
                     .era, .year, .month, .day, .hour, .minute, .second, .nanosecond, 
                     .weekday, .weekdayOrdinal, .quarter, .weekOfMonth, .weekOfYear, .yearForWeekOfYear, .dayOfYear

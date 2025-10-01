@@ -14,7 +14,7 @@ extension DateTest {
 
 extension DateTest.DateEnumerationTest {
 
-    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, *)
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
     @Test(
         "Enumeration by Adding",
         arguments: [
@@ -68,7 +68,7 @@ extension DateTest.DateEnumerationTest {
     }
 
 
-    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, *)
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
     @Test(
         "Enumeration by Matching (Compat version)", .timeLimit(.minutes(1)),
         arguments: [
@@ -142,7 +142,7 @@ extension DateTest.DateEnumerationTest {
     }
 
 
-    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, *)
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
     @Test(
         "Enumeration by Adding (Compat version)", .timeLimit(.minutes(1)),
         arguments: [

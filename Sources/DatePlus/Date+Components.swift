@@ -217,13 +217,13 @@ extension Date {
     }
     
     @inlinable
-    @available(macOS 14, iOS 17, tvOS 17, watchOS 10, *)
+    @available(macOS 14, iOS 17, tvOS 17, watchOS 10, visionOS 1, *)
     public func isLeapMonth(in timeZone: TimeZone? = nil, using calendar: Calendar = .current) -> Bool {
         self.component(.isLeapMonth, in: timeZone, using: calendar) == 1
     }
     
     @inlinable
-    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, *)
+    @available(macOS 15, iOS 18, tvOS 18, watchOS 11, visionOS 2, *)
     public func dayOfYear(in timeZone: TimeZone? = nil, using calendar: Calendar = .current) -> Int {
         self.component(.dayOfYear, in: timeZone, using: calendar)
     }
